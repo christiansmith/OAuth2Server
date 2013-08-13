@@ -1,0 +1,21 @@
+{
+  "name": "OAuth2Server",
+  "author": { 
+    "name": "Christian Smith", 
+    "email": "smith@anvil.io", 
+    "url": "http://anvil.io" 
+  },
+  "version": "0.0.0",
+  "description": "OAuth 2.0 Server",
+  "main": "Gruntfile.js",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.1",
+    "grunt-mocha-cov": "~0.0.7"
+  },
+  "repository" : { 
+    "type" : "git",
+    "url" : "https://github.com/RideAmigosCorp/OAuth2Server.git"
+  },
+  "license": "MIT"
+}
