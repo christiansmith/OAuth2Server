@@ -1,3 +1,13 @@
+/**
+ * Access token validation
+ *
+ * The OAuth 2.0 Authorization Framework
+ * ...
+ * http://tools.ietf.org/html/rfc6749#section-1.4
+ * http://tools.ietf.org/html/rfc6749#section-7
+ * http://tools.ietf.org/html/rfc6749#section-10.3
+ */
+
 describe('access token validation', function () {
 
   describe('GET /token/verify', function () {

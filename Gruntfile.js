@@ -16,7 +16,10 @@ module.exports = function (grunt) {
       options: {
         reporter: 'spec'
       },
-      all: ['test/authorization/**/*.js']
+      all: [
+        'test/authentication/**/*.js',
+        'test/authorization/**/*.js'
+      ]
     }
   });
 

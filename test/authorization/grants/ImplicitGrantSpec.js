@@ -1,3 +1,9 @@
+/**
+ * AuthorizationCode grant
+ *
+ * The OAuth 2.0 Authorization Framework
+ * http://tools.ietf.org/html/rfc6749#section-4.2
+ */
 
 describe('implicit grant', function () {
 
