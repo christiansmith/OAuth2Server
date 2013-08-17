@@ -1,3 +1,10 @@
+var cwd = process.cwd()
+  , path = require('path')
+  , chai = require('chai')
+  , Client = require(path.join(cwd, 'models/Client'))
+  , expect = chai.expect
+  ;
+
 /**
  * Client model
  *
@@ -7,26 +14,92 @@
 
 describe('Client', function () {
 
+  var err, client, validation, validClient = {
+    _id: '3546zbxn',
+    type: 'confidential',
+    name: 'ThirdPartyApp',
+    redirect_uris: 'http://example.com/callback.html'
+  };
+
+
+  beforeEach(function () {
+    Client.backend.reset(); 
+  });
+
+
   describe('schema', function () {
-    it('should have id');
-    it('should require type');
-    it('should enumerate types');   // confidential, public
-    it('should have name');
-    it('should have website');
-    it('should have description');
-    it('should have logo image');
-    it('should have terms accepted');
-    it('should have secret');
+
+    beforeEach(function () {
+      client = new Client({});
+      validation = client.validate();
+    });
+
+    it('should have _id', function () {
+      Client.schema._id.should.be.an('object');
+    });
+
+    it('should require type', function () {
+      validation.errors.type.attribute.should.equal('required');
+    });
+
+    it('should enumerate types', function () {
+      Client.schema.type.enum.should.contain('confidential');
+      Client.schema.type.enum.should.contain('public');
+    });
+
+    it('should have name', function () {
+      Client.schema.name.type.should.equal('string');
+    });
+
+    it('should have website', function () {
+      Client.schema.website.type.should.equal('string');
+    });
+
+    it('should have description', function () {
+      Client.schema.description.type.should.equal('string');
+    });
+
+    it('should have logo image', function () {
+      Client.schema.logo.type.should.equal('string');
+    });
+
+    it('should have terms accepted', function () {
+      Client.schema.terms.type.should.equal('boolean');
+    });
+
+    it('should have secret', function () {
+      Client.schema.secret.type.should.equal('string');
+    });
+
     it('should have redirect uris');
-    it('should have "created" timestamp');
-    it('should have "modified" timestamp');
+
+    it('should have "created" timestamp', function () {
+      Client.schema.created.should.be.an('object');
+    });
+    
+    it('should have "modified" timestamp', function () {
+      Client.schema.modified.should.be.an('object');
+    });
+
   });
 
 
   describe('constructor', function () {
+
     it('should initialize id if none is provided');
-    it('should set attrs defined in schema');
-    it('should ignore attrs not defined in schema');
+
+    it('should set attrs defined in schema', function () {
+      client = new Client(validClient);
+      client._id.should.equal(validClient._id);
+      client.type.should.equal(validClient.type);
+      client.name.should.equal(validClient.name);
+    });
+    
+    it('should ignore attrs not defined in schema', function () {
+      client = new Client({ hacker: 'p0wn3d' });
+      expect(client.hacker).equals(undefined);
+    });
+
   });
 
 

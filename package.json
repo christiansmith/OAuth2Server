@@ -1,9 +1,9 @@
 {
   "name": "OAuth2Server",
-  "author": { 
-    "name": "Christian Smith", 
-    "email": "smith@anvil.io", 
-    "url": "http://anvil.io" 
+  "author": {
+    "name": "Christian Smith",
+    "email": "smith@anvil.io",
+    "url": "http://anvil.io"
   },
   "version": "0.0.0",
   "description": "OAuth 2.0 Server",
@@ -11,11 +11,18 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-watch": "~0.5.1",
-    "grunt-mocha-cov": "~0.0.7"
+    "grunt-mocha-cov": "~0.0.7",
+    "chai": "~1.7.2",
+    "async": "~0.2.9"
   },
-  "repository" : { 
-    "type" : "git",
-    "url" : "https://github.com/RideAmigosCorp/OAuth2Server.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RideAmigosCorp/OAuth2Server.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "revalidator": "~0.1.5",
+    "underscore": "~1.5.1",
+    "bcrypt": "~0.7.6"
+  }
 }

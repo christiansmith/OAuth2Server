@@ -1,5 +1,5 @@
 /**
- * AuthorizationCode grant
+ * Authorization Code Grant
  *
  * The OAuth 2.0 Authorization Framework
  * http://tools.ietf.org/html/rfc6749#section-4.1

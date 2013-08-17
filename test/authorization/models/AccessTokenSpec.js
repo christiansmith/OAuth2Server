@@ -1,3 +1,12 @@
+var cwd = process.cwd()
+  , path = require('path')
+  , chai = require('chai')
+  , AccessToken = require(path.join(cwd, 'models/AccessToken'))
+//  , Backend = require(path.join(cwd, 'models/Backend'))  
+//  , backend = new Backend()
+  , expect = chai.expect
+  ;
+
 /**
  * AccessToken model
  *
@@ -12,38 +21,265 @@
 
 describe('AccessToken', function () {
 
-  describe('schema', function () {
-    it('should have a client id');
-    it('should have an access token');
-    it('should have a token type');
-    it('should enumerate token types'); // bearer, mac
-    it('should have an expiration');
-    it('should have a refresh token');
-    it('should have scope');
-    it('may define a default scope');
-    it('should have state??');
-    it('should have "created" timestamp');
-    it('should have "modified" timestamp');
+  var token, validation, validToken = {
+    client_id: '0987qwer',
+    access_token: '1234abcd',
+    expires_at: new Date('2014/01/31'),
+    refresh_token: '3456asdf',
+    scope: 'https://api1.tld https://api2.tld'
+  };
+
+  beforeEach(function () { 
+    AccessToken.backend.reset(); 
   });
+
+  describe('schema', function () {
+
+    beforeEach(function () {
+      token = new AccessToken();
+      validation = token.validate();
+    });
+
+    it('should require a client id', function () {
+      validation.errors.client_id.attribute.should.equal('required');
+    });
+
+    it('should have an access token', function () {
+      AccessToken.schema.access_token.type.should.equal('string');
+    });
+
+    it('should have a token type', function () {
+      AccessToken.schema.token_type.type.should.equal('string');
+    });
+
+    it('should enumerate token types', function () {
+      AccessToken.schema.token_type.enum.should.contain('bearer');
+      AccessToken.schema.token_type.enum.should.contain('mac');
+    });
+
+    it('should default token type to "bearer"', function () {
+      token.token_type.should.equal('bearer');
+    });
+
+    it('should have an expiration', function () {
+      AccessToken.schema.expires_at.type.should.equal('any');
+    });
+
+    it('should have a refresh token', function () {
+      AccessToken.schema.refresh_token.type.should.equal('string');
+    });
+
+    it('should have scope', function () {
+      AccessToken.schema.scope.type.should.equal('string');
+    });
+
+    it('may define a default scope');
+    
+    it('should have state??');
+
+    it('should have "created" timestamp', function () {
+      AccessToken.schema.created.should.be.an('object');
+    });
+    
+    it('should have "modified" timestamp', function () {
+      AccessToken.schema.modified.should.be.an('object');
+    });
+
+  });
+
+
+  describe('constructor', function () {
+
+    it('should set attrs defined in schema', function () {
+      token = new AccessToken(validToken);
+      token.client_id.should.equal(validToken.client_id);
+      token.access_token.should.equal(validToken.access_token);
+      token.expires_at.should.equal(validToken.expires_at);
+      token.refresh_token.should.equal(validToken.refresh_token);
+      token.scope.should.equal(validToken.scope);
+    });
+    
+    it('should ignore attrs not defined in schema', function () {
+      token = new AccessToken({ hacker: 'p0wn3d' });
+      expect(token.hacker).equals(undefined);
+    });
+
+  });
+
+
+  describe('creation', function () {
+
+    describe('with valid data', function () {
+
+      before(function (done) {
+        AccessToken.create(validToken, function (error, instance) {
+          err = error; 
+          token = instance; 
+          done();
+        });
+      });
+
+      it('should provide a null error', function () {
+        expect(err).equals(null);
+      });
+
+      it('should provide an AccessToken instance', function () {
+        (token instanceof AccessToken).should.equal(true);
+      });      
+
+      it('should set the "created" timestamp', function () {
+        token.created.should.be.defined;
+      });
+
+      it('should set the "modified" timestamp', function () {
+        token.modified.should.be.defined;
+      });
+
+    });
+
+    describe('with invalid data', function () {
+
+      beforeEach(function (done) {
+        AccessToken.create({}, function (error, instance) {
+          err = error; 
+          token = instance; 
+          done();
+        });
+      });
+
+      it('should provide a validation error', function () {
+        err.name.should.equal('ValidationError');
+      });
+
+      it('should not provide an access token', function () {
+        expect(token).equals(undefined);
+      });
+
+    });
+
+  });
+
+
+  describe('retrieval', function () {
+
+    describe('by access token', function () {
+
+      before(function (done) {
+        AccessToken.create(validToken, function (e) {
+          AccessToken.find({ access_token: validToken.access_token }, function (error, instance) {
+            err = error;
+            token = instance;
+            done();
+          });
+        });        
+      });
+
+      it('should provide a null error', function () {
+        expect(err).equals(null);
+      })
+
+      it('should provide an AccessToken instance', function () {
+        (token instanceof AccessToken).should.equal(true);
+      });
+
+    });
+
+  });
+
 
   describe('verification', function () {
     // AccessToken.verify(client_id, token, scope);
-    it('should verify a valid token');
-    it('should not verify a mismatching client');
-    it('should not verify an unknown access token');
-    it('should not verify an expired access token');
+    var verified;
 
-    describe('with default scope', function () {
+    describe('with valid details', function () {
+
+      before(function () {
+        token = new AccessToken(validToken);
+        verified = token.verify(token.client_id, token.access_token, token.scope);
+      });
+
+      it('should succeed', function () {
+        expect(verified).equals(true);
+      });
 
     });
 
-    describe('without default scope', function () {
+    describe('with mismatching client', function () {
+
+      before(function () {
+        token = new AccessToken(validToken);
+        verified = token.verify('wrong', token.access_token, token.scope);
+      });
+
+      it('should fail', function () {
+        expect(verified).equals(false);
+      });
 
     });
 
-    // 
-    it('should not verify an omitted scope');
-    it('should not verify with insufficient scope ???');
+    describe('with unknown access token', function () {
+
+      before(function () {
+        token = new AccessToken(validToken);
+        verified = token.verify(token.client_id, 'wrong', token.scope);
+      });
+
+      it('should fail', function () {
+        expect(verified).equals(false);
+      });
+
+    });
+
+
+    describe('with expired access token', function () {
+
+      before(function () {
+        token = new AccessToken(validToken);
+        token.expires_at = new Date('2012/12/21');
+        verified = token.verify(token.client_id, token.access_token, token.scope);
+      });
+
+      it('should fail', function () {
+        expect(verified).equals(false);
+      });
+
+    });
+
+
+    describe('with insufficient scope', function () {
+
+      before(function () {
+        token = new AccessToken(validToken);
+        token.scope = 'https://some.api.tld';
+        verified = token.verify(token.client_id, token.access_token, 'http://other.api.tld');
+      });
+
+      it('should fail', function () {
+        expect(verified).equals(false);
+      });
+
+    });
+    
+
+    describe('with omitted scope', function () {
+
+      before(function () {
+        token = new AccessToken(validToken);  
+      });
+
+      it('should fail', function () {
+        verified = token.verify(token.client_id, token.access_token, '');
+        expect(verified).equals(false);
+
+        verified = token.verify(token.client_id, token.access_token);
+        expect(verified).equals(false);
+      });
+
+    });
+
+
+    describe('with omitted scope and defined default', function () {});
+
   });
 
 });

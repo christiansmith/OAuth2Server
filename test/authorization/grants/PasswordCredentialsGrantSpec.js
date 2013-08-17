@@ -1,3 +1,9 @@
+/**
+ * Resource Owner Password Credentials Grant
+ *
+ * The OAuth 2.0 Authorization Framework
+ * http://tools.ietf.org/html/rfc6749#section-4.3
+ */
 
 describe('resource owner password credentials grant', function () {
 

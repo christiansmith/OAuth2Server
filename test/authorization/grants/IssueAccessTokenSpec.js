@@ -1,5 +1,5 @@
 /**
- * Issue access token
+ * Issuing an Access Token
  *
  * The OAuth 2.0 Authorization Framework
  * http://tools.ietf.org/html/rfc6749#section-3.2
