@@ -5,80 +5,41 @@
 var util      = require('util')
   , async     = require('async')
   , bcrypt    = require('bcrypt')
-  , validate  = require('../lib/validate')
-  , Backend = require('./Backend')
-  , backend = new Backend()
+  , Model = require('./Model')
   ;
 
 
 /**
- * User constructor
+ * Model definition
  */
 
-function User (attrs) {
-  var schema = User.schema
-    , self = this;
-  
-  // recurse through the schema properties
-  // and copy values from the provided attrs
-  function set(keys, source, target) {
-    keys.forEach(function (key) {
-      if (attrs[key] && schema[key].properties) {
-        if (!self[key]) { 
-          self[key] = {}; 
-        }
-        set(Object.keys(schema[key].properties), attrs[key], self[key]);
-      } else {
-        if (source[key]) { 
-          target[key] = source[key]; 
-        }
+var User = Model.extend(null, {
+  schema: {
+    _id:  { type: 'any' },
+    info: { 
+      type: 'object', 
+      required: true, 
+      properties: {
+        id:         { type: 'any' },
+        first:      { type: 'string' },
+        last:       { type: 'string' },
+        username:   { type: 'string' },
+        email:      { type: 'string', required: true, format: 'email' },
+        created:    { type: 'any' },
+        modified:   { type: 'any' }
       }
-    });
+    },
+    salt: { type: 'string' },
+    hash: { type: 'string' }    
   }
-
-  if (attrs) {
-    set(Object.keys(schema), attrs, self);
-  } 
-
-  if (!self['_id']) { self['_id'] = backend.createID(); }
-}
-
-/**
- * User schema (used by User.validate)
- */
-
-User.schema = {
-  _id:  { type: 'any' },
-  info: { 
-    type: 'object', 
-    required: true, 
-    properties: {
-      id:         { type: 'any' },
-      first:      { type: 'string' },
-      last:       { type: 'string' },
-      username:   { type: 'string' },
-      email:      { type: 'string', required: true, format: 'email' },
-      created:    { type: 'any' },
-      modified:   { type: 'any' }
-    }
-  },
-  salt: { type: 'string' },
-  hash: { type: 'string' }
-};
-
+});
 
 
 /**
- * Validate data against the User schema.
- */
-
-User.prototype.validate = function() {
-  return validate(this, User.schema);
-};
-
-
-/**
- * User.create(info, callback)
+ * Override Model.create. 
+ * We can refactor this to define unique values in the schema
+ * and automatically check. Also need a way to hook in before
+ * create/validate.
  */
 
 User.create = function (attrs, callback) {
@@ -99,7 +60,7 @@ User.create = function (attrs, callback) {
   async.parallel({
 
     registeredEmail: function (done) {
-      backend.find({ 'info.email': user.info.email }, function (err, data) {
+      User.backend.find({ 'info.email': user.info.email }, function (err, data) {
         if (err) { return done(err); }
         if (data) { return done(new RegisteredEmailError()); }
         done(null, data);
@@ -107,7 +68,7 @@ User.create = function (attrs, callback) {
     },
     
     registeredUsername: function (done) {
-      backend.find({ 'info.username': user.info.username }, function (err, data) {
+      User.backend.find({ 'info.username': user.info.username }, function (err, data) {
         if (err) { return done(err); }
         if (data) { return done(new RegisteredUsernameError()); }
         done(null, data);
@@ -116,28 +77,10 @@ User.create = function (attrs, callback) {
 
   }, function (err, result) {
     if (err) { return callback(err); }
-    backend.save(user, function (err) {
+    User.backend.save(user, function (err) {
       if (err) { return callback(err); }
       callback(null, user);
     });
-  });
-};
-
-
-/**
- * User.find(id, callback)
- */
-
-User.find = function (conditions, options, callback) {
-  if (callback === undefined) {
-    callback = options;
-    options = {};
-  }
-
-  backend.find(conditions, options, function (err, data) {
-    if (err) { return callback(err); }
-    if (!data) { return callback(null, data); }
-    callback(null, new User(data));
   });
 };
 
@@ -151,12 +94,13 @@ User.prototype.verifyPassword = function (password, callback) {
   bcrypt.compare(password, this.hash, callback);
 };
 
+
 /**
  * User.authenticate(email, password, callback)
  */
 
 User.authenticate = function (email, password, callback) {
-  backend.find({ 'info.email': email }, function (err, result) {
+  User.backend.find({ 'info.email': email }, function (err, result) {
     if (!result) { return callback(null, false, { message: 'Unknown user.' }); }
 
     user = new User(result);
@@ -169,7 +113,6 @@ User.authenticate = function (email, password, callback) {
     });
   });
 };
-
 
 
 /**
@@ -221,5 +164,4 @@ util.inherits(RegisteredUsernameError, Error);
  * Exports
  */
 
-User.backend = backend;
 module.exports = User;

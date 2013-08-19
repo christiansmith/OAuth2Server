@@ -90,30 +90,41 @@ Model.extend = function (proto, static) {
 
 Model.prototype.initialize = function(attrs) {
   var Constructor = this.constructor
-    , schema = Constructor.schema
     , self = this;
 
-  // Recurse through nested schema properties
-  // and copy values from the provided attrs
-  function set(keys, source, target) {
+  // Recurse through nested schema properties and 
+  // copy values from the provided attrs onto `this`.
+  function set (schema, source, target) {
+    var keys = Object.keys(schema);
+
     keys.forEach(function (key) {
-      if (attrs[key] && schema[key].properties) {
-        if (!self[key]) { 
-          self[key] = {}; 
-        }
-        set(Object.keys(schema[key].properties), attrs[key], self[key]);
+
+      // If the key defines a nested schema ...
+      if (schema[key].properties) {
+
+        // Define a nested object on `this`.
+        if (!target[key]) { target[key] = {}; }
+
+        // Recurse through the nested attrs/schema, setting
+        // properties provided by attrs.
+        set(schema[key].properties, source[key] || {}, target[key]);
+
       } else {
-        if (source[key]) { 
+        // If the data source provides a value, copy it to `this`.
+        // If not, and the schema provides a default value,
+        // copy it from the schema to `this`.
+        if (source[key]) {
           target[key] = source[key]; 
+        } else if (schema[key].default) {
+          target[key] = schema[key].default;
         }
       }
     });
   }
 
-  // Set properties of this
-  if (attrs) {
-    set(Object.keys(schema), attrs, self);
-  } 
+  // Set properties of `this`.
+  if (!attrs) { attrs = {}; }
+  set(Constructor.schema, attrs, self);
 
   // Initialize the ID
   if (!self[Constructor.uniqueID]) { 

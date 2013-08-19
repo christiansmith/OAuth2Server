@@ -65,6 +65,7 @@ describe('Model-extending constructor', function () {
     it('should initialize a default backend', function () {
       expect(Type.backend instanceof Backend).equals(true);
     });    
+
   });
 
 
@@ -121,9 +122,11 @@ describe('Model-extending constructor', function () {
           x: { type: 'string' },
           y: {
             properties: {
-              z: { type: 'number' }
+              z: { type: 'number' },
+              d: { type: 'boolean', default: true }
             }
-          }
+          },
+          z: { type: 'boolean', default: true }
         }
       });
     });
@@ -163,6 +166,13 @@ describe('Model-extending constructor', function () {
     it('should ignore attrs not defined in schema', function () {
       instance = new Type({ hacker: 'p0wn3d' });
       expect(instance.hacker).equals(undefined);
+    });
+
+    it('should set defaults defined in the schema', function () {
+      instance = new Type();
+      console.log(instance);
+      instance.z.should.equal(true);
+      instance.y.d.should.equal(true);
     });
 
   });

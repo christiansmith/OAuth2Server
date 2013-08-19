@@ -188,7 +188,7 @@ describe('AccessToken', function () {
 
 
   describe('verification', function () {
-    // AccessToken.verify(client_id, token, scope);
+    
     var verified;
 
     describe('with valid details', function () {
