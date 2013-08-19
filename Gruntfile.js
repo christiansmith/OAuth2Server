@@ -18,6 +18,7 @@ module.exports = function (grunt) {
         reporter: 'spec'
       },
       all: [
+        'test/models/**/*.js',
         'test/authentication/**/*.js',
         'test/authorization/**/*.js'
       ]
