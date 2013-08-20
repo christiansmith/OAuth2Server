@@ -1,45 +1,6 @@
 
 describe('direct authentication routes', function () {
 
-  /**
-   * QUESTIONS
-   *
-   * Configure to login with username vs. email?
-   *
-   * Admin user signup?
-   *
-   * Configure to lock anonymous account creation?
-   */
-
-
-  describe('POST /account', function () {
-
-    describe('with valid details', function () {
-      it('should respond 201');
-      it('should respond with JSON');
-      it('should respond with user info');
-    });
-
-    describe('with registered email', function () {
-      it('should respond 400');
-      it('should respond with JSON');
-      it('should respond with "registered email" error');      
-    });
-
-    describe('with registered username', function () {
-      it('should respond 400');
-      it('should respond with JSON');
-      it('should respond with "registered username" error');
-    });
-
-    describe('with invalid details', function () {
-      it('should respond 400');
-      it('should respond with JSON');
-      it('should respond with validation errors');
-    });
-
-  });
-
 
   describe('POST /login', function () {
 
@@ -102,5 +63,6 @@ describe('direct authentication routes', function () {
   describe('account verification', function () {
 
   });
+
 
 });

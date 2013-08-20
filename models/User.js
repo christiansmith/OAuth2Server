@@ -2,10 +2,10 @@
  * Module dependencies
  */
 
-var util      = require('util')
-  , async     = require('async')
-  , bcrypt    = require('bcrypt')
-  , Model = require('./Model')
+var util   = require('util')
+  , async  = require('async')
+  , bcrypt = require('bcrypt')
+  , Model  = require('./Model')
   ;
 
 

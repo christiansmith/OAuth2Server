@@ -170,7 +170,6 @@ describe('Model-extending constructor', function () {
 
     it('should set defaults defined in the schema', function () {
       instance = new Type();
-      console.log(instance);
       instance.z.should.equal(true);
       instance.y.d.should.equal(true);
     });
@@ -224,7 +223,8 @@ describe('Model-extending constructor', function () {
     before(function () {
       Type = Model.extend(null, {
         schema: {
-          email: { type: 'string', format: 'email' }
+          email: { type: 'string', format: 'email' },
+          uniq:  { type: 'string', unique: true }
         }
       });
     });
@@ -280,6 +280,10 @@ describe('Model-extending constructor', function () {
       it('should not provide an instance', function () {
         expect(instance).equals(undefined);
       });
+    });
+
+    describe('with a duplicate values on unique attributes', function () {
+      it('should provide a "duplicate value" error');
     });
 
   });

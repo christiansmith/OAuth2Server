@@ -7,7 +7,9 @@ module.exports = function (grunt) {
     watch: {
       test: {
         files: [
+          'config/**/*.js',
           'models/**/*.js',
+          'routes/**/*.js',
           'test/**/*.js'
         ],
         tasks: ['mochacov']

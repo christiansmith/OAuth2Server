@@ -13,7 +13,8 @@
     "grunt-contrib-watch": "~0.5.1",
     "grunt-mocha-cov": "~0.0.7",
     "chai": "~1.7.2",
-    "async": "~0.2.9"
+    "async": "~0.2.9",
+    "supertest": "~0.7.1"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "dependencies": {
     "revalidator": "~0.1.5",
     "underscore": "~1.5.1",
-    "bcrypt": "~0.7.6"
+    "bcrypt": "~0.7.6",
+    "express": "~3.3.5"
   }
 }
