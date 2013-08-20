@@ -1,4 +1,6 @@
-var express = require('express');
+var express = require('express')
+  , passport = require('passport')
+  ;
 
 module.exports = function (app) {
 
@@ -6,8 +8,12 @@ module.exports = function (app) {
     app.set('port', 3000);
     app.use(express.bodyParser());
     
-    // Explicitly register router
-    // before error handler.
+    // passport authentication middleware
+    app.use(passport.initialize());
+    app.use(passport.session());
+
+    // Explicitly register app.router
+    // before error handling.
     app.use(app.router);
 
     // Error handler

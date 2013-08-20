@@ -2,7 +2,9 @@
  * Module dependencies
  */
 
-var Model = require('./Model');
+var Model = require('./Model')
+  , crypto = require('crypto')
+  ;
 
 
 /**
@@ -12,6 +14,7 @@ var Model = require('./Model');
 var AccessToken = Model.extend(null, {
   schema: {
     client_id:      { type: 'string', required: true },
+    user_id:        { type: 'string', required: true },
     access_token:   { type: 'string' },
     token_type:     { type: 'string', enum: ['bearer', 'mac'], default: 'bearer' },
     expires_at:     { type: 'any' },
@@ -21,6 +24,30 @@ var AccessToken = Model.extend(null, {
     modified:       { type: 'any' }
   }
 });
+
+
+/**
+ * Issue access token
+ */
+
+AccessToken.issue = function(client, user, options, callback) {
+  if (callback === undefined) {
+    callback = options;
+    options = {};
+  }
+
+  this.create({
+    client_id:      client._id,
+    user_id:        user._id,
+    access_token:   crypto.randomBytes(10).toString('hex'),
+    expires_at:     new Date(Date.now() + 4 * 3600 * 1000),
+    refresh_token:  crypto.randomBytes(10).toString('hex'),
+    scope:          options.scope
+  }, function (err, token) {
+    if (err) { return callback(err); }
+    callback(null, token);
+  });
+};
 
 
 /**

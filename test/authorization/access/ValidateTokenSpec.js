@@ -68,6 +68,8 @@ describe('access token validation', function () {
       it('should respond with an error uri');
     });
 
+    describe('without state', function () {});
+
   });
 
 });

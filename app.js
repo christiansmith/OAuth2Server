@@ -1,9 +1,12 @@
 var express = require('express')
+  , passport = require('passport')
   , app = express()
   ;
 
 
 require('./config/')(app);
+require('./config/passport')(passport);
+require('./config/oauth2')(app);
 require('./routes/')(app);
 
 

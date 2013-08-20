@@ -25,6 +25,9 @@
     "revalidator": "~0.1.5",
     "underscore": "~1.5.1",
     "bcrypt": "~0.7.6",
-    "express": "~3.3.5"
+    "express": "~3.3.5",
+    "passport": "~0.1.17",
+    "passport-http": "~0.2.2",
+    "oauth2orize": "~0.1.0"
   }
 }
