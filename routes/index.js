@@ -1,7 +1,16 @@
+/**
+ * Module dependencies
+ */
+
 var passport = require('passport')
   , User = require('../models/User');
 
+
 module.exports = function (app) {
+
+  /**
+   * User registration endpoint
+   */
 
   app.post('/account', function (req, res, next) {
     User.create(req.body, function (err, user) {

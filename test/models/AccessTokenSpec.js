@@ -1,3 +1,7 @@
+/**
+ * Test dependencies
+ */
+
 var cwd = process.cwd()
   , path = require('path')
   , chai = require('chai')
@@ -21,7 +25,7 @@ var cwd = process.cwd()
 
 describe('AccessToken', function () {
 
-  var token, validation, validToken = {
+  var err, token, validation, validToken = {
     client_id: '0987qwer',
     user_id: '2345wert',
     access_token: '1234abcd',
@@ -274,41 +278,82 @@ describe('AccessToken', function () {
     
     var verified;
 
+    beforeEach(function (done) {
+      Client.backend.reset();
+      User.backend.reset();
+      AccessToken.backend.reset();
+
+      User.create(validUser, function (err, instance) {
+        user = instance;
+        Client.create(validClient, function (err, instance) {
+          client = instance;
+          AccessToken.issue(client, user, { scope: 'http://test.tld' }, function (error, instance) {
+            err = error;
+            token = instance;
+            done();
+          });
+        });
+      });
+    });    
+
+
     describe('with valid details', function () {
 
-      before(function () {
-        token = new AccessToken(validToken);
-        verified = token.verify(token.client_id, token.access_token, token.scope);
+      before(function (done) {
+        AccessToken.verify(token.access_token, client._id, token.scope, function (err, truth) {
+          verified = truth;
+          done();
+        });
       });
 
-      it('should succeed', function () {
+      it('should provide a null error', function () {
+        expect(err).equals(null);
+      })
+
+      it('should provide verification', function () {
         expect(verified).equals(true);
       });
 
     });
 
+
     describe('with mismatching client', function () {
 
-      before(function () {
-        token = new AccessToken(validToken);
-        verified = token.verify('wrong', token.access_token, token.scope);
+      before(function (done) {
+        AccessToken.verify(token.access_token, 'wrong', token.scope, function (error, truth) {
+          err = error;
+          verified = truth;
+          done();
+        });
       });
 
-      it('should fail', function () {
-        expect(verified).equals(false);
+      it('should provide an "InvalidTokenError"', function () {
+        err.name.should.equal('InvalidTokenError');
+      });
+
+      it('should not provide verification', function () {
+        expect(verified).equals(undefined);
       });
 
     });
 
+
     describe('with unknown access token', function () {
 
-      before(function () {
-        token = new AccessToken(validToken);
-        verified = token.verify(token.client_id, 'wrong', token.scope);
+      before(function (done) {
+        AccessToken.verify('unknown', client._id, token.scope, function (error, truth) {
+          err = error;
+          verified = truth;
+          done();
+        });
       });
 
-      it('should fail', function () {
-        expect(verified).equals(false);
+      it('should provide an "InvalidTokenError"', function () {
+        err.name.should.equal('InvalidTokenError');
+      });
+
+      it('should not provide verification', function () {
+        expect(verified).equals(undefined);
       });
 
     });
@@ -316,14 +361,29 @@ describe('AccessToken', function () {
 
     describe('with expired access token', function () {
 
-      before(function () {
-        token = new AccessToken(validToken);
-        token.expires_at = new Date('2012/12/21');
-        verified = token.verify(token.client_id, token.access_token, token.scope);
+      before(function (done) {
+        AccessToken.create({
+          client_id: token.client_id,
+          user_id: token.user_id,
+          access_token: '1234abcd',
+          expires_at: new Date('2012/12/21'),
+          refresh_token: '3456asdf',
+          scope: 'https://api1.tld https://api2.tld'
+        }, function (err, instance) {
+          AccessToken.verify(instance.access_token, instance.client_id, instance.scope, function (error, truth) {
+            err = error;
+            verified = truth;
+            done();
+          });
+        });
       });
 
-      it('should fail', function () {
-        expect(verified).equals(false);
+      it('should provide an "InvalidTokenError"', function () {
+        err.name.should.equal('InvalidTokenError');
+      });
+
+      it('should not provide verification', function () {
+        expect(verified).equals(undefined);
       });
 
     });
@@ -331,14 +391,20 @@ describe('AccessToken', function () {
 
     describe('with insufficient scope', function () {
 
-      before(function () {
-        token = new AccessToken(validToken);
-        token.scope = 'https://some.api.tld';
-        verified = token.verify(token.client_id, token.access_token, 'http://other.api.tld');
+      before(function (done) {
+        AccessToken.verify(token.access_token, client._id, 'https://insufficient.tld', function (error, truth) {
+          err = error;
+          verified = truth;
+          done();
+        });
       });
 
-      it('should fail', function () {
-        expect(verified).equals(false);
+      it('should provide an "InsufficientScopeError"', function () {
+        err.name.should.equal('InsufficientScopeError');
+      });
+
+      it('should not provide verification', function () {
+        expect(verified).equals(undefined);
       });
 
     });
@@ -346,16 +412,19 @@ describe('AccessToken', function () {
 
     describe('with omitted scope', function () {
 
-      before(function () {
-        token = new AccessToken(validToken);  
+      before(function (done) {
+        AccessToken.verify(token.access_token, client._id, undefined, function (err, truth) {
+          verified = truth;
+          done();
+        });
       });
 
-      it('should fail', function () {
-        verified = token.verify(token.client_id, token.access_token, '');
-        expect(verified).equals(false);
+      it('should provide an "InsufficientScopeError"', function () {
+        err.name.should.equal('InsufficientScopeError');
+      });
 
-        verified = token.verify(token.client_id, token.access_token);
-        expect(verified).equals(false);
+      it('should not provide verification', function () {
+        expect(verified).equals(undefined);
       });
 
     });

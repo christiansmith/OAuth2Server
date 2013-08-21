@@ -4,6 +4,7 @@
 
 var Model = require('./Model')
   , crypto = require('crypto')
+  , util = require('util')
   ;
 
 
@@ -54,35 +55,59 @@ AccessToken.issue = function(client, user, options, callback) {
  * Verify access token
  */
 
-AccessToken.prototype.verify = function (client_id, access_token, scope) {
-  return client_id    === this.client_id 
-      && access_token === this.access_token
-      && new Date()   <   this.expires_at
-      && scope        !== ''
-      && this.scope.indexOf(scope) !== -1
-      ;
+AccessToken.verify = function (access_token, client_id, scope, callback) {
+  this.find({ access_token: access_token }, function (err, token) {
+    if (!token) { 
+      return callback(new InvalidTokenError('Unknown access token')); 
+    }
+
+    if (client_id !== token.client_id) { 
+      return callback(new InvalidTokenError('Client mismatch')); 
+    }
+    
+    if (new Date() > token.expires_at) { 
+      return callback(new InvalidTokenError('Expired access token')); 
+    }
+
+    if (token.scope.indexOf(scope) === -1) {
+      return callback(new InsufficientScopeError());
+    }
+
+    callback(null, true);
+  });
 };
 
-//// untested draft of async verifiy, with custom errors
-//AccessToken.verify = function (access_token, client_id, scope, callback) {
-//  AccessToken.find({ access_token: access_token }, function (err, token) {
-//    var invalid = !token 
-//               || client_id    !== token.client_id
-//               || access_token !== token.access_token
-//               || new Date()   < token.expires_at
-//                ;
-//
-//    if (invalid) { 
-//      return callback(new InvalidTokenError()); 
-//    }
-//
-//    if (token.scope.indexOf(scope) === -1) {
-//      return callback(new InsufficientScopeError());
-//    }
-//
-//    callback(null, true);
-//  });
-//};
+
+/**
+ * InvalidTokenError
+ */
+
+function InvalidTokenError(description) {
+  this.name = 'InvalidTokenError';
+  this.message = 'invalid_token';
+  this.description = description;
+  this.statusCode = 400;
+  Error.call(this, this.message);
+  Error.captureStackTrace(this, arguments.callee);
+}
+
+util.inherits(InvalidTokenError, Error);
+
+
+/**
+ * InsufficientScopeError
+ */
+
+function InsufficientScopeError() {
+  this.name = 'InsufficientScopeError';
+  this.message = 'insufficient_scope';
+  this.description = 'Insufficient scope';
+  this.statusCode = 400;
+  Error.call(this, this.message);
+  Error.captureStackTrace(this, arguments.callee);
+}
+
+util.inherits(InsufficientScopeError, Error);
 
 
 /**

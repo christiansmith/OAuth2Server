@@ -1,3 +1,7 @@
+/**
+ * Test dependencies
+ */
+
 var cwd = process.cwd()
   , path = require('path')
   , chai = require('chai')

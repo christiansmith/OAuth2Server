@@ -1,3 +1,7 @@
+/**
+ * Test dependencies
+ */
+
 var cwd = process.cwd()
   , path = require('path')
   , chai = require('chai')
@@ -104,7 +108,18 @@ describe('Client', function () {
 
 
   describe('registration', function () {
-    it('should generate a secret');
+
+    before(function (done) {
+      Client.backend.reset();
+      Client.register(validClient, function (err, instance) {
+        client = instance;
+        done();
+      });
+    });
+
+    it('should generate a secret', function () {
+      client.secret.should.be.defined;
+    });
   });
 
 

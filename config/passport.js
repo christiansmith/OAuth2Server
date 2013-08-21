@@ -16,7 +16,7 @@ module.exports = function (passport) {
 
 
   /**
-   * Basic Strategy
+   * HTTP Basic Authentication Strategy
    */
 
   passport.use('basic', new BasicStrategy(function (username, password, done) {

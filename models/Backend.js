@@ -2,7 +2,9 @@
  * Module dependencies
  */
 
-var _     = require('underscore');
+var _      = require('underscore')
+  , crypto = require('crypto')
+  ;
 
 
 /**
@@ -28,7 +30,7 @@ Backend.prototype.reset = function() {
  */
 
 Backend.prototype.createID = function () { 
-  return '1234abcd'; 
+  return crypto.randomBytes(10).toString('hex');
 };
 
 

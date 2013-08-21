@@ -277,8 +277,8 @@ describe('User', function () {
     describe('by id', function () {
 
       before(function (done) {
-        User.create(validUser, function (e) {
-          User.find({ _id: '1234abcd' }, function (error, instance) {
+        User.create(validUser, function (e, u) {
+          User.find({ _id: u._id }, function (error, instance) {
             err = error;
             user = instance;
             done();

@@ -17,10 +17,10 @@ module.exports = function (app) {
     app.use(app.router);
 
     // Error handler
-    app.use(function (err, req, res, next) {      
+    app.use(function (err, req, res, next) {   
       var error = (err.errors)
         ? { errors: err.errors }
-        : { error: err.message };
+        : { error: err.message, error_description: err.description };
       res.send(err.statusCode || 500, error);
     });
   });
