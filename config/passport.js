@@ -2,7 +2,8 @@
  * Module dependencies
  */
 
-var BasicStrategy = require('passport-http').BasicStrategy
+var LocalStrategy = require('passport-local').Strategy
+  , BasicStrategy = require('passport-http').BasicStrategy
   , User = require('../models/User')
   , Client = require('../models/Client')
   ;
@@ -13,6 +14,18 @@ var BasicStrategy = require('passport-http').BasicStrategy
  */
 
 module.exports = function (passport) {
+
+  /**
+   * Local Authentication
+   */
+  
+  passport.use(new LocalStrategy({
+    usernameField: 'email'
+  }, function (email, password, done) {
+    User.authenticate(email, password, function (err, user, info) {
+      return done(err, user, info);
+    });
+  }));
 
 
   /**
@@ -25,5 +38,20 @@ module.exports = function (passport) {
       return done(null, client);
     });
   }));
+
+
+  /**
+   * User session
+   */
+
+  passport.serializeUser(function (user, done) {
+    done(null, user._id);
+  });
+
+  passport.deserializeUser(function (id, done) {
+    User.find({ _id: id }, function (err, user) {
+      done(err, user);
+    });
+  });
 
 };

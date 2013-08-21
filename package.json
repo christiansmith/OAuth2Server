@@ -28,6 +28,8 @@
     "express": "~3.3.5",
     "passport": "~0.1.17",
     "passport-http": "~0.2.2",
-    "oauth2orize": "~0.1.0"
+    "oauth2orize": "~0.1.0",
+    "passport-local": "~0.1.6",
+    "connect-redis": "~1.4.5"
   }
 }

@@ -108,7 +108,7 @@ User.authenticate = function (email, password, callback) {
       if (match) {
         callback(null, user, { message: 'Authenticated successfully!' });
       } else {
-        callback(null, false, { message: 'Incorrect password.'});
+        callback(null, false, { message: 'Invalid password.'});
       }
     });
   });

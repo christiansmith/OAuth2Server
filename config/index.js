@@ -1,12 +1,33 @@
+/**
+ * Configuration dependencies
+ */
+
 var express = require('express')
   , passport = require('passport')
+  , RedisStore = require('connect-redis')(express)  
   ;
+
+
+/**
+ * Exports
+ */
 
 module.exports = function (app) {
 
   app.configure(function () {
+
+    // settings
     app.set('port', 3000);
+
+    // request parsing
+    app.use(express.cookieParser('secret'));
     app.use(express.bodyParser());
+
+    // session config
+    app.use(express.session({ 
+      store: new RedisStore(), 
+      secret: 'nodejs sauce' 
+    }));
     
     // passport authentication middleware
     app.use(passport.initialize());

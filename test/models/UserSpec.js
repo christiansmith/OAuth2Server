@@ -451,7 +451,7 @@ describe('User', function () {
       });
 
       it('should provide a message', function () {
-        info.message.should.equal('Incorrect password.');
+        info.message.should.equal('Invalid password.');
       });
 
     });
