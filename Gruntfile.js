@@ -21,8 +21,7 @@ module.exports = function (grunt) {
       },
       all: [
         'test/models/**/*.js',
-        'test/authentication/**/*.js',
-        'test/authorization/**/*.js'
+        'test/routes/**/*.js'
       ]
     }
   });
