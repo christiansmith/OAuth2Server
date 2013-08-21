@@ -18,8 +18,15 @@ var cwd = process.cwd()
 
 describe('Client', function () {
 
+  var user, validUser = {
+    _id: '1234',
+    email: 'trane@example.com',
+    password: 'secret'
+  };
+
   var err, client, validation, validClient = {
-    _id: '3546zbxn',
+    _id: '2345',
+    user_id: validUser._id,
     type: 'confidential',
     name: 'ThirdPartyApp',
     redirect_uris: 'http://example.com/callback.html'
@@ -40,6 +47,11 @@ describe('Client', function () {
 
     it('should have _id', function () {
       Client.schema._id.should.be.an('object');
+    });
+
+    it('should require user_id', function () {
+      console.log(validation)
+      validation.errors.user_id.attribute.should.equal('required');
     });
 
     it('should require type', function () {
@@ -120,6 +132,7 @@ describe('Client', function () {
     it('should generate a secret', function () {
       client.secret.should.be.defined;
     });
+
   });
 
 

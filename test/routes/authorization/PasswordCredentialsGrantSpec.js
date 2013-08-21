@@ -36,6 +36,7 @@ describe('resource owner password credentials grant', function () {
       User.create({ email: 'valid@example.com', password: 'secret' }, function (err, user) {
         Client.create({ 
           _id: 'thirdparty', 
+          user_id: user._id,
           secret: 'secret', 
           type: 'confidential' 
         }, done);

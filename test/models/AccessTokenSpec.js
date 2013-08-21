@@ -25,16 +25,8 @@ var cwd = process.cwd()
 
 describe('AccessToken', function () {
 
-  var err, token, validation, validToken = {
-    client_id: '0987qwer',
-    user_id: '2345wert',
-    access_token: '1234abcd',
-    expires_at: new Date('2014/01/31'),
-    refresh_token: '3456asdf',
-    scope: 'https://api1.tld https://api2.tld'
-  };
-
   var user, validUser = {
+    _id: '1234',
     first: 'John',
     last: 'Coltrane',
     username: 'trane',
@@ -43,10 +35,20 @@ describe('AccessToken', function () {
   };
 
   var client, validClient = {
-    _id: '3546zbxn',
+    _id: '2345',
+    user_id: validUser._id,
     type: 'confidential',
     name: 'ThirdPartyApp',
     redirect_uris: 'http://example.com/callback.html'    
+  };
+
+  var err, token, validation, validToken = {
+    client_id: validClient._id,
+    user_id: validUser._id,
+    access_token: '1234abcd',
+    expires_at: new Date('2014/01/31'),
+    refresh_token: '3456asdf',
+    scope: 'https://api1.tld https://api2.tld'
   };
 
 
@@ -224,7 +226,7 @@ describe('AccessToken', function () {
 
       User.create(validUser, function (err, instance) {
         user = instance;
-        Client.create(validClient, function (err, instance) {
+        Client.register(validClient, function (err, instance) {
           client = instance;
           AccessToken.issue(client, user, { scope: 'http://test.tld' }, function (error, instance) {
             err = error;

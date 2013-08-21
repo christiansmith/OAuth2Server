@@ -14,7 +14,8 @@ var Model = require('./Model')
 var Client = Model.extend(null, {
   schema: {
 	_id:         { type: 'any' },
-	type:        { type: 'string', enum: ['confidential', 'public'], required: true },
+  user_id:     { type: 'string', required: true },
+	type:        { type: 'string', required: true, enum: ['confidential', 'public'] },
 	name:        { type: 'string' },
 	website:     { type: 'string' },
 	description: { type: 'string' },

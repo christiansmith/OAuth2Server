@@ -32,12 +32,14 @@ describe('access token validation', function () {
 
 
   var user, validUser = {
+    _id: '1234',
     email: 'valid@example.com',
     password: 'secret'    
   };
 
 
   var client, validClient = {
+    user_id: validUser._id,
     type: 'confidential',
     name: 'ThirdPartyApp',
     redirect_uris: 'http://example.com/callback.html'    

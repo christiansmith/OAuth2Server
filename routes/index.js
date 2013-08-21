@@ -9,6 +9,16 @@ var passport = require('passport')
 module.exports = function (app) {
 
   /**
+   * Authenticate middleware
+   */
+
+  app.authenticate = function (req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    res.send(401, 'Unauthorized');
+  };
+
+
+  /**
    * User registration endpoint
    */
 
@@ -53,5 +63,8 @@ module.exports = function (app) {
       res.json({ authenticated: false });
     }
   });
+
+
+  require('./client')(app);
 
 };
