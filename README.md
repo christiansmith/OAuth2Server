@@ -1,5 +1,24 @@
 # OAuth2Server
 
+
+## Project Goals
+
+Where most OAuth-related packages provide middleware or toolkits for implementing an authorization server, this project aims to deliver a ready-to-deploy server that can be incorporated out-of-the-box into a distributed architecture, along with a collection of SDKs for using it within client applications and API services. This won't be right for everyone, so it's great to have options like @nightworld's [node-oauth2-server](https://npmjs.org/package/node-oauth2-server) and @jaredhanson's [oauth2orize](https://github.com/jaredhanson/oauth2orize).
+
+There are currently three major use cases we intend to support:
+
+1. Centralized user account management and authentication for trusted client applications
+2. Third party API access as an OAuth 2.0 provider
+3. Single sign on
+
+
+## How to Participate
+
+* Come to the [Google Hangout](http://bit.ly/AuthHangout) at 10am Pacific every Thursday, where we review code, brainstorm, and talk shop. 
+* If you want to contribute specific features, please submit an issue describing your proposed enhancements *first*, so we can avoid duplicating efforts.
+* Pair program with the author(s). Just email @christiansmith to arrange a time.
+
+
 ## The MIT License
 
 Copyright (c) 2013 Christian Smith http://anvil.io and RideAmigos Corp. http://rideamigoscorp.com
