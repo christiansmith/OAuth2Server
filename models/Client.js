@@ -13,17 +13,17 @@ var Model = require('./Model')
 
 var Client = Model.extend(null, {
   schema: {
-	_id:         { type: 'any' },
-  user_id:     { type: 'string', required: true },
-	type:        { type: 'string', required: true, enum: ['confidential', 'public'] },
-	name:        { type: 'string' },
-	website:     { type: 'string' },
-	description: { type: 'string' },
-	logo:        { type: 'string' },
-	terms:       { type: 'boolean' },
-	secret:      { type: 'string' },
-	created:     { type: 'any' },
-	modified:    { type: 'any' }
+  	_id:         { type: 'any' },
+    user_id:     { type: 'string', required: true },
+  	type:        { type: 'string', required: true, enum: ['confidential', 'public'] },
+  	name:        { type: 'string' },
+  	website:     { type: 'string' },
+  	description: { type: 'string' },
+  	logo:        { type: 'string' },
+  	terms:       { type: 'boolean' },
+  	secret:      { type: 'string' },
+  	created:     { type: 'any' },
+  	modified:    { type: 'any' }
   }
 });
 

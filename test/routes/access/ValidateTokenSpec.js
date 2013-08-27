@@ -20,6 +20,7 @@ var cwd = process.cwd()
   , request = require('supertest')
   , app = require(path.join(cwd, 'app'))  
   , User = require(path.join(cwd, 'models/User'))
+  , Resource = require(path.join(cwd, 'models/Resource'))
   , Client = require(path.join(cwd, 'models/Client'))
   , AccessToken = require(path.join(cwd, 'models/AccessToken'))
   ;
@@ -37,6 +38,10 @@ describe('access token validation', function () {
     password: 'secret'    
   };
 
+  var resource, validResource = {
+    user_id: validUser._id,
+    uri: 'https://protected.tld'
+  };
 
   var client, validClient = {
     user_id: validUser._id,
@@ -51,6 +56,7 @@ describe('access token validation', function () {
     before(function (done) {
       User.backend.reset();
       Client.backend.reset();
+      Resource.backend.reset();
       AccessToken.backend.reset();
 
       User.create(validUser, function (err, instance) {
@@ -59,10 +65,14 @@ describe('access token validation', function () {
         Client.register(validClient, function (err, instance) {
           client = instance;
 
-          AccessToken.issue(client, user, { scope: 'https://resourceserver.tld' }, function (err, instance) {
-            token = instance;
+          Resource.register(validResource, function (err, instance) {
+            resource = instance;
 
-            done();
+            AccessToken.issue(client, user, { scope: 'https://resourceserver.tld' }, function (err, instance) {
+              token = instance;
+
+              done();
+            });
           });
         });
       });
@@ -74,7 +84,7 @@ describe('access token validation', function () {
     describe('with valid request', function () {
 
       before(function (done) {
-        var credentials = new Buffer(client._id + ':' + client.secret).toString('base64');
+        var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
         
         request(app)
           .post('/access')
@@ -154,7 +164,7 @@ describe('access token validation', function () {
       before(function (done) {
         Client.create(validClient, function (err, instance) {
           client2 = instance;
-          var credentials = new Buffer(client2._id + ':' + client2.secret).toString('base64');
+          var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
           
           request(app)
             .post('/access')
@@ -191,7 +201,7 @@ describe('access token validation', function () {
     describe('with unknown access token', function () {
 
       before(function (done) {
-        var credentials = new Buffer(client._id + ':' + client.secret).toString('base64');
+        var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
         
         request(app)
           .post('/access')
@@ -234,7 +244,7 @@ describe('access token validation', function () {
           refresh_token: '3456asdf',
           scope: 'https://api1.tld https://api2.tld'
         }, function (err, instance) {
-          var credentials = new Buffer(client._id + ':' + client.secret).toString('base64');
+          var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
           
           request(app)
             .post('/access')
@@ -271,7 +281,7 @@ describe('access token validation', function () {
     describe('with insufficient scope', function () {
 
       before(function (done) {
-        var credentials = new Buffer(client._id + ':' + client.secret).toString('base64');
+        var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
         
         request(app)
           .post('/access')
