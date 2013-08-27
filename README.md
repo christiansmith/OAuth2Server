@@ -14,7 +14,7 @@ There are currently three major use cases we intend to support:
 
 ## How to Participate
 
-* Come to the [Google Hangout](http://bit.ly/AuthHangout) at 10am Pacific every Thursday, where we review code, brainstorm, and talk shop. 
+* Come to the [Google Hangout](http://bit.ly/Auth2Hangout) at 10am Pacific every Thursday, where we review code, brainstorm, and talk shop. 
 * If you want to contribute specific features, please submit an issue describing your proposed enhancements *first*, so we can avoid duplicating efforts.
 * Pair program with the author(s). Just email [christiansmith](https://github.com/christiansmith) to arrange a time.
 
