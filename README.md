@@ -19,6 +19,11 @@ There are currently three major use cases we intend to support:
 * Pair program with the author(s). Just email [christiansmith](https://github.com/christiansmith) to arrange a time.
 
 
+## Related Projects
+
+* [OAuth2Resource](https://github.com/RideAmigosCorp/OAuth2Resource) provides Express middleware for authorizing access to resource servers protected by OAuth2Server.
+
+
 ## The MIT License
 
 Copyright (c) 2013 Christian Smith http://anvil.io and RideAmigos Corp. http://rideamigoscorp.com
