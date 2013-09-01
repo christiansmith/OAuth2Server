@@ -60,11 +60,10 @@ module.exports = function (app) {
 
   app.post('/access', passport.authenticate('resource', { session: false }), function (req, res, next) {
     var token  = req.body.access_token
-      , client = req.body.client_id
       , scope  = req.body.scope
       ;
 
-    AccessToken.verify(token, client, scope, function (err, verified) {
+    AccessToken.verify(token, scope, function (err, verified) {
       if (err) { return next(err); }
       res.json({ authorized: verified });
     });

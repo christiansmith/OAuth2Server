@@ -157,46 +157,6 @@ describe('access token validation', function () {
       it('should respond with an error uri');
     });
 
-    describe('with client mismatch', function () {
-
-      var client2;
-
-      before(function (done) {
-        Client.create(validClient, function (err, instance) {
-          client2 = instance;
-          var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
-          
-          request(app)
-            .post('/access')
-            .set('Authorization', 'Basic ' + credentials)
-            .send('access_token=' + token.access_token + '&client_id=' + client2._id + '&scope=https://resourceserver.tld')
-            .end(function (error, response) {
-              err = error;
-              res = response;
-              done();
-            });
-        });
-      });
-
-      it('should respond 400', function () {
-        res.statusCode.should.equal(400);
-      });
-
-      it('should respond with JSON', function () {
-        res.headers['content-type'].should.contain('application/json');
-      });
-
-      it('should respond with an "invalid_token" error', function () {
-        res.body.error.should.equal('invalid_token');
-      });
-
-      it('should respond with an error description', function () {
-        res.body.error_description.should.equal('Client mismatch');
-      });
-
-      it('should respond with an error uri');
-
-    });
 
     describe('with unknown access token', function () {
 

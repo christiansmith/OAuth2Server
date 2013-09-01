@@ -273,6 +273,9 @@ describe('AccessToken', function () {
       token.scope.should.equal('http://test.tld');
     });
 
+    it('should invalidate previously issued access tokens?');
+    it('should destroy previously issued access tokens?');
+
   });
 
 
@@ -302,7 +305,7 @@ describe('AccessToken', function () {
     describe('with valid details', function () {
 
       before(function (done) {
-        AccessToken.verify(token.access_token, client._id, token.scope, function (err, truth) {
+        AccessToken.verify(token.access_token, token.scope, function (err, truth) {
           verified = truth;
           done();
         });
@@ -319,31 +322,10 @@ describe('AccessToken', function () {
     });
 
 
-    describe('with mismatching client', function () {
-
-      before(function (done) {
-        AccessToken.verify(token.access_token, 'wrong', token.scope, function (error, truth) {
-          err = error;
-          verified = truth;
-          done();
-        });
-      });
-
-      it('should provide an "InvalidTokenError"', function () {
-        err.name.should.equal('InvalidTokenError');
-      });
-
-      it('should not provide verification', function () {
-        expect(verified).equals(undefined);
-      });
-
-    });
-
-
     describe('with unknown access token', function () {
 
       before(function (done) {
-        AccessToken.verify('unknown', client._id, token.scope, function (error, truth) {
+        AccessToken.verify('unknown', token.scope, function (error, truth) {
           err = error;
           verified = truth;
           done();
@@ -372,7 +354,7 @@ describe('AccessToken', function () {
           refresh_token: '3456asdf',
           scope: 'https://api1.tld https://api2.tld'
         }, function (err, instance) {
-          AccessToken.verify(instance.access_token, instance.client_id, instance.scope, function (error, truth) {
+          AccessToken.verify(instance.access_token, instance.scope, function (error, truth) {
             err = error;
             verified = truth;
             done();
@@ -394,7 +376,7 @@ describe('AccessToken', function () {
     describe('with insufficient scope', function () {
 
       before(function (done) {
-        AccessToken.verify(token.access_token, client._id, 'https://insufficient.tld', function (error, truth) {
+        AccessToken.verify(token.access_token, 'https://insufficient.tld', function (error, truth) {
           err = error;
           verified = truth;
           done();
@@ -415,7 +397,7 @@ describe('AccessToken', function () {
     describe('with omitted scope', function () {
 
       before(function (done) {
-        AccessToken.verify(token.access_token, client._id, undefined, function (err, truth) {
+        AccessToken.verify(token.access_token, undefined, function (err, truth) {
           verified = truth;
           done();
         });

@@ -64,7 +64,11 @@ module.exports = function (app) {
     }
   });
 
+  // local api (requires session)
   require('./resource')(app);
   require('./client')(app);
 
+  // third party api (requires client authentication and access token)
+  require('./api/user')(app);
+  
 };

@@ -55,14 +55,10 @@ AccessToken.issue = function(client, user, options, callback) {
  * Verify access token
  */
 
-AccessToken.verify = function (access_token, client_id, scope, callback) {
+AccessToken.verify = function (access_token, scope, callback) {
   this.find({ access_token: access_token }, function (err, token) {
     if (!token) { 
       return callback(new InvalidTokenError('Unknown access token')); 
-    }
-
-    if (client_id !== token.client_id) { 
-      return callback(new InvalidTokenError('Client mismatch')); 
     }
     
     if (new Date() > token.expires_at) { 
