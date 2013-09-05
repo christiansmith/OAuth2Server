@@ -2,7 +2,7 @@
  * Module dependencies
  */
 
-var Model = require('./Model')
+var Model = require('modinha')
   , crypto = require('crypto')
   , util = require('util')
   ;

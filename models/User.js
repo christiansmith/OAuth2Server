@@ -5,7 +5,7 @@
 var util   = require('util')
   , async  = require('async')
   , bcrypt = require('bcrypt')
-  , Model  = require('./Model')
+  , Model  = require('modinha')
   ;
 
 

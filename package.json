@@ -30,6 +30,7 @@
     "passport-http": "~0.2.2",
     "oauth2orize": "~0.1.0",
     "passport-local": "~0.1.6",
-    "connect-redis": "~1.4.5"
+    "connect-redis": "~1.4.5",
+    "modinha": "0.0.1"
   }
 }
