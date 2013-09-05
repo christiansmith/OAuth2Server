@@ -16,17 +16,17 @@ There are currently three major use cases we intend to support:
 
 * Come to the [Google Hangout](http://bit.ly/Auth2Hangout) at 10am Pacific every Thursday, where we review code, brainstorm, and talk shop. 
 * If you want to contribute specific features, please submit an issue describing your proposed enhancements *first*, so we can avoid duplicating efforts.
-* Pair program with the author(s). Just email [christiansmith](https://github.com/christiansmith) to arrange a time.
+* Pair program with the author. Just email [christiansmith](https://github.com/christiansmith) to arrange a time.
 
 
 ## Related Projects
 
-* [OAuth2Resource](https://github.com/RideAmigosCorp/OAuth2Resource) provides Express middleware for authorizing access to resource servers protected by OAuth2Server.
+* [OAuth2Resource](https://github.com/christiansmith/OAuth2Resource) provides Express middleware for authorizing access to resource servers protected by OAuth2Server.
 
 
 ## The MIT License
 
-Copyright (c) 2013 Christian Smith http://anvil.io and RideAmigos Corp. http://rideamigoscorp.com
+Copyright (c) 2013 Christian Smith http://anvil.io
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

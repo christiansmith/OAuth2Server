@@ -89,7 +89,7 @@ describe('access token validation', function () {
         request(app)
           .post('/access')
           .set('Authorization', 'Basic ' + credentials)
-          .send('access_token=' + token.access_token + '&client_id=' + client._id + '&scope=' + token.scope)
+          .send('access_token=' + token.access_token + '&scope=' + token.scope)
           .end(function (error, response) {
             err = error;
             res = response;
@@ -111,11 +111,38 @@ describe('access token validation', function () {
 
     });
 
-    describe('with unauthenticated client', function () {
+    describe('with unauthenticated resource', function () {
 
       before(function (done) {
         request(app)
           .post('/access')
+          .end(function (error, response) {
+            err = error;
+            res = response;
+            done();
+          });
+      });
+
+      it('should respond 401', function () {
+        res.statusCode.should.equal(401);
+      });
+
+      it('should respond with error', function () {
+        res.text.should.equal('Unauthorized')
+      });
+
+    });
+
+
+    describe('with invalid resource credentials', function () {
+
+      before(function (done) {
+        var credentials = new Buffer(resource._id + ':wrong').toString('base64');
+        
+        request(app)
+          .post('/access')
+          .set('Authorization', 'Basic ' + credentials)
+          .send('access_token=' + token.access_token + '&scope=' + token.scope)
           .end(function (error, response) {
             err = error;
             res = response;
@@ -166,7 +193,7 @@ describe('access token validation', function () {
         request(app)
           .post('/access')
           .set('Authorization', 'Basic ' + credentials)
-          .send('access_token=unknown&client_id=' + client._id + '&scope=https://resourceserver.tld')
+          .send('access_token=unknown&scope=https://resourceserver.tld')
           .end(function (error, response) {
             err = error;
             res = response;
@@ -209,7 +236,7 @@ describe('access token validation', function () {
           request(app)
             .post('/access')
             .set('Authorization', 'Basic ' + credentials)
-            .send('access_token=' + instance.access_token + '&client_id=' + client._id + '&scope=https://resourceserver.tld')
+            .send('access_token=' + instance.access_token + '&scope=https://resourceserver.tld')
             .end(function (error, response) {
               err = error;
               res = response;
@@ -246,7 +273,7 @@ describe('access token validation', function () {
         request(app)
           .post('/access')
           .set('Authorization', 'Basic ' + credentials)
-          .send('access_token=' + token.access_token + '&client_id=' + client._id + '&scope=insufficient')
+          .send('access_token=' + token.access_token + '&scope=insufficient')
           .end(function (error, response) {
             err = error;
             res = response;
