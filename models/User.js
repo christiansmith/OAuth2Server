@@ -15,7 +15,6 @@ var util   = require('util')
 
 var User = Model.extend(null, {
   schema: {
-    _id:  { type: 'any' },
     info: { 
       type: 'object', 
       required: true, 

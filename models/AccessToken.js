@@ -20,9 +20,7 @@ var AccessToken = Model.extend(null, {
     token_type:     { type: 'string', enum: ['bearer', 'mac'], default: 'bearer' },
     expires_at:     { type: 'any' },
     refresh_token:  { type: 'string' },
-    scope:          { type: 'string' },
-    created:        { type: 'any' },
-    modified:       { type: 'any' }
+    scope:          { type: 'string' }
   }
 });
 

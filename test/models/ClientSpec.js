@@ -50,7 +50,6 @@ describe('Client', function () {
     });
 
     it('should require user_id', function () {
-      console.log(validation)
       validation.errors.user_id.attribute.should.equal('required');
     });
 

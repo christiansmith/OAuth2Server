@@ -13,9 +13,7 @@ var AuthorizationCode = Model.extend(null, {
   schema: {
     client_id:  { type: 'string', required: true },
     code:       { type: 'string', required: true },
-    expires_at: { type: 'any' },
-    created:    { type: 'any' },
-    modified:   { type: 'any' }
+    expires_at: { type: 'any' }
   }
 });
 

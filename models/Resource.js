@@ -13,13 +13,10 @@ var Model = require('modinha')
 
 var Resource = Model.extend(null, {
   schema: {
-    _id:         { type: 'any' },
     user_id:     { type: 'string', required: true },
     uri:         { type: 'string', required: true },
     secret:      { type: 'string', required: true },
-    description: { type: 'string' },    
-    created:     { type: 'any' },
-    modified:    { type: 'any' }
+    description: { type: 'string' }
   }
 });
 
