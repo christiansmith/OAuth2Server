@@ -24,8 +24,8 @@ describe('Resource', function () {
 
   var err, resource, validation, validResource = {
     user_id: '1234',
-    uri: 'https://protected.tld',
-    secret: 'g1bb3r1sh'
+    uri: 'https://protected.tld'
+    //secret: 'g1bb3r1sh'
   };
 
 
@@ -53,8 +53,8 @@ describe('Resource', function () {
       validation.errors.uri.attribute.should.equal('required');
     });
 
-    it('should require secret', function () {
-      validation.errors.secret.attribute.should.equal('required');
+    it('should have secret', function () {
+      Resource.schema.secret.should.be.an('object');
     });
 
     it('should have description', function () {
@@ -64,11 +64,11 @@ describe('Resource', function () {
   });
 
 
-  describe('registration', function () {
+  describe('creation', function () {
 
     before(function (done) {
       Resource.backend.reset();
-      Resource.register(validResource, function (err, instance) {
+      Resource.create(validResource, function (err, instance) {
         resource = instance;
         done();
       });

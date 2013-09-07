@@ -99,30 +99,11 @@ describe('Client', function () {
   });
 
 
-  describe('constructor', function () {
-
-    it('should initialize id if none is provided');
-
-    it('should set attrs defined in schema', function () {
-      client = new Client(validClient);
-      client._id.should.equal(validClient._id);
-      client.type.should.equal(validClient.type);
-      client.name.should.equal(validClient.name);
-    });
-    
-    it('should ignore attrs not defined in schema', function () {
-      client = new Client({ hacker: 'p0wn3d' });
-      expect(client.hacker).equals(undefined);
-    });
-
-  });
-
-
-  describe('registration', function () {
+  describe('creation', function () {
 
     before(function (done) {
       Client.backend.reset();
-      Client.register(validClient, function (err, instance) {
+      Client.create(validClient, function (err, instance) {
         client = instance;
         done();
       });

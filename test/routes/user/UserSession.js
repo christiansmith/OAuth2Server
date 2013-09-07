@@ -57,10 +57,10 @@ describe('User Session (API)', function () {
     User.create(validUser, function (err, instance) {
       user = instance;
 
-      Client.register(validClient, function (err, instance) {
+      Client.create(validClient, function (err, instance) {
         client = instance;
 
-        Resource.register(validResource, function (err, instance) {
+        Resource.create(validResource, function (err, instance) {
           resource = instance;
 
           AccessToken.issue(client, user, { scope: 'https://resourceserver.tld' }, function (err, instance) {

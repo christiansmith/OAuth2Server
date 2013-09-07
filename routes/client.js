@@ -7,7 +7,7 @@ module.exports = function (app) {
 
   app.post('/clients', authenticate, function (req, res, next) {
     req.body.user_id = req.user._id;
-    Client.register(req.body, function (err, client) {
+    Client.create(req.body, function (err, client) {
       if (err) { return next(err); }
       res.json(201, client);
     });

@@ -226,7 +226,7 @@ describe('AccessToken', function () {
 
       User.create(validUser, function (err, instance) {
         user = instance;
-        Client.register(validClient, function (err, instance) {
+        Client.create(validClient, function (err, instance) {
           client = instance;
           AccessToken.issue(client, user, { scope: 'http://test.tld' }, function (error, instance) {
             err = error;

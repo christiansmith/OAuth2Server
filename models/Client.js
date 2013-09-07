@@ -26,16 +26,12 @@ var Client = Model.extend(null, {
 
 
 /**
- * Client Registration
+ * Generate the secret
  */
 
-Client.register = function (attrs, callback) {
-	attrs.secret = crypto.randomBytes(10).toString('hex');
-	Client.create(attrs, function (err, client) {
-		if (err) { return callback(err); }
-		callback(null, client);
-	});
-};
+Client.before('create', function () {
+  this.secret = crypto.randomBytes(10).toString('hex');
+});
 
 
 /**
