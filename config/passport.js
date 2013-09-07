@@ -30,6 +30,19 @@ module.exports = function (passport) {
 
 
   /**
+   * Administration HTTP Basic Authentication Strategy
+   */
+
+  passport.use('administration', new BasicStrategy(function (id, secret, done) {
+    if (id !== 'foo' || secret !== 'bar') {
+      done(null, false);
+    } else {
+      done(null, true);
+    }
+  }));
+
+
+  /**
    * Client HTTP Basic Authentication Strategy
    */
 

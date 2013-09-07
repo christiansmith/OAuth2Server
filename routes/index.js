@@ -3,7 +3,10 @@
  */
 
 var passport = require('passport')
-  , User = require('../models/User');
+  , User = require('../models/User')
+  , Client = require('../models/Client')
+  , Resource = require('../models/Resource')
+  ;
 
 
 module.exports = function (app) {
@@ -71,4 +74,15 @@ module.exports = function (app) {
   // third party api (requires client authentication and access token)
   require('./api/user')(app);
   
+
+  
+  require('milonga')(app);
+
+  var authenticate = passport.authenticate('administration', { session: false });
+
+  app.resource('/v1/users', User, authenticate);
+  app.resource('/v1/clients', Client, authenticate);
+  app.resource('/v1/resources', Resource, authenticate);
+
+
 };
