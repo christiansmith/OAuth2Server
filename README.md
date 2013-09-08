@@ -1,5 +1,7 @@
 # OAuth2Server
 
+NOTICE - DEVELOPMENT ON THIS PROJECT HAS MOVED TO A [NEW REPOSITORY](https://github.com/christiansmith/OAuth2Server).
+Please watch, star, fork and submit issues to https://github.com/christiansmith/OAuth2Server
 
 ## Project Goals
 
