@@ -17,32 +17,6 @@ var LocalStrategy = require('passport-local').Strategy
 module.exports = function (passport) {
 
   /**
-   * Local Authentication
-   */
-  
-  passport.use('local', new LocalStrategy({
-    usernameField: 'email'
-  }, function (email, password, done) {
-    User.authenticate(email, password, function (err, user, info) {
-      return done(err, user, info);
-    });
-  }));
-
-
-  /**
-   * Administration HTTP Basic Authentication Strategy
-   */
-
-  passport.use('administration', new BasicStrategy(function (id, secret, done) {
-    if (id !== 'foo' || secret !== 'bar') {
-      done(null, false);
-    } else {
-      done(null, true);
-    }
-  }));
-
-
-  /**
    * Client HTTP Basic Authentication Strategy
    */
 
@@ -64,20 +38,5 @@ module.exports = function (passport) {
       return done(null, resource);
     });
   }));
-
-
-  /**
-   * User session
-   */
-
-  passport.serializeUser(function (user, done) {
-    done(null, user._id);
-  });
-
-  passport.deserializeUser(function (id, done) {
-    User.find({ _id: id }, function (err, user) {
-      done(err, user);
-    });
-  });
 
 };

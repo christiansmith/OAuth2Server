@@ -3,8 +3,7 @@
  */
 
 var express = require('express')
-  , passport = require('passport')
-  , RedisStore = require('connect-redis')(express)  
+  , passport = require('passport') 
   ;
 
 
@@ -22,16 +21,10 @@ module.exports = function (app) {
     // request parsing
     app.use(express.cookieParser('secret'));
     app.use(express.bodyParser());
-
-    // session config
-    app.use(express.session({ 
-      store: new RedisStore(), 
-      secret: 'nodejs sauce' 
-    }));
     
     // passport authentication middleware
     app.use(passport.initialize());
-    app.use(passport.session());
+//    app.use(passport.session());
 
     // Explicitly register app.router
     // before error handling.
