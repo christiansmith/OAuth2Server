@@ -1,8 +1,5 @@
 # OAuth2Server
 
-NOTICE - DEVELOPMENT ON THIS PROJECT HAS MOVED TO A [NEW REPOSITORY](https://github.com/christiansmith/OAuth2Server).
-Please watch, star, fork and submit issues to https://github.com/christiansmith/OAuth2Server
-
 ## Project Goals
 
 Where most OAuth-related packages provide middleware or toolkits for implementing an authorization server, this project aims to deliver a ready-to-deploy server that can be incorporated out-of-the-box into a distributed architecture, along with a collection of SDKs for using it within client applications and API services. This won't be right for everyone, so it's great to have options like [nightworld](https://github.com/nightworld)'s [node-oauth2-server](https://npmjs.org/package/node-oauth2-server) and [jaredhanson](https://github.com/jaredhanson)'s [oauth2orize](https://github.com/jaredhanson/oauth2orize).
