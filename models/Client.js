@@ -2,8 +2,8 @@
  * Module dependencies
  */
 
-var Model = require('modinha')
-  , crypto = require('crypto')
+var Modinha = require('modinha')
+  , random  = Modinha.defaults.random
   ;
 
 
@@ -11,7 +11,7 @@ var Model = require('modinha')
  * Model definition
  */
 
-var Client = Model.extend(null, {
+var Client = Modinha.extend(null, {
   schema: {
     user_id:     { type: 'string', required: true },
   	type:        { type: 'string', required: true, enum: ['confidential', 'public'] },
@@ -20,17 +20,8 @@ var Client = Model.extend(null, {
   	description: { type: 'string' },
   	logo:        { type: 'string' },
   	terms:       { type: 'boolean' },
-  	secret:      { type: 'string' }
+  	secret:      { type: 'string', default: random }
   }
-});
-
-
-/**
- * Generate the secret
- */
-
-Client.before('create', function () {
-  this.secret = crypto.randomBytes(10).toString('hex');
 });
 
 

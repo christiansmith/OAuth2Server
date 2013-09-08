@@ -2,17 +2,19 @@
  * Module dependencies
  */
 
-var Model = require('modinha');
+var Modinha = require('modinha')
+  , random  = Modinha.defaults.random
+  ;
 
 
 /**
  * Model definition
  */
 
-var AuthorizationCode = Model.extend(null, {
+var AuthorizationCode = Modinha.extend(null, {
   schema: {
     client_id:  { type: 'string', required: true },
-    code:       { type: 'string', required: true },
+    code:       { type: 'string', required: true, default: random },
     expires_at: { type: 'any' }
   }
 });

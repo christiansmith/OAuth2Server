@@ -116,25 +116,6 @@ describe('AccessToken', function () {
   });
 
 
-  describe('constructor', function () {
-
-    it('should set attrs defined in schema', function () {
-      token = new AccessToken(validToken);
-      token.client_id.should.equal(validToken.client_id);
-      token.access_token.should.equal(validToken.access_token);
-      token.expires_at.should.equal(validToken.expires_at);
-      token.refresh_token.should.equal(validToken.refresh_token);
-      token.scope.should.equal(validToken.scope);
-    });
-    
-    it('should ignore attrs not defined in schema', function () {
-      token = new AccessToken({ hacker: 'p0wn3d' });
-      expect(token.hacker).equals(undefined);
-    });
-
-  });
-
-
   describe('creation', function () {
 
     describe('with valid data', function () {
@@ -145,72 +126,11 @@ describe('AccessToken', function () {
           token = instance; 
           done();
         });
-      });
+      });    
 
-      it('should provide a null error', function () {
-        expect(err).equals(null);
-      });
-
-      it('should provide an AccessToken instance', function () {
-        (token instanceof AccessToken).should.equal(true);
-      });      
-
-      it('should generate an access_token');
-
-      it('should set the "created" timestamp', function () {
-        token.created.should.be.defined;
-      });
-
-      it('should set the "modified" timestamp', function () {
-        token.modified.should.be.defined;
-      });
-
-    });
-
-    describe('with invalid data', function () {
-
-      beforeEach(function (done) {
-        AccessToken.create({}, function (error, instance) {
-          err = error; 
-          token = instance; 
-          done();
-        });
-      });
-
-      it('should provide a validation error', function () {
-        err.name.should.equal('ValidationError');
-      });
-
-      it('should not provide an access token', function () {
-        expect(token).equals(undefined);
-      });
-
-    });
-
-  });
-
-
-  describe('retrieval', function () {
-
-    describe('by access token', function () {
-
-      before(function (done) {
-        AccessToken.create(validToken, function (e) {
-          AccessToken.find({ access_token: validToken.access_token }, function (error, instance) {
-            err = error;
-            token = instance;
-            done();
-          });
-        });        
-      });
-
-      it('should provide a null error', function () {
-        expect(err).equals(null);
-      })
-
-      it('should provide an AccessToken instance', function () {
-        (token instanceof AccessToken).should.equal(true);
-      });
+      it('should generate an access token', function () {
+        token.access_token.should.be.defined;
+      });    
 
     });
 

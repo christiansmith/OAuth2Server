@@ -2,87 +2,56 @@
  * Module dependencies
  */
 
-var passport = require('passport')
-  , User = require('../models/User')
-  , Client = require('../models/Client')
-  , Resource = require('../models/Resource')
+var cwd         = process.cwd()
+  , path        = require('path')  
+  , passport    = require('passport')
+
+ // models
+  , User        = require(path.join(cwd, 'models/User'))
+  , Client      = require(path.join(cwd, 'models/Client'))
+  , Resource    = require(path.join(cwd, 'models/Resource'))
+  , AccessToken = require(path.join(cwd, 'models/AccessToken'))    
   ;
 
 
 module.exports = function (app) {
 
   /**
-   * Authenticate middleware
+   * Resource definition helper
    */
 
-  app.authenticate = function (req, res, next) {
-    if (req.isAuthenticated()) { return next(); }
-    res.send(401, 'Unauthorized');
-  };
-
-
-  /**
-   * User registration endpoint
-   */
-
-  app.post('/account', function (req, res, next) {
-    User.create(req.body, function (err, user) {
-      if (err) { return next(err); }
-      res.json(201, { authenticated: true, user: user.info });
-    });
-  });
-
-  /**
-   * User authentication endpoint
-   */
-  
-  app.post('/login', function (req, res, next) {
-    passport.authenticate('local', function (err, user, info) {
-      if (!user) { return res.json(400, { error: info.message }); }
-      req.login(user, function (err) {
-        res.json({ authenticated: true, user: user.info });
-      });
-    })(req, res, next);
-  });
-
-  /**
-   * User logout endpoint
-   */
-
-  app.post('/logout', function (req, res) {
-    req.logout();
-    res.send(204);
-  });
-
-
-  /**
-   * User session endpoint
-   */
-
-  app.get('/session', function (req, res) {
-    if (req.user) {
-      res.json({ authenticated: true,  user: req.user.info });
-    } else {
-      res.json({ authenticated: false });
-    }
-  });
-
-  // local api (requires session)
-  require('./resource')(app);
-  require('./client')(app);
-
-  // third party api (requires client authentication and access token)
-  require('./api/user')(app);
-  
-
-  
   require('milonga')(app);
 
+
+  /**
+   * Authentication middleware
+   */
+
   var authenticate = passport.authenticate('administration', { session: false });
+
+
+  /**
+   * RESTful routes
+   */
 
   app.resource('/v1/users', User, authenticate);
   app.resource('/v1/clients', Client, authenticate);
   app.resource('/v1/resources', Resource, authenticate);
 
+
+  /**
+   * User info by access token
+   */
+
+  app.get('/api/user', function (req, res, next) {
+    AccessToken.find({ access_token: req.query.access_token }, function (err, token) {
+      if (err) { return next(err); }
+      if (!token) { return next(new Error('AccessToken not found')); }
+      User.find({ _id: token.user_id }, function (err, user) {
+        if (err) { return next(err); }
+        res.json(user.info);
+      });
+    });
+  });
 
 };

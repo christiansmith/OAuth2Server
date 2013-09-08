@@ -122,31 +122,6 @@ describe('User', function () {
   });
 
 
-  describe('constructor', function () {
-    it('should initialize id if none is provided', function () {
-      user = new User();
-      (typeof user._id).should.equal('string');
-
-      user = new User({});
-      (typeof user._id).should.equal('string');
-    });
-
-    it('should set attrs defined in schema', function () {
-      var id = '1234abcd'
-        , info = { first: 'John', last: 'Coltrane' };
-      user = new User({ _id: id, info: info });
-      user._id.should.equal(id);
-      user.info.first.should.equal(info.first);
-      user.info.last.should.equal(info.last);
-    });
-    
-    it('should ignore attrs not defined in schema', function () {
-      user = new User({ hacker: 'p0wn3d' });
-      expect(user.hacker).equals(undefined);
-    });
-  });
-
-
   describe('creation', function () {
 
     describe('with valid data', function () {
@@ -157,14 +132,6 @@ describe('User', function () {
           user = instance; 
           done();
         });
-      });
-
-      it('should provide a null error', function () {
-        expect(err).equals(null);
-      });
-
-      it('should provide a User instance', function () {
-        (user instanceof User).should.equal(true);
       });
 
       it('should hash the password', function () {
@@ -178,35 +145,8 @@ describe('User', function () {
         json.should.not.contain(validUser.password);
       });
 
-      it('should set the "created" timestamp', function () {
-        user.info.created.should.be.defined;
-      });
-
-      it('should set the "modified" timestamp', function () {
-        user.info.modified.should.be.defined;
-      });
-
     });
 
-    describe('with invalid data', function () {
-
-      beforeEach(function (done) {
-        User.create({}, function (error, instance) {
-          err = error; 
-          user = instance; 
-          done();
-        });
-      });
-
-      it('should provide a validation error', function () {
-        err.name.should.equal('ValidationError');
-      });
-
-      it('should not provide a user', function () {
-        expect(user).equals(undefined);
-      });
-
-    });
     
     describe('with a registered email', function () {
       
@@ -272,77 +212,6 @@ describe('User', function () {
   });
 
 
-  describe('retrieval', function () {
-
-    describe('by id', function () {
-
-      before(function (done) {
-        User.create(validUser, function (e, u) {
-          User.find({ _id: u._id }, function (error, instance) {
-            err = error;
-            user = instance;
-            done();
-          });
-        });        
-      });
-
-      it('should provide a null error', function () {
-        expect(err).equals(null);
-      })
-
-      it('should provide a User instance', function () {
-        (user instanceof User).should.equal(true);
-      });
-
-    });
-
-    describe('by username', function () {
-
-      before(function (done) {
-        User.create(validUser, function (e) {
-          User.find({ 'info.username': validUser.username }, function (error, instance) {
-            err = error;
-            user = instance;
-            done();
-          });
-        });        
-      });
-
-      it('should provide a null error', function () {
-        expect(err).equals(null);
-      })
-
-      it('should provide a User instance', function () {
-        (user instanceof User).should.equal(true);
-      });
-
-    });
-
-    describe('by email', function () {
-
-      before(function (done) {
-        User.create(validUser, function (e) {
-          User.find({ 'info.email': validUser.email }, function (error, instance) {
-            err = error;
-            user = instance;
-            done();
-          });
-        });        
-      });
-
-      it('should provide a null error', function () {
-        expect(err).equals(null);
-      })
-
-      it('should provide a User instance', function () {
-        (user instanceof User).should.equal(true);
-      });
-
-    });
-
-  });
-
-
   describe('password verification', function () {
 
     it('should verify a correct password', function (done) {
@@ -380,7 +249,7 @@ describe('User', function () {
     describe('with valid email and password credentials', function () {
 
       before(function (done) {
-        User.create(validUser, function (err, user) {
+        User.create(validUser, function (e, user) {
           User.authenticate(validUser.email, validUser.password, function (error, instance, information) {
             err = error;
             user = instance;
