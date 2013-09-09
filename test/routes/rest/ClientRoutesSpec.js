@@ -38,6 +38,7 @@ describe('Client REST Routes', function () {
     Credentials.create({ role: 'administrator' }, function (e, c) {
       credentials = c;
 
+      Client.backend.reset();
       Client.create(validClient, function (error, instance) {
         var auth = new Buffer(instance._id + ':' + instance.secret).toString('base64');
         client = instance;
@@ -51,6 +52,57 @@ describe('Client REST Routes', function () {
 
 
   describe('GET /v1/clients', function () {
+
+    describe('with invalid authentication', function () {
+
+      before(function (done) {
+        request(app)
+          .get('/v1/clients')
+          .set('Authorization', 'Basic ' + new Buffer(credentials.key + ':wrong').toString('base64'))
+          .end(function (error, response) {
+            err = error;
+            res = response;
+            done();
+          });
+      });
+
+      it('should respond 401', function () {
+        res.statusCode.should.equal(401);
+      });
+
+      it('should respond "Unauthorized"', function () {
+        res.text.should.equal('Unauthorized');
+      });
+
+    });
+
+    describe('with valid request', function () {
+
+      before(function (done) {
+        request(app)
+          .get('/v1/clients')
+          .set('Authorization', 'Basic ' + new Buffer(credentials.key + ':' + credentials.secret).toString('base64'))
+          .end(function (error, response) {
+            err = error;
+            res = response;
+            done();
+          });
+      });
+
+      it('should respond 200', function () {
+        res.statusCode.should.equal(200);
+      });
+
+      it('should respond with JSON', function () {
+        res.headers['content-type'].should.contain('application/json');
+      });
+
+      it('should respond with clients', function () {
+        console.log(res.body)
+        res.body[0].name.should.equal('ThirdPartyApp');
+      });
+
+    });
 
   });
 
@@ -107,7 +159,7 @@ describe('Client REST Routes', function () {
 
     });
 
-    describe('with unknown access token', function () {
+    describe('with unknown client id', function () {
       it('should respond 404');
     });
 
@@ -354,7 +406,7 @@ describe('Client REST Routes', function () {
 
     });
 
-    describe('with unknown access token', function () {
+    describe('with unknown client id', function () {
       it('should respond 404');
     });
 
