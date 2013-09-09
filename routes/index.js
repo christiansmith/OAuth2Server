@@ -27,7 +27,7 @@ module.exports = function (app) {
    * Authentication middleware
    */
 
-  var authenticate = passport.authenticate('administration', { session: false });
+  var authenticate = passport.authenticate('basic', { session: false });
 
 
   /**
@@ -43,7 +43,7 @@ module.exports = function (app) {
    * User info by access token
    */
 
-  app.get('/api/user', function (req, res, next) {
+  app.get('/v1/user', function (req, res, next) {
     AccessToken.find({ access_token: req.query.access_token }, function (err, token) {
       if (err) { return next(err); }
       if (!token) { return next(new Error('AccessToken not found')); }

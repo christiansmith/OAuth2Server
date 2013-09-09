@@ -26,7 +26,7 @@ chai.should();
  * Spec
  */
 
-describe('User Session (API)', function () {
+describe('User Info', function () {
 
   var token, err, res;
 
@@ -74,13 +74,13 @@ describe('User Session (API)', function () {
   });
 
 
-  describe('GET /api/user', function () {
+  describe('GET /v1/user', function () {
 
     before(function (done) {
       var credentials = new Buffer(client._id + ':' + client.secret).toString('base64');
 
       request(app)
-        .get('/api/user?access_token=' + token.access_token + '&scope=' + token.scope)
+        .get('/v1/user?access_token=' + token.access_token + '&scope=' + token.scope)
         .set('Authorization', 'Basic ' + credentials)
         .end(function (error, response) {
           res = response;

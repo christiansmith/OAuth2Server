@@ -26,7 +26,7 @@ describe('Client', function () {
 
   var err, client, validation, validClient = {
     _id: '2345',
-    user_id: validUser._id,
+//    user_id: validUser._id,
     type: 'confidential',
     name: 'ThirdPartyApp',
     redirect_uris: 'http://example.com/callback.html'
@@ -49,9 +49,9 @@ describe('Client', function () {
       Client.schema._id.should.be.an('object');
     });
 
-    it('should require user_id', function () {
-      validation.errors.user_id.attribute.should.equal('required');
-    });
+//    it('should require user_id', function () {
+//      validation.errors.user_id.attribute.should.equal('required');
+//    });
 
     it('should require type', function () {
       validation.errors.type.attribute.should.equal('required');
