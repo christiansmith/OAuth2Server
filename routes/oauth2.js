@@ -2,11 +2,13 @@
  * Module dependencies
  */
 
-var oauth2 = require('oauth2orize')
-  , passport = require('passport')
-  , User = require('../models/User')
-  , Client = require('../models/Client')
-  , AccessToken = require('../models/AccessToken')  
+var cwd         = process.cwd()
+  , path        = require('path')
+  , oauth2      = require('oauth2orize')
+  , passport    = require('passport')
+  , User        = require(path.join(cwd, 'models/User'))
+  , Client      = require(path.join(cwd, 'models/Client'))
+  , AccessToken = require(path.join(cwd, 'models/AccessToken'))  
   ;
 
 
@@ -35,13 +37,6 @@ module.exports = function (app) {
       })
     });
   }));
-
-
-  /**
-   * HTTP Basic authentication middleware
-   */
-
-  //var authenticate = app.authenticate = passport.authenticate('basic', { session: false });
 
 
   /**

@@ -6,7 +6,6 @@ var express = require('express')
 
 require('./config/')(app);
 require('./config/passport')(passport);
-require('./config/oauth2')(app);
 require('./routes/')(app);
 
 

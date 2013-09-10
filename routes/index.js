@@ -40,7 +40,14 @@ module.exports = function (app) {
 
 
   /**
-   * User info by access token
+   * OAuth 2.0 Routes
+   */
+
+  require('./oauth2')(app);
+
+
+  /**
+   * Protected resource routes (local)
    */
 
   app.get('/v1/user', function (req, res, next) {
