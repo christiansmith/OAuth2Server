@@ -31,7 +31,8 @@
     "oauth2orize": "~0.1.0",
     "passport-local": "~0.1.6",
     "connect-redis": "~1.4.5",
-    "modinha": "~0.0.10",
-    "milonga": "~0.0.3"
+    "modinha": "~0.0.11",
+    "milonga": "~0.0.3",
+    "modinha-json": "~0.0.4"
   }
 }

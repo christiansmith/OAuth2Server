@@ -11,7 +11,7 @@ var Modinha = require('modinha')
  * Model definition
  */
 
-var Client = Modinha.extend(null, {
+var Client = Modinha.extend('Clients', null, {
   schema: {
   	type:        { type: 'string', required: true, enum: ['confidential', 'public'] },
   	name:        { type: 'string' },

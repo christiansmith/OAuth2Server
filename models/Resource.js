@@ -11,7 +11,7 @@ var Modinha = require('modinha')
  * Model definition
  */
 
-var Resource = Modinha.extend(null, {
+var Resource = Modinha.extend('Resources', null, {
   schema: {
     user_id:     { type: 'string', required: true },
     uri:         { type: 'string', required: true },

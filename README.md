@@ -14,13 +14,16 @@ There are currently three major use cases we intend to support:
 ## How to Participate
 
 * Come to the [Google Hangout](http://bit.ly/Auth2Hangout) at 10am Pacific every Thursday, where we review code, brainstorm, and talk shop. 
-* If you want to contribute specific features, please submit an issue describing your proposed enhancements *first*, so we can avoid duplicating efforts.
-* Pair program with the author. Just email [christiansmith](https://github.com/christiansmith) to arrange a time.
+* Read the [project blog](http://oauth2server.blogspot.com/). Every effort will be made to post weekly updates.
+* If you want to contribute specific features, please submit an issue describing your proposed enhancements *first*, so we can avoid duplicating efforts. 
+* Pair program with the principal author. Just email [christiansmith](https://github.com/christiansmith) to arrange a time.
 
 
 ## Related Projects
 
 * [OAuth2Resource](https://github.com/christiansmith/OAuth2Resource) provides Express middleware for authorizing access to resource servers protected by OAuth2Server.
+* [Modinha](https://github.com/christiansmith/Modinha) Schema-based data modeling with swappable storage adapters. Extracted from OAuth2Server
+* [Milonga](https://github.com/christiansmith/Milonga) Milonga is a helper for defining a set of RESTful Express routes based on Modinha models. Developed for use in OAuth2Server
 
 
 ## The MIT License

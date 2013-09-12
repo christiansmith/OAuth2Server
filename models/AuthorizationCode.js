@@ -11,7 +11,7 @@ var Modinha = require('modinha')
  * Model definition
  */
 
-var AuthorizationCode = Modinha.extend(null, {
+var AuthorizationCode = Modinha.extend('AuthorizationCodes', null, {
   schema: {
     client_id:  { type: 'string', required: true },
     code:       { type: 'string', required: true, default: random },

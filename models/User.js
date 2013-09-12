@@ -13,7 +13,7 @@ var util   = require('util')
  * Model definition
  */
 
-var User = Model.extend(null, {
+var User = Model.extend('Users', null, {
   schema: {
     info: { 
       type: 'object', 
@@ -56,7 +56,7 @@ User.create = function (attrs, callback) {
   user.info.created = now;
   user.info.modified = now;
 
-  async.parallel({
+  async.series({
 
     registeredEmail: function (done) {
       User.backend.find({ 'info.email': user.info.email }, function (err, data) {

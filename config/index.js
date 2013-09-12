@@ -4,6 +4,7 @@
 
 var express = require('express')
   , passport = require('passport') 
+  , Modinha = require('modinha')
   ;
 
 
@@ -37,6 +38,12 @@ module.exports = function (app) {
         : { error: err.message, error_description: err.description };
       res.send(err.statusCode || 500, error);
     });
+
+    Modinha.adapter = {
+      type: 'modinha-json',
+      path: 'data'
+    };
+
   });
 
 };

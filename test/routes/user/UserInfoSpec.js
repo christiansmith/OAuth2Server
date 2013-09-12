@@ -7,12 +7,17 @@ var cwd = process.cwd()
   , chai = require('chai')
   , expect = chai.expect
   , request = require('supertest')
-  , app = require(path.join(cwd, 'app'))  
+  , app = require(path.join(cwd, 'app')) 
+  , Modinha = require('modinha') 
   , User = require(path.join(cwd, 'models/User'))
   , Resource = require(path.join(cwd, 'models/Resource'))
   , Client = require(path.join(cwd, 'models/Client'))
   , AccessToken = require(path.join(cwd, 'models/AccessToken'))
   ;
+
+
+console.log(Modinha.adapter)
+console.log(User.adapter)
 
 
 /**

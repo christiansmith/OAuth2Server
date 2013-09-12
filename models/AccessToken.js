@@ -12,7 +12,7 @@ var Modinha = require('modinha')
  * Model definition
  */
 
-var AccessToken = Modinha.extend(null, {
+var AccessToken = Modinha.extend('AccessTokens', null, {
   schema: {
     client_id:      { type: 'string', required: true },
     user_id:        { type: 'string', required: true },

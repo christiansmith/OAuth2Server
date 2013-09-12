@@ -11,7 +11,7 @@ var Modinha = require('modinha')
  * Model definition
  */
 
-var HTTPCredentials = Modinha.extend(null, {
+var HTTPCredentials = Modinha.extend('HTTPCredentials', null, {
   schema: {
     key:    { type: 'string', required: true, default: random },
     secret: { type: 'string', required: true, default: random },

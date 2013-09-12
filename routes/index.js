@@ -17,25 +17,17 @@ var cwd         = process.cwd()
 module.exports = function (app) {
 
   /**
-   * Resource definition helper
-   */
-
-  require('milonga')(app);
-
-
-  /**
-   * Authentication middleware
-   */
-
-  var authenticate = passport.authenticate('basic', { session: false });
-
-
-  /**
    * RESTful routes
    */
 
-  app.resource('/v1/users', User, authenticate);
-  app.resource('/v1/clients', Client, authenticate);
+  require('milonga')(app);   // adds app.resource
+
+  var authenticate = passport.authenticate('basic', { 
+    session: false 
+  });
+
+  app.resource('/v1/users',     User,     authenticate);
+  app.resource('/v1/clients',   Client,   authenticate);
   app.resource('/v1/resources', Resource, authenticate);
 
 
