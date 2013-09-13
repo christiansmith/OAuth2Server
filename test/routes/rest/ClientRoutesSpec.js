@@ -98,7 +98,6 @@ describe('Client REST Routes', function () {
       });
 
       it('should respond with clients', function () {
-        console.log(res.body)
         res.body[0].name.should.equal('ThirdPartyApp');
       });
 

@@ -28,8 +28,8 @@ var User = Model.extend('Users', null, {
         modified:   { type: 'any' }
       }
     },
-    salt: { type: 'string' },
-    hash: { type: 'string' }    
+    salt: { type: 'string', private: true },
+    hash: { type: 'string', private: true }    
   }
 });
 
@@ -42,7 +42,7 @@ var User = Model.extend('Users', null, {
  */
 
 User.create = function (attrs, callback) {
-  var user = new User({ info: attrs })
+  var user = new User({ info: attrs }, { private: true })
     , validation = user.validate()
     ;
 
@@ -99,10 +99,9 @@ User.prototype.verifyPassword = function (password, callback) {
  */
 
 User.authenticate = function (email, password, callback) {
-  User.backend.find({ 'info.email': email }, function (err, result) {
-    if (!result) { return callback(null, false, { message: 'Unknown user.' }); }
+  User.find({ 'info.email': email }, { private: true }, function (err, user) {
+    if (!user) { return callback(null, false, { message: 'Unknown user.' }); }
 
-    user = new User(result);
     user.verifyPassword(password, function (err, match) {
       if (match) {
         callback(null, user, { message: 'Authenticated successfully!' });

@@ -21,7 +21,7 @@ module.exports = function (app) {
    */
 
   server.exchange(oauth2.exchange.password(function(client, username, password, scope, done) {
-    User.find({ 'info.email': username }, function (err, user) {
+    User.find({ 'info.email': username }, { private: true }, function (err, user) {
       if (err) { return done(err); }
       
       if (!user) { return done(null, false) }
