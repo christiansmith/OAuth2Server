@@ -96,7 +96,7 @@ describe('User REST Routes', function () {
       });
 
       it('should respond with users', function () {
-        res.body[0].info.email.should.equal(validUser.email);
+        res.body[0].email.should.equal(validUser.email);
       });
 
     });
@@ -151,7 +151,7 @@ describe('User REST Routes', function () {
       });
 
       it('should respond with a user', function () {
-        res.body.info.email.should.equal(validUser.email);
+        res.body.email.should.equal(validUser.email);
       });
 
     });
@@ -214,7 +214,7 @@ describe('User REST Routes', function () {
       });
 
       it('should create a new user', function () {
-        User.backend.documents[0].info.email.should.equal(validUser.email);
+        User.backend.documents[0].email.should.equal(validUser.email);
       });
 
     });
@@ -288,7 +288,7 @@ describe('User REST Routes', function () {
           request(app)
             .put('/v1/users/' + instance._id)
             .set('Authorization', 'Basic ' + new Buffer(credentials.key + ':' + credentials.secret).toString('base64'))
-            .send({ info: { email: 'updated@example.com' } })
+            .send({ email: 'updated@example.com' })
             .end(function (error, response) {
               err = error;
               res = response;
@@ -306,7 +306,7 @@ describe('User REST Routes', function () {
       });
 
       it('should update a user', function () {
-        User.backend.documents[0].info.email.should.equal('updated@example.com');
+        User.backend.documents[0].email.should.equal('updated@example.com');
       });
 
     });
@@ -319,7 +319,7 @@ describe('User REST Routes', function () {
           request(app)
             .put('/v1/users/' + instance._id)
             .set('Authorization', 'Basic ' + new Buffer(credentials.key + ':' + credentials.secret).toString('base64'))
-            .send({ info: { email: 'not-valid' } })
+            .send({ email: 'not-valid' })
             .end(function (error, response) {
               err = error;
               res = response;

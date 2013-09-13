@@ -20,8 +20,8 @@ module.exports = function (app) {
    * Exchange user password credentials for an access token
    */
 
-  server.exchange(oauth2.exchange.password(function(client, username, password, scope, done) {
-    User.find({ 'info.email': username }, { private: true }, function (err, user) {
+  server.exchange(oauth2.exchange.password(function(client, email, password, scope, done) {
+    User.find({ email: email }, { private: true }, function (err, user) {
       if (err) { return done(err); }
       
       if (!user) { return done(null, false) }

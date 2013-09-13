@@ -46,52 +46,26 @@ describe('User', function () {
       User.schema._id.should.be.an('object');
     });
 
-//    it('should require info', function () {
-//      console.log('ValidtionError', validation)
-//      validation.errors.info.attribute.should.equal('required');
-//    });
-
-    describe('info', function () {
-
-      beforeEach(function () {
-        user = new User({ info: {} });
-        validation = user.validate();
-      });
-
-      it('should have id', function () {
-        User.schema.info.properties.id.type.should.equal('any');
-      });
-
-      it('should have first name', function () {
-        User.schema.info.properties.first.type.should.equal('string');
-      });
-      
-      it('should have last name', function () {
-        User.schema.info.properties.last.type.should.equal('string');
-      });
-      
-      it('should have username', function () {
-        User.schema.info.properties.username.type.should.equal('string');
-      });
-      
-      it('should require email', function () {
-        validation.errors.email.attribute.should.equal('required');
-      });
-      
-      it('should require email to be valid', function () {
-        validation = (new User({ info: { email: 'not-valid' } })).validate();
-        validation.errors.email.attribute.should.equal('format');        
-      });
-      
-      it('should have "created" timestamp', function () {
-        User.schema.info.properties.created.should.be.an('object');
-      });
-      
-      it('should have "modified" timestamp', function () {
-        User.schema.info.properties.modified.should.be.an('object');
-      });
+    it('should have first name', function () {
+      User.schema.first.type.should.equal('string');
     });
-
+    
+    it('should have last name', function () {
+      User.schema.last.type.should.equal('string');
+    });
+    
+    it('should have username', function () {
+      User.schema.username.type.should.equal('string');
+    });
+    
+    it('should require email', function () {
+      validation.errors.email.attribute.should.equal('required');
+    });
+    
+    it('should require email to be valid', function () {
+      validation = (new User({ email: 'not-valid' })).validate();
+      validation.errors.email.attribute.should.equal('format');        
+    });
 
     it('should have salt', function () {
       User.schema.salt.type.should.equal('string');

@@ -48,7 +48,7 @@ module.exports = function (app) {
       if (!token) { return next(new Error('AccessToken not found')); }
       User.find({ _id: token.user_id }, function (err, user) {
         if (err) { return next(err); }
-        res.json(user.info);
+        res.json(user);
       });
     });
   });

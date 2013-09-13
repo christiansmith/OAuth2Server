@@ -102,7 +102,7 @@ describe('User Info', function () {
     });
             
     it('should respond with user info', function () {
-      res.body.created.should.equal(JSON.parse(JSON.stringify(user.info)).created);
+      res.body.created.should.equal(JSON.parse(JSON.stringify(user)).created);
     });
 
   });

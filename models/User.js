@@ -15,19 +15,23 @@ var util   = require('util')
 
 var User = Model.extend('Users', null, {
   schema: {
-    info: { 
-      type: 'object', 
-      required: true, 
-      properties: {
-        id:         { type: 'any' },
-        first:      { type: 'string' },
-        last:       { type: 'string' },
-        username:   { type: 'string' },
-        email:      { type: 'string', required: true, format: 'email' },
-        created:    { type: 'any' },
-        modified:   { type: 'any' }
-      }
-    },
+    first:      { type: 'string' },
+    last:       { type: 'string' },
+    username:   { type: 'string' },
+    email:      { type: 'string', required: true, format: 'email' },    
+//    info: { 
+//      type: 'object', 
+//      required: true, 
+//      properties: {
+//        id:         { type: 'any' },
+//        first:      { type: 'string' },
+//        last:       { type: 'string' },
+//        username:   { type: 'string' },
+//        email:      { type: 'string', required: true, format: 'email' },
+//        created:    { type: 'any' },
+//        modified:   { type: 'any' }
+//      }
+//    },
     salt: { type: 'string', private: true },
     hash: { type: 'string', private: true }    
   }
@@ -42,7 +46,7 @@ var User = Model.extend('Users', null, {
  */
 
 User.create = function (attrs, callback) {
-  var user = new User({ info: attrs }, { private: true })
+  var user = new User(attrs, { private: true })
     , validation = user.validate()
     ;
 
@@ -53,13 +57,13 @@ User.create = function (attrs, callback) {
   user.hash = bcrypt.hashSync(attrs.password, user.salt);
 
   var now = new Date();
-  user.info.created = now;
-  user.info.modified = now;
+  user.created = now;
+  user.modified = now;
 
   async.series({
 
     registeredEmail: function (done) {
-      User.backend.find({ 'info.email': user.info.email }, function (err, data) {
+      User.backend.find({ email: user.email }, function (err, data) {
         if (err) { return done(err); }
         if (data) { return done(new RegisteredEmailError()); }
         done(null, data);
@@ -67,7 +71,7 @@ User.create = function (attrs, callback) {
     },
     
     registeredUsername: function (done) {
-      User.backend.find({ 'info.username': user.info.username }, function (err, data) {
+      User.backend.find({ username: user.username }, function (err, data) {
         if (err) { return done(err); }
         if (data) { return done(new RegisteredUsernameError()); }
         done(null, data);
@@ -99,7 +103,7 @@ User.prototype.verifyPassword = function (password, callback) {
  */
 
 User.authenticate = function (email, password, callback) {
-  User.find({ 'info.email': email }, { private: true }, function (err, user) {
+  User.find({ email: email }, { private: true }, function (err, user) {
     if (!user) { return callback(null, false, { message: 'Unknown user.' }); }
 
     user.verifyPassword(password, function (err, match) {
