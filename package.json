@@ -14,7 +14,8 @@
     "grunt-mocha-cov": "~0.0.7",
     "chai": "~1.7.2",
     "async": "~0.2.9",
-    "supertest": "~0.7.1"
+    "supertest": "~0.7.1",
+    "Faker": "~0.5.11"
   },
   "repository": {
     "type": "git",
