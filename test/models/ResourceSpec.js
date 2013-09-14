@@ -23,9 +23,7 @@ describe('Resource', function () {
   };
 
   var err, resource, validation, validResource = {
-    user_id: '1234',
     uri: 'https://protected.tld'
-    //secret: 'g1bb3r1sh'
   };
 
 

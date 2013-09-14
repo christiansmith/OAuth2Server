@@ -65,7 +65,7 @@ AccessToken.verify = function (access_token, scope, callback) {
       return callback(new InsufficientScopeError());
     }
 
-    callback(null, true);
+    callback(null, token);
   });
 };
 

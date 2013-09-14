@@ -39,7 +39,7 @@ module.exports = function (app) {
       } else if (err) {
         next(new InvalidRequestError(err.description));
       } else {
-        req.token = access_token;
+        req.token = verified;
         next();        
       }
 
@@ -47,33 +47,22 @@ module.exports = function (app) {
 
   }
 
-
   /**
-   * Instead of looking up the access token like this we should 
-   * verify it with middleware. Then we'll have the token available 
-   * on `req`, and we can use it to find the user.
+   * Access token specific user routes
    */
 
   app.get('/v1/user', authorize, function (req, res, next) {
-    AccessToken.find({ access_token: req.token }, function (err, token) {
+    User.find({ _id: req.token.user_id }, function (err, user) {
       if (err) { return next(err); }
-      if (!token) { return next(new Error('AccessToken not found')); }
-      User.find({ _id: token.user_id }, function (err, user) {
-        if (err) { return next(err); }
-        res.json(user);
-      });
+      res.json(user);
     });
   });
 
 
   app.post('/v1/user', authorize, function (req, res, next) {
-    AccessToken.find({ access_token: req.token }, function (err, token) {
+    User.update({ _id: req.token.user_id }, req.body, function (err, user) {
       if (err) { return next(err); }
-      if (!token) { return next(new Error('AccessToken not found')); }
-      User.update({ _id: token.user_id }, req.body, function (err, user) {
-        if (err) { return next(err); }
-        res.json(user);
-      });      
+      res.json(user);
     });
   });
 

@@ -225,9 +225,9 @@ describe('AccessToken', function () {
 
     describe('with valid details', function () {
 
-      before(function (done) {
-        AccessToken.verify(token.access_token, token.scope, function (err, truth) {
-          verified = truth;
+      beforeEach(function (done) {
+        AccessToken.verify(token.access_token, token.scope, function (err, instance) {
+          verified = instance;
           done();
         });
       });
@@ -236,8 +236,8 @@ describe('AccessToken', function () {
         expect(err).equals(null);
       })
 
-      it('should provide verification', function () {
-        expect(verified).equals(true);
+      it('should provide the token', function () {
+        verified._id.should.equal(token._id);
       });
 
     });

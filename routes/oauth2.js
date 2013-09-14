@@ -60,7 +60,7 @@ module.exports = function (app) {
 
     AccessToken.verify(token, scope, function (err, verified) {
       if (err) { return next(err); }
-      res.json({ authorized: verified });
+      res.json({ authorized: true });
     });
   });
 
