@@ -36,7 +36,6 @@ describe('AccessToken', function () {
 
   var client, validClient = {
     _id: '2345',
-    user_id: validUser._id,
     type: 'confidential',
     name: 'ThirdPartyApp',
     redirect_uris: 'http://example.com/callback.html'    
@@ -45,9 +44,7 @@ describe('AccessToken', function () {
   var err, token, validation, validToken = {
     client_id: validClient._id,
     user_id: validUser._id,
-    access_token: '1234abcd',
     expires_at: new Date('2014/01/31'),
-    refresh_token: '3456asdf',
     scope: 'https://api1.tld https://api2.tld'
   };
 
@@ -131,6 +128,10 @@ describe('AccessToken', function () {
       it('should generate an access token', function () {
         token.access_token.should.be.defined;
       });    
+
+      it('should generate an refresh token', function () {
+        token.refresh_token.should.be.defined;
+      }); 
 
     });
 

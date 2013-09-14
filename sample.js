@@ -55,7 +55,6 @@ async.waterfall([
 
   function (user, client, callback) {
     Resource.create({
-      user_id: user._id,
       uri: 'https://protected.tld'
     }, function (err, resource) {
       console.log('RESOURCE', err || resource);

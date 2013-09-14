@@ -14,7 +14,12 @@ var cwd         = process.cwd()
   ;
 
 
+/**
+ * Exports
+ */
+
 module.exports = function (app) {
+
 
   /**
    * RESTful routes
@@ -39,18 +44,10 @@ module.exports = function (app) {
 
 
   /**
-   * Protected resource routes (local)
+   * Protected resource routes (user)
    */
 
-  app.get('/v1/user', function (req, res, next) {
-    AccessToken.find({ access_token: req.query.access_token }, function (err, token) {
-      if (err) { return next(err); }
-      if (!token) { return next(new Error('AccessToken not found')); }
-      User.find({ _id: token.user_id }, function (err, user) {
-        if (err) { return next(err); }
-        res.json(user);
-      });
-    });
-  });
+  require('./user')(app);
+
 
 };

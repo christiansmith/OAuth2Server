@@ -15,25 +15,12 @@ var util   = require('util')
 
 var User = Model.extend('Users', null, {
   schema: {
-    first:      { type: 'string' },
-    last:       { type: 'string' },
-    username:   { type: 'string' },
-    email:      { type: 'string', required: true, format: 'email' },    
-//    info: { 
-//      type: 'object', 
-//      required: true, 
-//      properties: {
-//        id:         { type: 'any' },
-//        first:      { type: 'string' },
-//        last:       { type: 'string' },
-//        username:   { type: 'string' },
-//        email:      { type: 'string', required: true, format: 'email' },
-//        created:    { type: 'any' },
-//        modified:   { type: 'any' }
-//      }
-//    },
-    salt: { type: 'string', private: true },
-    hash: { type: 'string', private: true }    
+    first:    { type: 'string' },
+    last:     { type: 'string' },
+    username: { type: 'string' },
+    email:    { type: 'string', required: true, format: 'email' },    
+    salt:     { type: 'string', private: true },
+    hash:     { type: 'string', private: true }    
   }
 });
 

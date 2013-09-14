@@ -45,13 +45,11 @@ describe('Resource', function () {
       Resource.schema._id.should.be.an('object');
     });
 
-    it('should require user_id', function () {
-      validation.errors.user_id.attribute.should.equal('required');
-    });
-
     it('should require uri', function () {
       validation.errors.uri.attribute.should.equal('required');
     });
+
+    it('should have scopes');
 
     it('should have secret', function () {
       Resource.schema.secret.should.be.an('object');
