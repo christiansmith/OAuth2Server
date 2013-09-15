@@ -7,7 +7,7 @@
   },
   "version": "0.0.0",
   "description": "OAuth 2.0 Server",
-  "main": "Gruntfile.js",
+  "main": "app.js",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-watch": "~0.5.1",
@@ -34,6 +34,8 @@
     "connect-redis": "~1.4.5",
     "modinha": "0.0.14",
     "milonga": "~0.0.3",
-    "modinha-json": "~0.0.4"
+    "modinha-json": "~0.0.4",
+    "modinha-mongodb": "0.0.2",
+    "async": "~0.2.9"
   }
 }

@@ -40,11 +40,18 @@ module.exports = function (app) {
 
 
   /**
+   * Authentication middleware
+   */
+
+  var authenticate = passport.authenticate('basic', { session: false });
+
+
+  /**
    * Token endpoint
    */
 
   app.post('/token', 
-    passport.authenticate('client', { session: false }), 
+    authenticate, 
     server.token(),
     server.errorHandler());
 
@@ -53,7 +60,7 @@ module.exports = function (app) {
    * Access token validation endpoint
    */
 
-  app.post('/access', passport.authenticate('resource', { session: false }), function (req, res, next) {
+  app.post('/access', authenticate, function (req, res, next) {
     var token  = req.body.access_token
       , scope  = req.body.scope
       ;

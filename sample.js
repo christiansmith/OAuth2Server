@@ -19,6 +19,10 @@ var cwd         = process.cwd()
 async.waterfall([
 
   function (callback) {
+    setTimeout(function () { console.log('now...');callback(null); }, 3000)
+  },
+
+  function (callback) {
     Credentials.create({
       role: 'administrator'
     }, function (err, credentials) {
@@ -64,7 +68,7 @@ async.waterfall([
   },
 
   function (user, client, resource, callback) {
-    AccessToken.issue(client, user, { scope: 'limited' }, function (err, token) {
+    AccessToken.issue(client, user, { scope: 'https://authorizationserver.tld' }, function (err, token) {
       console.log('ACCESS TOKEN', err || token);
       if (err) { return callback(err); }
       callback(null);

@@ -62,11 +62,13 @@ describe('AccessToken', function () {
     });
 
     it('should require a client id', function () {
-      validation.errors.client_id.attribute.should.equal('required');
+      AccessToken.schema.client_id.required.should.equal(true);
+      //validation.errors.client_id.attribute.should.equal('required');
     });
 
     it('should require a user id', function () {
-      validation.errors.user_id.attribute.should.equal('required');
+      AccessToken.schema.user_id.required.should.equal(true);
+      //validation.errors.user_id.attribute.should.equal('required');
     });
 
     it('should have an access token', function () {
@@ -270,9 +272,7 @@ describe('AccessToken', function () {
         AccessToken.create({
           client_id: token.client_id,
           user_id: token.user_id,
-          access_token: '1234abcd',
           expires_at: new Date('2012/12/21'),
-          refresh_token: '3456asdf',
           scope: 'https://api1.tld https://api2.tld'
         }, function (err, instance) {
           AccessToken.verify(instance.access_token, instance.scope, function (error, truth) {

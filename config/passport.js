@@ -28,27 +28,4 @@ module.exports = function (passport) {
     });
   }));  
 
-  /**
-   * Client HTTP Basic Authentication Strategy
-   */
-
-  passport.use('client', new BasicStrategy(function (username, password, done) {
-    Client.find({ _id: username }, function (err, client) {
-      if (!client || client.secret !== password) { return done(null, false) }
-      return done(null, client);
-    });
-  }));
-
-
-  /**
-   * Resource Server HTTP Basic Authentication Strategy
-   */
-
-  passport.use('resource', new BasicStrategy(function (username, password, done) {
-    Resource.find({ _id: username }, function (err, resource) {
-      if (!resource || resource.secret !== password) { return done(null, false) }
-      return done(null, resource);
-    });
-  }));
-
 };

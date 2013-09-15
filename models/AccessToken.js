@@ -14,8 +14,8 @@ var Modinha = require('modinha')
 
 var AccessToken = Modinha.extend('AccessTokens', null, {
   schema: {
-    client_id:      { type: 'string', required: true },
-    user_id:        { type: 'string', required: true },
+    client_id:      { type: 'any', required: true },
+    user_id:        { type: 'any', required: true },
     access_token:   { type: 'string', default: random },
     token_type:     { type: 'string', enum: ['bearer', 'mac'], default: 'bearer' },
     expires_at:     { type: 'any' },

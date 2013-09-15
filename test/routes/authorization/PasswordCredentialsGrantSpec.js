@@ -18,13 +18,14 @@ var cwd = process.cwd()
   , app = require(path.join(cwd, 'app'))  
   , User = require(path.join(cwd, 'models/User'))
   , Client = require(path.join(cwd, 'models/Client')) 
+  , Credentials = require(path.join(cwd, 'models/HTTPCredentials'))   
   ;
 
 
 describe('resource owner password credentials grant', function () {
 
 
-  var res, user, client;
+  var res, user, client, credentials, validBasic, invalidBasic;
 
 
   describe('POST /token', function () {
@@ -32,17 +33,23 @@ describe('resource owner password credentials grant', function () {
     before(function (done) {
       User.backend.reset();
       Client.backend.reset();
+      Credentials.backend.reset();
 
       User.create({ email: 'valid@example.com', password: 'secret' }, function (err, instance) {
         user = instance;
         Client.create({ 
           _id: 'thirdparty', 
           user_id: user._id,
-          //secret: 'secret', 
           type: 'confidential' 
         }, function (err, instance) {
           client = instance;
-          done();
+          Credentials.create({ role: 'client' }, function (err, instance) {
+            credentials = instance;
+            validBasic   = new Buffer(credentials.key + ':' + credentials.secret).toString('base64');
+            invalidBasic = new Buffer(credentials.key + ':wrong').toString('base64');
+
+            done();
+          });
         });
       });
     });
@@ -54,7 +61,7 @@ describe('resource owner password credentials grant', function () {
       before(function (done) {
         request(app)
           .post('/token')
-          .set('Authorization', 'Basic ' + new Buffer('thirdparty:wrong').toString('base64'))
+          .set('Authorization', 'Basic ' + invalidBasic)
           .end(function (error, response) {
             err = error;
             res = response;
@@ -78,7 +85,7 @@ describe('resource owner password credentials grant', function () {
       before(function (done) {
         request(app)
           .post('/token')
-          .set('Authorization', 'Basic ' + new Buffer(client._id + ':' + client.secret).toString('base64'))
+          .set('Authorization', 'Basic ' + validBasic)
           .send('grant_type=password&username=valid@example.com&password=secret&scope=https://resourceserver.tld')
           .end(function (err, response) {
             res = response;
@@ -116,7 +123,7 @@ describe('resource owner password credentials grant', function () {
       before(function (done) {
         request(app)
           .post('/token')
-          .set('Authorization', 'Basic ' + new Buffer(client._id + ':' + client.secret).toString('base64'))
+          .set('Authorization', 'Basic ' + validBasic)
           .send('grant_type=password&username=unknown@example.com&password=secret&scope=https://resourceserver.tld')
           .end(function (err, response) {
             res = response;
@@ -150,7 +157,7 @@ describe('resource owner password credentials grant', function () {
       before(function (done) {
         request(app)
           .post('/token')
-          .set('Authorization', 'Basic ' + new Buffer(client._id + ':' + client.secret).toString('base64'))
+          .set('Authorization', 'Basic ' + validBasic)
           .send('grant_type=password&password=secret&scope=https://resourceserver.tld')
           .end(function (err, response) {
             res = response;
@@ -184,7 +191,7 @@ describe('resource owner password credentials grant', function () {
       before(function (done) {
         request(app)
           .post('/token')
-          .set('Authorization', 'Basic ' + new Buffer(client._id + ':' + client.secret).toString('base64'))
+          .set('Authorization', 'Basic ' + validBasic)
           .send('grant_type=password&username=valid@example.com&password=wrong&scope=https://resourceserver.tld')
           .end(function (err, response) {
             res = response;
@@ -218,7 +225,7 @@ describe('resource owner password credentials grant', function () {
       before(function (done) {
         request(app)
           .post('/token')
-          .set('Authorization', 'Basic ' + new Buffer(client._id + ':' + client.secret).toString('base64'))
+          .set('Authorization', 'Basic ' + validBasic)
           .send('grant_type=password&username=valid@example.com&scope=https://resourceserver.tld')
           .end(function (err, response) {
             res = response;

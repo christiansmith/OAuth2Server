@@ -23,14 +23,18 @@ var cwd = process.cwd()
   , Resource = require(path.join(cwd, 'models/Resource'))
   , Client = require(path.join(cwd, 'models/Client'))
   , AccessToken = require(path.join(cwd, 'models/AccessToken'))
+  , Credentials = require(path.join(cwd, 'models/HTTPCredentials'))    
   ;
 
 
 describe('access token validation', function () {
 
 
-  var token, err, res;
+  var token, err, res, validBasic, invalidBasic;
 
+  var credentials, validCredentials = {
+    role: 'client'
+  };
 
   var user, validUser = {
     _id: '1234',
@@ -58,6 +62,7 @@ describe('access token validation', function () {
       Client.backend.reset();
       Resource.backend.reset();
       AccessToken.backend.reset();
+      Credentials.backend.reset();
 
       User.create(validUser, function (err, instance) {
         user = instance;
@@ -68,10 +73,16 @@ describe('access token validation', function () {
           Resource.create(validResource, function (err, instance) {
             resource = instance;
 
-            AccessToken.issue(client, user, { scope: 'https://resourceserver.tld' }, function (err, instance) {
-              token = instance;
+            Credentials.create(validCredentials, function (err, instance) {
+              credentials = instance;
+              validBasic   = new Buffer(credentials.key + ':' + credentials.secret).toString('base64');
+              invalidBasic = new Buffer(credentials.key + ':wrong').toString('base64');
 
-              done();
+              AccessToken.issue(client, user, { scope: 'https://resourceserver.tld' }, function (err, instance) {
+                token = instance;
+
+                done();
+              });
             });
           });
         });
@@ -83,12 +94,10 @@ describe('access token validation', function () {
 
     describe('with valid request', function () {
 
-      before(function (done) {
-        var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
-        
+      before(function (done) {        
         request(app)
           .post('/access')
-          .set('Authorization', 'Basic ' + credentials)
+          .set('Authorization', 'Basic ' + validBasic)
           .send('access_token=' + token.access_token + '&scope=' + token.scope)
           .end(function (error, response) {
             err = error;
@@ -137,11 +146,9 @@ describe('access token validation', function () {
     describe('with invalid resource credentials', function () {
 
       before(function (done) {
-        var credentials = new Buffer(resource._id + ':wrong').toString('base64');
-        
         request(app)
           .post('/access')
-          .set('Authorization', 'Basic ' + credentials)
+          .set('Authorization', 'Basic ' + invalidBasic)
           .send('access_token=' + token.access_token + '&scope=' + token.scope)
           .end(function (error, response) {
             err = error;
@@ -188,11 +195,9 @@ describe('access token validation', function () {
     describe('with unknown access token', function () {
 
       before(function (done) {
-        var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
-        
         request(app)
           .post('/access')
-          .set('Authorization', 'Basic ' + credentials)
+          .set('Authorization', 'Basic ' + validBasic)
           .send('access_token=unknown&scope=https://resourceserver.tld')
           .end(function (error, response) {
             err = error;
@@ -231,11 +236,9 @@ describe('access token validation', function () {
           refresh_token: '3456asdf',
           scope: 'https://api1.tld https://api2.tld'
         }, function (err, instance) {
-          var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
-          
           request(app)
             .post('/access')
-            .set('Authorization', 'Basic ' + credentials)
+            .set('Authorization', 'Basic ' + validBasic)
             .send('access_token=' + instance.access_token + '&scope=https://resourceserver.tld')
             .end(function (error, response) {
               err = error;
@@ -268,11 +271,9 @@ describe('access token validation', function () {
     describe('with insufficient scope', function () {
 
       before(function (done) {
-        var credentials = new Buffer(resource._id + ':' + resource.secret).toString('base64');
-        
         request(app)
           .post('/access')
-          .set('Authorization', 'Basic ' + credentials)
+          .set('Authorization', 'Basic ' + validBasic)
           .send('access_token=' + token.access_token + '&scope=insufficient')
           .end(function (error, response) {
             err = error;

@@ -17,7 +17,7 @@ module.exports = function (app) {
   app.configure(function () {
 
     // settings
-    app.set('port', 3000);
+    app.set('port', process.env.PORT || 3000);
 
     // request parsing
     app.use(express.cookieParser('secret'));
@@ -39,10 +39,17 @@ module.exports = function (app) {
       res.send(err.statusCode || 500, error);
     });
 
+    //Modinha.adapter = {
+    //  type: 'modinha-json',
+    //  path: 'data'
+    //};
+
     Modinha.adapter = {
-      type: 'modinha-json',
-      path: 'data'
+      type: 'modinha-mongodb', 
+      uri: 'mongodb://anvil:anvil@mongo.onmodulus.net:27017/ra9ridIr'
     };
+
+
 
   });
 

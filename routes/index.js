@@ -20,6 +20,7 @@ var cwd         = process.cwd()
 
 module.exports = function (app) {
 
+  app.get('/', function (req, res) { res.json({ OAuth2Server: 'Welcome' }); })
 
   /**
    * RESTful routes

@@ -42,7 +42,6 @@ module.exports = function (app) {
         req.token = verified;
         next();        
       }
-
     });
 
   }

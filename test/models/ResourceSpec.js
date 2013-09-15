@@ -26,7 +26,6 @@ describe('Resource', function () {
     uri: 'https://protected.tld'
   };
 
-
   beforeEach(function () { 
     Resource.backend.reset(); 
   });
