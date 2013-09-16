@@ -2,9 +2,10 @@
  * Configuration dependencies
  */
 
-var express = require('express')
+var config   = require('../oauth2server.json') 
+  , express  = require('express')
   , passport = require('passport') 
-  , Modinha = require('modinha')
+  , Modinha  = require('modinha')
   ;
 
 
@@ -39,18 +40,8 @@ module.exports = function (app) {
       res.send(err.statusCode || 500, error);
     });
 
-    //Modinha.adapter = {
-    //  type: 'modinha-json',
-    //  path: 'data'
-    //};
-
-    Modinha.adapter = {
-      type: 'modinha-mongodb', 
-      uri: 'mongodb://anvil:anvil@mongo.onmodulus.net:27017/ra9ridIr'
-    };
-
-
-
+    Modinha.adapter = config.adapter;
+    
   });
 
 };

@@ -1,0 +1,6 @@
+{
+  "adapter": {
+    "type": "modinha-mongodb",
+    "uri": "mongodb://USERNAME:PASSWORD@mongo.onmodulus.net:27017/DATABASE"
+  }
+}
