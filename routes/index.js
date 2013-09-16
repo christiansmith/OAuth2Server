@@ -5,6 +5,7 @@
 var cwd         = process.cwd()
   , path        = require('path')  
   , passport    = require('passport')
+  , pkg         = require(path.join(cwd, 'package.json'))
 
  // models
   , User        = require(path.join(cwd, 'models/User'))
@@ -20,7 +21,13 @@ var cwd         = process.cwd()
 
 module.exports = function (app) {
 
-  app.get('/', function (req, res) { res.json({ OAuth2Server: 'Welcome' }); })
+  /**
+   * Welcome
+   */
+
+  app.get('/', function (req, res) { 
+    res.json({ "Welcome": "OAuth2Server v" + pkg.version }); 
+  });
 
   /**
    * RESTful routes
