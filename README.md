@@ -16,7 +16,7 @@ You can get the code by cloning this respository. It will be available by packag
 
     $ git clone https://github.com/christiansmith/OAuth2Server.git
 
-[API docs](https://github.com/christiansmith/OAuth2Server/wiki/API) are in the wiki. We're developing fast and this may be out of sync with the code. Please [post an issue](https://github.com/christiansmith/OAuth2Server/issues) if you have questions about usage. 
+[API](https://github.com/christiansmith/OAuth2Server/wiki/API) and [configuration](https://github.com/christiansmith/OAuth2Server/wiki/Configuration) docs are in the [wiki](https://github.com/christiansmith/OAuth2Server/wiki). We're developing fast and this may be out of sync with the code. Please [post an issue](https://github.com/christiansmith/OAuth2Server/issues) if you have questions about usage. 
 
 
 ## How to Participate
