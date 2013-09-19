@@ -6,6 +6,7 @@ var config   = require('../oauth2server.json')
   , express  = require('express')
   , passport = require('passport') 
   , Modinha  = require('modinha')
+  , cors     = require('cors')
   ;
 
 
@@ -28,6 +29,8 @@ module.exports = function (app) {
     app.use(passport.initialize());
 //    app.use(passport.session());
 
+    app.use(cors());
+
     // Explicitly register app.router
     // before error handling.
     app.use(app.router);
@@ -41,7 +44,7 @@ module.exports = function (app) {
     });
 
     Modinha.adapter = config.adapter;
-    
+
   });
 
 };
