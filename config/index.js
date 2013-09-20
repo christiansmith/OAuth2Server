@@ -2,7 +2,9 @@
  * Configuration dependencies
  */
 
-var config   = require('../oauth2server.json') 
+var cwd      = process.cwd()
+  , path     = require('path')  
+  , config   = require(path.join(cwd, 'config.json'))
   , express  = require('express')
   , passport = require('passport') 
   , Modinha  = require('modinha')

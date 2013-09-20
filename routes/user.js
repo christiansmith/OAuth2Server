@@ -6,8 +6,8 @@ var cwd         = process.cwd()
   , path        = require('path')  
   , util        = require('util')
   , passport    = require('passport')
-  , User        = require(path.join(cwd, 'models/User'))
-  , AccessToken = require(path.join(cwd, 'models/AccessToken'))    
+  , User        = require('../models/User')
+  , AccessToken = require('../models/AccessToken')    
   ;
 
 

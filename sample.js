@@ -3,16 +3,14 @@
  * is configured for Modinha.
  */
 
-var cwd         = process.cwd()
-  , path        = require('path')
-  , async       = require('async')
+var async       = require('async')
   , Faker       = require('Faker')
-  , app         = require(path.join(cwd, 'app'))
-  , User        = require(path.join(cwd, 'models/User')) 
-  , Client      = require(path.join(cwd, 'models/Client')) 
-  , Resource    = require(path.join(cwd, 'models/Resource')) 
-  , AccessToken = require(path.join(cwd, 'models/AccessToken'))
-  , Credentials = require(path.join(cwd, 'models/HTTPCredentials'))
+  , app         = require('./app')
+  , User        = require('./models/User')
+  , Client      = require('./models/Client')
+  , Resource    = require('./models/Resource')
+  , AccessToken = require('./models/AccessToken')
+  , Credentials = require('./models/HTTPCredentials')
   ;
 
 
@@ -59,7 +57,10 @@ async.waterfall([
 
   function (user, client, callback) {
     Resource.create({
-      uri: 'https://protected.tld'
+      uri: 'https://protected.tld',
+      scopes: [
+        { 'https://protected.tld': 'access everything on this server' }
+      ]
     }, function (err, resource) {
       console.log('RESOURCE', err || resource);
       if (err) { return callback(err); }

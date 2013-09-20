@@ -1,5 +1,5 @@
 {
-  "name": "OAuth2Server",
+  "name": "oauth2server",
   "author": {
     "name": "Christian Smith",
     "email": "smith@anvil.io",
@@ -15,7 +15,8 @@
     "chai": "~1.7.2",
     "async": "~0.2.9",
     "supertest": "~0.7.1",
-    "Faker": "~0.5.11"
+    "Faker": "~0.5.11",
+    "grunt-release": "~0.5.1"
   },
   "repository": {
     "type": "git",

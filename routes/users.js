@@ -2,10 +2,8 @@
  * Module dependencies
  */
 
-var cwd      = process.cwd()
-  , path     = require('path')  
-  , passport = require('passport')
-  , User     = require(path.join(cwd, 'models/User'))
+var passport = require('passport')
+  , User     = require('../models/User')
   ;
 
 

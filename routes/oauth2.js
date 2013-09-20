@@ -2,13 +2,11 @@
  * Module dependencies
  */
 
-var cwd         = process.cwd()
-  , path        = require('path')
-  , oauth2      = require('oauth2orize')
+var oauth2      = require('oauth2orize')
   , passport    = require('passport')
-  , User        = require(path.join(cwd, 'models/User'))
-  , Client      = require(path.join(cwd, 'models/Client'))
-  , AccessToken = require(path.join(cwd, 'models/AccessToken'))  
+  , User        = require('../models/User')
+  , Client      = require('../models/Client')
+  , AccessToken = require('../models/AccessToken')  
   ;
 
 
