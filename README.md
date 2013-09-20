@@ -21,27 +21,27 @@ You can get the code by cloning this respository. It will be available by packag
 
 ## How to Participate
 
-We want to both *build the right thing* and *build the thing right*.
+Help us **build the right thing** by coming to the **Google Hangout** at **10am Pacific every Thursday** to brainstorm features and use cases. The hangout link is tweeted by **@anvilhacks** and posted to the [**project blog**](http://oauth2server.blogspot.com/) a few minutes in advance each week. We love to hear from prospective users.
 
-* Help us *build the right thing* by coming to the [Google Hangout](http://bit.ly/Auth2Hangout) at 10am Pacific every Thursday to brainstorm features and use cases. We love to hear from prospective users.
-* To help us *build the thing right*:
-  * **Post and comment** on [issues](https://github.com/christiansmith/OAuth2Server/issues). This is the best place to discuss/debate implementation details, point out bugs, flaws, and security issues. 
-  * **Fork and request pulls** for features and bug fixes. For substantial features, please [submit an issue](https://github.com/christiansmith/OAuth2Server/issues) describing your proposed enhancements *first*, so we can avoid duplicating efforts.
-  * **Pair program**. These sessions are always fun and productive. Send me an email to arrange a time (smith at anvil dot io). 
-* Stay up to date by watching this repository, reading the [project blog](http://oauth2server.blogspot.com/) and checking the [issues](https://github.com/christiansmith/OAuth2Server/issues).
-* Promote the project and help us find more early users by blogging, tweeting, +1-ing, starring, gossiping and anything else you think might help.
+To help us **build the thing right**:
+
+* *Post and comment* on [**issues**](https://github.com/christiansmith/OAuth2Server/issues). This is the best place to discuss/debate implementation details, point out bugs, flaws, and security issues. 
+* *Fork and request pulls* for features and bug fixes. For substantial features, please [**submit an issue**](https://github.com/christiansmith/OAuth2Server/issues) describing your proposed enhancements *first*, so we can avoid duplicating efforts.
+* *Pair program*. These sessions are always fun and productive. Send me an email to arrange a time (smith at anvil dot io). 
+* *Stay up to date* by watching this repository, reading the [**project blog**](http://oauth2server.blogspot.com/) and checking the [**issues**](https://github.com/christiansmith/OAuth2Server/issues).
+* *Promote the project* and help us find more early users by blogging, tweeting, +1-ing, starring, gossiping and anything else you think might help.
 
 
 ## Sponsorship
 
-Accelerate development of features you need by sponsoring the project. Email for more info (smith at anvil dot io).
+Accelerate development of features you need by sponsoring the project. Contact Christian Smith for more information (smith at anvil dot io).
 
 
 ## Related Projects
 
 * [OAuth2Resource](https://github.com/christiansmith/OAuth2Resource) provides Express middleware for authorizing access to resource servers protected by OAuth2Server.
+* [OAuth2Admin](https://github.com/christiansmith/OAuth2Admin) is a standalone AngularJS application for administration of a running OAuth2Server instance.
 * [Modinha](https://github.com/christiansmith/Modinha) Schema-based data modeling with swappable storage adapters. Extracted from OAuth2Server
-* [Milonga](https://github.com/christiansmith/Milonga) Milonga is a helper for defining a set of RESTful Express routes based on Modinha models. Developed for use in OAuth2Server
 
 
 ## Acknowledgements
