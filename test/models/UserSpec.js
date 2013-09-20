@@ -162,6 +162,28 @@ describe('User', function () {
 
     });
 
+    describe('with an empty username', function () {
+
+      beforeEach(function (done) {
+        User.create({ email: 'valid@example.com', password: 'secret' }, function () {
+          User.create({
+            email: 'also.valid@example.com',
+            password: 'secret'
+          }, function (error, instance) {
+            err = error;
+            user = instance;
+            done();
+          });
+        })
+      });
+
+      it('should not provide a "registered username" error', function () {
+        expect(err).equals(null);
+      });
+
+    });
+
+
     describe('with a weak password', function () {
       it('should provide a "insecure password" error');
     });

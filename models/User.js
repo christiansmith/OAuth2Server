@@ -58,6 +58,7 @@ User.create = function (attrs, callback) {
     },
     
     registeredUsername: function (done) {
+      if (!user.username) { return done(null); }
       User.backend.find({ username: user.username }, function (err, data) {
         if (err) { return done(err); }
         if (data) { return done(new RegisteredUsernameError()); }
