@@ -217,6 +217,10 @@ describe('User REST Routes', function () {
         User.backend.documents[0].email.should.equal(validUser.email);
       });
 
+      it('should not include hash in response', function () {
+        expect(res.body.hash).equals(undefined);
+      });
+
     });
 
     describe('with invalid request', function () {
