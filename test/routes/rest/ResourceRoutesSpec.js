@@ -28,8 +28,10 @@ describe('Resource REST Routes', function () {
 
 
   var res, credentials, resource, validResource = {
-    user_id: '1234',
-    uri: 'https://protected.tld'
+    uri: 'https://protected.tld',
+    scopes: [
+      { 'https://protected.tld/': 'Read/write access to the entire service' }
+    ]
   };
 
 

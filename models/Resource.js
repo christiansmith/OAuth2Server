@@ -14,6 +14,7 @@ var Modinha = require('modinha')
 var Resource = Modinha.extend('Resources', null, {
   schema: {
     uri:         { type: 'string', required: true },
+    scopes:      { type: 'array',  required: true },
     secret:      { type: 'string', default: random },
     description: { type: 'string' }
   }

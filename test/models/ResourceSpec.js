@@ -17,14 +17,13 @@ var cwd = process.cwd()
 
 describe('Resource', function () {
 
-  var user, validUser = {
-    email: 'valid@example.com',
-    password: 'secret'    
+  var err, resource, validation, validResource = {
+    uri: 'https://protected.tld',
+    scopes: [
+      { 'https://protected.tld/': 'Read/write access to the entire service.'}
+    ]
   };
 
-  var err, resource, validation, validResource = {
-    uri: 'https://protected.tld'
-  };
 
   beforeEach(function () { 
     Resource.backend.reset(); 
@@ -46,7 +45,13 @@ describe('Resource', function () {
       validation.errors.uri.attribute.should.equal('required');
     });
 
-    it('should have scopes');
+    it('should have scopes', function () {
+      Resource.schema.scopes.type.should.equal('array');
+    });
+
+    it('should require scopes', function () {
+      validation.errors.scopes.attribute.should.equal('required');
+    });
 
     it('should have secret', function () {
       Resource.schema.secret.should.be.an('object');
