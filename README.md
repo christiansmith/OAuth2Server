@@ -12,11 +12,44 @@ There are currently three major use cases we intend to support:
 
 ## Using OAuth2Server
 
-You can get the code by cloning this respository. It will be available by package manager as we get closer to a stable release.
+OAuth2Server is available as an npm package. 
 
-    $ git clone https://github.com/christiansmith/OAuth2Server.git
+    $ npm install oauth2server --save
+
+Only two files are required to set up your own instance locally, `app.js` and `config.json`. For deployment to [Modulus.io](http://modulus.io), the only additional requirement is a `package.json` file listing OAuth2Server as a dependency.
+
+
+#### app.js
+
+```javascript
+var app = require('oauth2server');
+
+app.listen(app.settings.port, function () {
+  console.log(
+      'OAuth2Server is running on port ' + app.settings.port
+  );   
+});
+```
+
+#### config.json
+
+```json
+{
+  "adapter": {
+    "type": "modinha-mongodb",
+    "uri": "mongodb://USERNAME:PASSWORD@mongo.onmodulus.net:27017/DATABASE"
+  }
+}
+```
 
 [API](https://github.com/christiansmith/OAuth2Server/wiki/API) and [configuration](https://github.com/christiansmith/OAuth2Server/wiki/Configuration) docs are in the [wiki](https://github.com/christiansmith/OAuth2Server/wiki). We're developing fast and this may be out of sync with the code. Please [post an issue](https://github.com/christiansmith/OAuth2Server/issues) if you have questions about usage. 
+
+
+## Developing OAuth2Server
+
+Please fork the repository if you intend to contribute. Otherwise just clone this repo. 
+
+    $ git clone https://github.com/christiansmith/OAuth2Server.git
 
 
 ## How to Participate
