@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/RideAmigosCorp/OAuth2Server.git"
+    "url": "https://github.com/christiansmith/OAuth2Server.git"
   },
   "license": "MIT",
   "dependencies": {

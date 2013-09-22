@@ -16,11 +16,28 @@ var cwd      = process.cwd()
 module.exports = function (app) {
 
   /**
+   * Authentication middleware
+   */
+
+  app.authenticate = passport.authenticate('basic', { 
+    session: false 
+  });
+
+  /**
    * Welcome
    */
 
   app.get('/', function (req, res) { 
     res.json({ "Welcome": "OAuth2Server v" + pkg.version }); 
+  });
+
+
+  /**
+   * Verify HTTP Basic Credentials
+   */
+
+  app.post('/', app.authenticate, function (req, res) {
+    res.json({ validCredentials: true });
   });
 
 
