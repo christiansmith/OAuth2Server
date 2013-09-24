@@ -5,7 +5,7 @@
 var util   = require('util')
   , async  = require('async')
   , bcrypt = require('bcrypt')
-  , Model  = require('modinha')
+  , Modinha  = require('modinha')
   ;
 
 
@@ -13,7 +13,7 @@ var util   = require('util')
  * Model definition
  */
 
-var User = Model.extend('Users', null, {
+var User = Modinha.extend('Users', null, {
   schema: {
     first:    { type: 'string' },
     last:     { type: 'string' },
@@ -26,54 +26,46 @@ var User = Model.extend('Users', null, {
 
 
 /**
- * Override Model.create. 
- * We can refactor this to define unique values in the schema
- * and automatically check. Also need a way to hook in before
- * create/validate.
+ * Hash the password
  */
 
-User.create = function (attrs, callback) {
-  var user = new User(attrs, { private: true })
-    , validation = user.validate()
-    ;
-
-  if (!validation.valid) { return callback(validation); }
-  if (!attrs.password) { return callback(new PasswordRequiredError()); }
+User.before('validate', function (user, attrs, callback) {
+  if (!attrs.password) { 
+    return callback(new PasswordRequiredError()); 
+  }
 
   user.salt = bcrypt.genSaltSync(10);
   user.hash = bcrypt.hashSync(attrs.password, user.salt);
 
-  var now = new Date();
-  user.created = now;
-  user.modified = now;
+  callback(null);
+});
 
-  async.series({
 
-    registeredEmail: function (done) {
-      User.backend.find({ email: user.email }, function (err, data) {
-        if (err) { return done(err); }
-        if (data) { return done(new RegisteredEmailError()); }
-        done(null, data);
-      }); 
-    },
-    
-    registeredUsername: function (done) {
-      if (!user.username) { return done(null); }
-      User.backend.find({ username: user.username }, function (err, data) {
-        if (err) { return done(err); }
-        if (data) { return done(new RegisteredUsernameError()); }
-        done(null, data);
-      });      
-    }
+/**
+ * Require email to be unique
+ */
 
-  }, function (err, result) {
+User.before('create', function (user, attrs, callback) {
+  User.backend.find({ email: user.email }, function (err, data) {
     if (err) { return callback(err); }
-    User.backend.save(user, function (err) {
-      if (err) { return callback(err); }
-      callback(null, user);
-    });
+    if (data) { return callback(new RegisteredEmailError()); }
+    callback(null, data);
   });
-};
+});
+
+
+/**
+ * Require username to be unique, if provided
+ */
+
+User.before('create', function (user, attrs, callback) {
+  if (!user.username) { return callback(null); }
+  User.backend.find({ username: user.username }, function (err, data) {
+    if (err) { return callback(err); }
+    if (data) { return callback(new RegisteredUsernameError()); }
+    callback(null, data);
+  }); 
+});
 
 
 /**

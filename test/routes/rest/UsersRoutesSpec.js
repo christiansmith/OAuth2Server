@@ -230,7 +230,7 @@ describe('User REST Routes', function () {
         request(app)
           .post('/v1/users')
           .set('Authorization', 'Basic ' + new Buffer(credentials.key + ':' + credentials.secret).toString('base64'))
-          .send({})
+          .send({ password: 'secret' })
           .end(function (error, response) {
             err = error;
             res = response;
