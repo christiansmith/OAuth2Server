@@ -21,7 +21,7 @@ module.exports = function (app) {
   app.configure(function () {
 
     // settings
-    app.set('port', process.env.PORT || 3000);
+    app.set('port', process.env.PORT || config.port || 3000);
 
     // request parsing
     app.use(express.cookieParser('secret'));
