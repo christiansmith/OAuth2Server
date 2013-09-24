@@ -16,7 +16,7 @@ OAuth2Server is available as an npm package.
 
     $ npm install oauth2server --save
 
-Only two files are required to set up your own instance locally, `app.js` and `config.json`. For deployment to [Modulus.io](http://modulus.io), the only additional requirement is a `package.json` file listing OAuth2Server (~0.0.3) as a dependency.
+Only two files are required to set up your own instance locally, `app.js` and `config.json`. For [deployment](https://github.com/christiansmith/OAuth2Server/wiki/Deployment) to [Modulus.io](http://modulus.io), the only additional requirement is a `package.json` file listing OAuth2Server (~0.0.3) as a dependency.
 
 
 #### app.js
