@@ -5,7 +5,7 @@
     "email": "smith@anvil.io",
     "url": "http://anvil.io"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "OAuth 2.0 Server",
   "main": "app.js",
   "devDependencies": {
