@@ -5,7 +5,7 @@
 var cwd      = process.cwd()
   , path     = require('path')  
   , passport = require('passport')
-  , pkg      = require(path.join(cwd, 'package.json'))   
+  , pkg      = require('../package.json')  
   ;
 
 
