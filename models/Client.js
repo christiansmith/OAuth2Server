@@ -3,7 +3,7 @@
  */
 
 var Modinha = require('modinha')
-  , random  = Modinha.defaults.random
+  , Credentials = require('./HTTPCredentials')
   ;
 
 
@@ -19,8 +19,32 @@ var Client = Modinha.extend('Clients', null, {
   	description: { type: 'string' },
   	logo:        { type: 'string' },
   	terms:       { type: 'boolean' },
-  	secret:      { type: 'string', default: random }
+    key:         { type: 'string', private: true }
   }
+});
+
+
+/**
+ * Issue credentials
+ */
+
+Client.before('create', function (client, attrs, callback) {
+  Credentials.create({ role: 'client' }, function (err, credentials) {
+    if (err) { return callback(err); }
+    client.key = credentials.key;
+    callback(null, credentials);
+  });
+});
+
+
+/**
+ * Include secret in creation result
+ */
+
+Client.before('complete', function (client, attrs, result, callback) {
+  var credentials = result.beforeCreate[0];
+  client.secret = credentials.secret;
+  callback(null);
 });
 
 
