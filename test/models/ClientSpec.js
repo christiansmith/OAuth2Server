@@ -98,7 +98,6 @@ describe('Client', function () {
       Client.backend.reset();
       Credentials.backend.reset();
       Client.create(validClient, function (err, instance) {
-        console.log('CREATION', err, instance, Client.backend)
         client = instance;
         credentials = Credentials.backend.documents[0]
         done();

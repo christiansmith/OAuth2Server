@@ -286,13 +286,17 @@ describe('User REST Routes', function () {
 
     describe('with valid request', function () {
 
+      var salt, hash;
+
       before(function (done) {
         User.backend.reset();
         User.create(validUser, function (err, instance) {
+          salt = User.backend.documents[0].salt;
+          hash = User.backend.documents[0].hash;
           request(app)
             .put('/v1/users/' + instance._id)
             .set('Authorization', 'Basic ' + new Buffer(credentials.key + ':' + credentials.secret).toString('base64'))
-            .send({ email: 'updated@example.com' })
+            .send({ email: 'updated@example.com', password: 'newsecret' })
             .end(function (error, response) {
               err = error;
               res = response;
@@ -311,6 +315,11 @@ describe('User REST Routes', function () {
 
       it('should update a user', function () {
         User.backend.documents[0].email.should.equal('updated@example.com');
+      });
+
+      it('should hash the new password', function () {
+        User.backend.documents[0].salt.should.not.equal(salt);
+        User.backend.documents[0].hash.should.not.equal(hash);
       });
 
     });

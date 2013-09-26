@@ -67,6 +67,7 @@ module.exports = function (app) {
       , attrs = req.body;
 
     Client.update(conditions, attrs, function (err, instance) {
+      console.log('UPDATED', err, instance)
       if (err) { return next(err); }
       res.json(instance);
     });

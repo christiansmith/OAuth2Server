@@ -30,12 +30,14 @@ var User = Modinha.extend('Users', null, {
  */
 
 User.before('validate', function (user, attrs, callback) {
-  if (!attrs.password) { 
+  if (!user.created && !attrs.password) { 
     return callback(new PasswordRequiredError()); 
   }
 
-  user.salt = bcrypt.genSaltSync(10);
-  user.hash = bcrypt.hashSync(attrs.password, user.salt);
+  if (attrs.password) {
+    user.salt = bcrypt.genSaltSync(10);
+    user.hash = bcrypt.hashSync(attrs.password, user.salt);    
+  }
 
   callback(null);
 });

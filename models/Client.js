@@ -42,8 +42,11 @@ Client.before('create', function (client, attrs, callback) {
  */
 
 Client.before('complete', function (client, attrs, result, callback) {
-  var credentials = result.beforeCreate[0];
-  client.secret = credentials.secret;
+  if (result.beforeCreate) {
+    var credentials = result.beforeCreate[0];
+    client.secret = credentials.secret;
+  }
+
   callback(null);
 });
 
