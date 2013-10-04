@@ -68,7 +68,7 @@ module.exports = function (app) {
 
     User.update(conditions, attrs, function (err, instance) {
       if (err) { return next(err); }
-      res.json(instance);
+      res.json(new User(instance));
     });
   });
 
