@@ -45,6 +45,11 @@ Please fork the repository if you intend to contribute. Otherwise just clone thi
 
     $ git clone https://github.com/christiansmith/OAuth2Server.git
 
+To get started experimenting, there's a script for generating sample data in your configured storage target.
+
+From the source code, run `$ node sample.js`.
+
+From a project directory, run `$ node node_modules/oauth2server/sample.js`.
 
 ## How to Participate
 
