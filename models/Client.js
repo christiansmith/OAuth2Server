@@ -13,7 +13,11 @@ var Modinha = require('modinha')
 
 var Client = Modinha.extend('Clients', null, {
   schema: {
-  	type:        { type: 'string', required: true, enum: ['confidential', 'public'] },
+  	type:        { 
+      type: 'string', 
+      required: true, 
+      enum: ['confidential', 'public', 'trusted'] 
+    },
   	name:        { type: 'string' },
   	website:     { type: 'string' },
   	description: { type: 'string' },

@@ -51,6 +51,7 @@ describe('Client', function () {
     it('should enumerate types', function () {
       Client.schema.type.enum.should.contain('confidential');
       Client.schema.type.enum.should.contain('public');
+      Client.schema.type.enum.should.contain('trusted');
     });
 
     it('should have name', function () {
