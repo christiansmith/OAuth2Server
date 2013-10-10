@@ -7,6 +7,7 @@ var cwd = process.cwd()
   , chai = require('chai')
   , User = require(path.join(cwd, 'models/User'))  
   , Resource = require(path.join(cwd, 'models/Resource'))
+  , Credentials = require(path.join(cwd, 'models/HTTPCredentials')) 
   , expect = chai.expect
   ;
 
@@ -53,9 +54,13 @@ describe('Resource', function () {
       validation.errors.scopes.attribute.should.equal('required');
     });
 
-    it('should have secret', function () {
-      Resource.schema.secret.should.be.an('object');
+    it('should have a private "key" reference to credentials', function () {
+      Resource.schema.key.private.should.equal(true);
     });
+
+//    it('should have secret', function () {
+//      Resource.schema.secret.should.be.an('object');
+//    });
 
     it('should have description', function () {
       Resource.schema.description.should.be.an('object');
@@ -66,16 +71,28 @@ describe('Resource', function () {
 
   describe('creation', function () {
 
+    var credentials;
+
     before(function (done) {
       Resource.backend.reset();
+      Credentials.backend.reset();
       Resource.create(validResource, function (err, instance) {
         resource = instance;
+        credentials = Credentials.backend.documents[0]
         done();
       });
     });
 
-    it('should generate a secret', function () {
-      resource.secret.should.be.defined;
+    it('should issue HTTP credentials', function () {
+      Credentials.backend.documents[0].role.should.equal('resource');
+    });
+
+    it('should associate credentials with the resource', function () {
+      resource.key.should.equal(Credentials.backend.documents[0].key);
+    });
+
+    it('should provide the secret with the resource', function () {
+      resource.secret.should.equal(credentials.secret)
     });
 
   });

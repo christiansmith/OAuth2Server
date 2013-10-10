@@ -78,7 +78,7 @@ describe('Client', function () {
 
     it('should have a private "key" reference to credentials', function () {
       Client.schema.key.private.should.equal(true);
-    })
+    });
 
     it('should have "created" timestamp', function () {
       Client.schema.created.should.be.an('object');
