@@ -67,6 +67,15 @@ describe('User', function () {
       validation.errors.email.attribute.should.equal('format');        
     });
 
+    it('should have a list of roles', function () {
+      User.schema.roles.type.should.equal('array');
+    });
+
+    it('should have an empty list of roles by default', function () {
+      expect(Array.isArray(user.roles)).equals(true);
+      user.roles.length.should.equal(0);
+    });
+
     it('should have salt', function () {
       User.schema.salt.type.should.equal('string');
     });

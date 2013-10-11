@@ -18,7 +18,8 @@ var User = Modinha.extend('Users', null, {
     first:    { type: 'string' },
     last:     { type: 'string' },
     username: { type: 'string' },
-    email:    { type: 'string', required: true, format: 'email' },    
+    email:    { type: 'string', required: true, format: 'email' },
+    roles:    { type: 'array', default: [] },    
     salt:     { type: 'string', private: true },
     hash:     { type: 'string', private: true }    
   }
