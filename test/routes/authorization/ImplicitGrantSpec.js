@@ -15,7 +15,14 @@ describe('implicit grant', function () {
     describe('with valid request', function () {
       
       describe('and authenticated user', function () {
-        it('should respond with an authorization prompt');
+
+        describe('authorization prompt', function () {
+          it('should show the client name');
+          it('should show requested scope descriptions');
+          it('should have an "Allow" button');
+          it('should have a "Deny" button');
+        });
+
       });
 
       describe('and unauthenticated user', function () {
