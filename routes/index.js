@@ -63,4 +63,10 @@ module.exports = function (app) {
 
   require('./user')(app);
 
+
+  /**
+   * Authentication routes
+   */
+  require('./authentication')(app);
+
 };

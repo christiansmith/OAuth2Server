@@ -26,6 +26,29 @@ module.exports = function (passport) {
       if (!credentials || credentials.secret !== secret) { return done(null, false) }
       return done(null, credentials);
     });
-  }));  
+  }));
+
+
+  /**
+   * Password Login Stratety
+   */
+
+  passport.use(new LocalStrategy({ 
+    usernameField: 'email' 
+  }, function (email, password, done) {
+    User.authenticate(email, password, function (err, user, info) {
+      return done(err, user, info);
+    });
+  }));
+
+  passport.serializeUser(function (user, done) {
+    done(null, user._id);
+  });
+
+  passport.deserializeUser(function (id, done) {
+    User.find({ _id: id }, function (err, user) {
+      done(err, user);
+    });
+  });
 
 };

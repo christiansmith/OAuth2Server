@@ -91,7 +91,7 @@ User.authenticate = function (email, password, callback) {
 
     user.verifyPassword(password, function (err, match) {
       if (match) {
-        callback(null, user, { message: 'Authenticated successfully!' });
+        callback(null, new User(user), { message: 'Authenticated successfully!' });
       } else {
         callback(null, false, { message: 'Invalid password.'});
       }

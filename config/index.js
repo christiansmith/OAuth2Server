@@ -27,9 +27,12 @@ module.exports = function (app) {
     app.use(express.cookieParser('secret'));
     app.use(express.bodyParser());
     
+    // express session
+    app.use(express.session());
+
     // passport authentication middleware
     app.use(passport.initialize());
-//    app.use(passport.session());
+    app.use(passport.session());
 
     app.use(cors());
 
