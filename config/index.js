@@ -20,8 +20,13 @@ module.exports = function (app) {
 
   app.configure(function () {
 
-    // settings
+    // default settings
     app.set('port', process.env.PORT || config.port || 3000);
+
+    // config file settings
+    Object.keys(config).forEach(function (key) {
+      app.set(key, config[key]);
+    });
 
     // request parsing
     app.use(express.cookieParser('secret'));

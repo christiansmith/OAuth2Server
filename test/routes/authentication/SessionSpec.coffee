@@ -45,20 +45,21 @@ describe 'Session', ->
         res.body.user.email.should.equal credentials.email
 
 
-#    describe 'for unauthenticated user', ->
-#
-#      before (done) ->
-#        request(app)
-#          .get('/session')
-#          .end (err, _res) ->
-#            res = _res
-#            done()     
-#
-#      it 'should respond 200', ->
-#        res.statusCode.should.eql 200
-#
-#      it 'should respond with JSON', ->
-#        res.headers['content-type'].should.include 'application/json'
-#
-#      it 'should respond with authenticated as false', -> 
-#        res.body.authenticated.should.equal false
+    describe 'for unauthenticated user', ->
+
+      before (done) ->
+        request(app)
+          .get('/session')
+          .end (error, response) ->
+            err = error
+            res = response
+            done()   
+
+      it 'should respond 200', ->
+        res.statusCode.should.eql 200
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.include 'application/json'
+
+      it 'should respond with authenticated as false', -> 
+        res.body.authenticated.should.equal false

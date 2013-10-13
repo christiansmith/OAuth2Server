@@ -3,7 +3,7 @@
  */
 
 var cwd      = process.cwd()
-  , path     = require('path')  
+  , path     = require('path')
   , passport = require('passport')
   , pkg      = require('../package.json')  
   ;
@@ -67,6 +67,13 @@ module.exports = function (app) {
   /**
    * Authentication routes
    */
-  require('./authentication')(app);
+  
+  if (app.settings['local-ui'] !== false) {
+    require('./authentication')(app);
+  }
+  //if (config['local-ui'] !== false) {
+  //  require('./authentication')(app);
+  //}
+  
 
 };
