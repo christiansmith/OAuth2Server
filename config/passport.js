@@ -47,6 +47,13 @@ module.exports = function (passport) {
 
   passport.deserializeUser(function (id, done) {
     User.find({ _id: id }, function (err, user) {
+      // https://github.com/jaredhanson/passport/issues/6#issuecomment-4857287
+      // 
+      // make sure `user` is null if not found
+      // in order to invalidate the session.
+      // This should be done at the persistence 
+      // level. 
+      if (user === undefined) { user = null; }
       done(err, user);
     });
   });
