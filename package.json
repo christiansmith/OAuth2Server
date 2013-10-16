@@ -37,6 +37,7 @@
     "modinha-json": "~0.0.4",
     "modinha-mongodb": "0.0.2",
     "async": "~0.2.9",
-    "cors": "~1.0.1"
+    "cors": "~1.0.1",
+    "oauth2ui": "0.0.2"
   }
 }

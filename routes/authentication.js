@@ -2,7 +2,8 @@
  * Module dependencies
  */
 
-var passport = require('passport')
+var path = require('path')
+  , passport = require('passport')
   , User     = require('../models/User')
   ;
 
@@ -12,6 +13,25 @@ var passport = require('passport')
  */
 
 module.exports = function (app) {
+
+  /**
+   * User interface app
+   *
+   * We assume this is a single page app 
+   * and that front-end routing with show the 
+   * correct view.
+   */
+
+  var ui = function (req, res) {
+    res.sendfile('index.html', { 
+      root: app.settings['local-ui']
+    });
+  }
+
+  app.get('/authorize', ui);
+  app.get('/signin', ui);
+  app.get('/signup', ui);
+
 
   /**
    * Password signup

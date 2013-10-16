@@ -71,9 +71,5 @@ module.exports = function (app) {
   if (app.settings['local-ui'] !== false) {
     require('./authentication')(app);
   }
-  //if (config['local-ui'] !== false) {
-  //  require('./authentication')(app);
-  //}
   
-
 };
