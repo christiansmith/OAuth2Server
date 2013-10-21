@@ -18,12 +18,13 @@ var Client = Modinha.extend('Clients', null, {
       required: true, 
       enum: ['confidential', 'public', 'trusted'] 
     },
-  	name:        { type: 'string' },
-  	website:     { type: 'string' },
-  	description: { type: 'string' },
-  	logo:        { type: 'string' },
-  	terms:       { type: 'boolean' },
-    key:         { type: 'string', private: true }
+  	name:         { type: 'string' },
+  	website:      { type: 'string' },
+  	description:  { type: 'string' },
+  	logo:         { type: 'string' },
+  	terms:        { type: 'boolean' },
+    redirect_uri: { type: 'string' },
+    key:          { type: 'string', private: true }
   }
 });
 

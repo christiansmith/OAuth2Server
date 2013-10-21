@@ -74,7 +74,9 @@ describe('Client', function () {
       Client.schema.terms.type.should.equal('boolean');
     });
 
-    it('should have redirect uris');
+    it('should have a redirect uri', function () {
+      Client.schema.redirect_uri.type.should.equal('string');
+    });
 
     it('should have a private "key" reference to credentials', function () {
       Client.schema.key.private.should.equal(true);

@@ -2,9 +2,11 @@
  * Module dependencies
  */
 
-var path = require('path')
+var path     = require('path')
+  , util     = require('util')
   , passport = require('passport')
   , User     = require('../models/User')
+  , Client   = require('../models/Client')  
   ;
 
 
@@ -22,15 +24,87 @@ module.exports = function (app) {
    * correct view.
    */
 
-  var ui = function (req, res) {
-    res.sendfile('index.html', { 
-      root: app.settings['local-ui']
+  function ui (req, res, next) {
+    if (req.is('json')) {
+      next();
+    } else {
+      res.sendfile('index.html', { 
+        root: app.settings['local-ui']
+      });
+    } 
+  };
+
+  function missingClient (req, res, next) {
+    next((!req.query.client_id)
+      ? new AuthorizationError('unauthorized_client', 'Missing client id', 403)
+      : null); 
+  };
+
+  function unknownClient (req, res, next) {
+    Client.find({ _id: req.query.client_id }, function (err, client) {
+      if (!client) { 
+        next(new AuthorizationError('unauthorized_client', 'Unknown client', 403)); 
+      } else {
+        req.client = client;
+        next();
+      }
     });
+  };
+
+  function missingResponseType (req, res, next) {
+    next((!req.query.response_type)
+      ? new AuthorizationError('invalid_request', 'Missing response type', 501)
+      : null);
+  };
+
+  function unsupportedResponseType (req, res, next) {
+    next((req.query.response_type !== 'token')
+      ? new AuthorizationError('unsupported_response_type', 'Unsupported response type', 501)
+      : null);
+  };
+
+  function missingRedirectURI (req, res, next) {
+    next((!req.query.redirect_uri)
+      ? new AuthorizationError('invalid_request', 'Missing redirect uri')
+      : null);
+  };
+
+  function mismatchingRedirectURI (req, res, next) {
+    next((req.client.redirect_uri !== req.query.redirect_uri)
+      ? new AuthorizationError('invalid_request', 'Mismatching redirect uri')
+      : null);
   }
 
-  app.get('/authorize', ui);
+  app.get('/authorize', 
+    ui, 
+    missingClient, 
+    unknownClient,
+    missingResponseType, 
+    unsupportedResponseType,
+    missingRedirectURI,
+    mismatchingRedirectURI,
+    function (req, res, next) {
+      res.json({ scope: [] });
+    });
+
   app.get('/signin', ui);
   app.get('/signup', ui);
+
+
+  /**
+   * AuthorizationError
+   */
+
+  function AuthorizationError(message, description, status) {
+    this.name = 'AuthorizationError';
+    this.message = message || 'invalid_request';
+    this.description = description;
+    this.statusCode = status || 400;
+    Error.call(this, this.message);
+    Error.captureStackTrace(this, arguments.callee);
+  }
+
+  util.inherits(AuthorizationError, Error);
 
 
   /**
