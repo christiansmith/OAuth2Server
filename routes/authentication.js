@@ -3,11 +3,8 @@
  */
 
 var path     = require('path')
-  , util     = require('util')
   , passport = require('passport')
   , User     = require('../models/User')
-  , Client   = require('../models/Client') 
-  , Scope    = require('../models/Scope') 
   ;
 
 
@@ -18,115 +15,13 @@ var path     = require('path')
 module.exports = function (app) {
 
   /**
-   * User interface app
-   *
-   * We assume this is a single page app 
-   * and that front-end routing with show the 
-   * correct view.
+   * Signin and signup routes
    */
 
-  function ui (req, res, next) {
-    if (req.is('json')) {
-      next();
-    } else {
-      res.sendfile('index.html', { 
-        root: app.settings['local-ui']
-      });
-    } 
-  };
-
-  function missingClient (req, res, next) {
-    next((!req.query.client_id)
-      ? new AuthorizationError('unauthorized_client', 'Missing client id', 403)
-      : null); 
-  };
-
-  function unknownClient (req, res, next) {
-    Client.find({ _id: req.query.client_id }, function (err, client) {
-      if (!client) { 
-        next(new AuthorizationError('unauthorized_client', 'Unknown client', 403)); 
-      } else {
-        req.client = client;
-        next();
-      }
-    });
-  };
-
-  function missingResponseType (req, res, next) {
-    next((!req.query.response_type)
-      ? new AuthorizationError('invalid_request', 'Missing response type', 501)
-      : null);
-  };
-
-  function unsupportedResponseType (req, res, next) {
-    next((req.query.response_type !== 'token')
-      ? new AuthorizationError('unsupported_response_type', 'Unsupported response type', 501)
-      : null);
-  };
-
-  function missingRedirectURI (req, res, next) {
-    next((!req.query.redirect_uri)
-      ? new AuthorizationError('invalid_request', 'Missing redirect uri')
-      : null);
-  };
-
-  function mismatchingRedirectURI (req, res, next) {
-    next((req.client.redirect_uri !== req.query.redirect_uri)
-      ? new AuthorizationError('invalid_request', 'Mismatching redirect uri')
-      : null);
-  }
-
-  function scopeDetails (req, res, next) {
-    var scope = (req.query.scope)
-              ? req.query.scope.split(' ')
-              : [];
-
-    if (scope.length > 0) {
-      Scope.get(scope, function (err, result) {
-        if (err) { return next(err); }
-        req.scope = result;
-        next();
-      });
-    } else {
-      req.scope = [];
-      next();
-    }
-  }
-
-  app.get('/authorize', 
-    ui, 
-    missingClient, 
-    unknownClient,
-    missingResponseType, 
-    unsupportedResponseType,
-    missingRedirectURI,
-    mismatchingRedirectURI,
-    scopeDetails,
-    function (req, res, next) {
-      res.json({ 
-        client: req.client, 
-        scope: req.scope
-      });
-    });
+  var ui = require('./ui')(app);
 
   app.get('/signin', ui);
   app.get('/signup', ui);
-
-
-  /**
-   * AuthorizationError
-   */
-
-  function AuthorizationError(message, description, status) {
-    this.name = 'AuthorizationError';
-    this.message = message || 'invalid_request';
-    this.description = description;
-    this.statusCode = status || 400;
-    Error.call(this, this.message);
-    Error.captureStackTrace(this, arguments.callee);
-  }
-
-  util.inherits(AuthorizationError, Error);
 
 
   /**
