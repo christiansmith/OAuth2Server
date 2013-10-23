@@ -85,6 +85,9 @@ describe('implicit grant', function () {
           res.headers['content-type'].should.contain('application/json');
         });
 
+        it('should respond with client info');
+        it('should respond with scope descriptions');
+
       });
   
       describe('with unsupported response type', function () {

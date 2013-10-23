@@ -11,6 +11,7 @@ var async       = require('async')
   , Resource    = require('./models/Resource')
   , AccessToken = require('./models/AccessToken')
   , Credentials = require('./models/HTTPCredentials')
+  , Scope       = require('./models/Scope')
   ;
 
 
@@ -47,7 +48,7 @@ async.waterfall([
       user_id: user._id,
       type: 'confidential',
       name: Faker.Company.companyName(),
-      redirect_uris: ['https://anvil.io/callback.html']
+      redirect_uri: 'someuri'
     }, function (err, client) {
       console.log('CLIENT', err || client);
       if (err) { return callback(err); }

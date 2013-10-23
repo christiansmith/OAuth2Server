@@ -6,7 +6,8 @@ var path     = require('path')
   , util     = require('util')
   , passport = require('passport')
   , User     = require('../models/User')
-  , Client   = require('../models/Client')  
+  , Client   = require('../models/Client') 
+  , Scope    = require('../models/Scope') 
   ;
 
 
@@ -75,6 +76,23 @@ module.exports = function (app) {
       : null);
   }
 
+  function scopeDetails (req, res, next) {
+    var scope = (req.query.scope)
+              ? req.query.scope.split(' ')
+              : [];
+
+    if (scope.length > 0) {
+      Scope.get(scope, function (err, result) {
+        if (err) { return next(err); }
+        req.scope = result;
+        next();
+      });
+    } else {
+      req.scope = [];
+      next();
+    }
+  }
+
   app.get('/authorize', 
     ui, 
     missingClient, 
@@ -83,8 +101,12 @@ module.exports = function (app) {
     unsupportedResponseType,
     missingRedirectURI,
     mismatchingRedirectURI,
+    scopeDetails,
     function (req, res, next) {
-      res.json({ scope: [] });
+      res.json({ 
+        client: req.client, 
+        scope: req.scope
+      });
     });
 
   app.get('/signin', ui);
