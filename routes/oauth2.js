@@ -39,6 +39,7 @@ module.exports = function (app) {
   }));
 
 
+
   /**
    * Authentication middleware
    */
@@ -72,20 +73,44 @@ module.exports = function (app) {
   });
 
 
+
+
   /**
-   * Authorize endpoint
+   * Authorization UI
    */
 
   var ui = require('./ui')(app);
 
+
+  /**
+   * Parameter lookup helper
+   */
+
+  var methodObject = { 'POST': 'body', 'GET': 'query'}
+
+
+  /**
+   * Local user authentication middleware
+   */
+
+  function authenticateUser (req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    res.send(401, 'Unauthorized');
+  };
+
+
+  /**
+   * Implicit Grant Middleware
+   */
+
   function missingClient (req, res, next) {
-    next((!req.query.client_id)
+    next((!req[methodObject[req.method]].client_id)
       ? new AuthorizationError('unauthorized_client', 'Missing client id', 403)
       : null); 
   };
 
   function unknownClient (req, res, next) {
-    Client.find({ _id: req.query.client_id }, function (err, client) {
+    Client.find({ _id: req[methodObject[req.method]].client_id }, function (err, client) {
       if (!client) { 
         next(new AuthorizationError('unauthorized_client', 'Unknown client', 403)); 
       } else {
@@ -96,25 +121,25 @@ module.exports = function (app) {
   };
 
   function missingResponseType (req, res, next) {
-    next((!req.query.response_type)
+    next((!req[methodObject[req.method]].response_type)
       ? new AuthorizationError('invalid_request', 'Missing response type', 501)
       : null);
   };
 
   function unsupportedResponseType (req, res, next) {
-    next((req.query.response_type !== 'token')
+    next((req[methodObject[req.method]].response_type !== 'token')
       ? new AuthorizationError('unsupported_response_type', 'Unsupported response type', 501)
       : null);
   };
 
   function missingRedirectURI (req, res, next) {
-    next((!req.query.redirect_uri)
+    next((!req[methodObject[req.method]].redirect_uri)
       ? new AuthorizationError('invalid_request', 'Missing redirect uri')
       : null);
   };
 
   function mismatchingRedirectURI (req, res, next) {
-    next((req.client.redirect_uri !== req.query.redirect_uri)
+    next((req.client.redirect_uri !== req[methodObject[req.method]].redirect_uri)
       ? new AuthorizationError('invalid_request', 'Mismatching redirect uri')
       : null);
   }
@@ -136,6 +161,10 @@ module.exports = function (app) {
     }
   }
 
+  /**
+   * Authorize endpoints
+   */
+
   app.get('/authorize', 
     ui, 
     missingClient, 
@@ -152,6 +181,19 @@ module.exports = function (app) {
       });
     });
   
+  app.post('/authorize', 
+    authenticateUser, 
+    missingClient,     
+    unknownClient,
+    missingResponseType,
+    unsupportedResponseType,
+    missingRedirectURI,
+    mismatchingRedirectURI,    
+    function (req, res, next) {
+      res.redirect(req.body.redirect_uri);
+    });
+
+
   /**
    * AuthorizationError
    */

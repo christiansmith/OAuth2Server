@@ -33,7 +33,7 @@ module.exports = function (passport) {
    * Password Login Stratety
    */
 
-  passport.use(new LocalStrategy({ 
+  passport.use('local', new LocalStrategy({ 
     usernameField: 'email' 
   }, function (email, password, done) {
     User.authenticate(email, password, function (err, user, info) {
