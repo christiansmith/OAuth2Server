@@ -2,13 +2,14 @@
  * Module dependencies
  */
 
-var util        = require('util')
-  , oauth2      = require('oauth2orize')
-  , passport    = require('passport')
-  , User        = require('../models/User')
-  , Client      = require('../models/Client')
-  , Scope       = require('../models/Scope')   
-  , AccessToken = require('../models/AccessToken')  
+var util           = require('util')
+  , oauth2         = require('oauth2orize')
+  , passport       = require('passport')
+  , User           = require('../models/User')
+  , Client         = require('../models/Client')
+  , Scope          = require('../models/Scope')   
+  , AccessToken    = require('../models/AccessToken')  
+  , FormUrlencoded = require('form-urlencoded')
   ;
 
 
@@ -38,6 +39,13 @@ module.exports = function (app) {
     });
   }));
 
+
+  server.grant(oauth2.grant.token(function(client, user, ares, done) {
+    AccessToken.issue(client, user, { scope: ares.scope }, function(err, accessToken) {
+      if (err) { return done(err); }
+      done(null, accessToken);
+    });
+  }));
 
 
   /**
@@ -188,9 +196,21 @@ module.exports = function (app) {
     missingResponseType,
     unsupportedResponseType,
     missingRedirectURI,
-    mismatchingRedirectURI,    
+    mismatchingRedirectURI,   
+    //server.token(),
+    //server.errorHandler(), 
     function (req, res, next) {
-      res.redirect(req.body.redirect_uri);
+      if (req.body.authorized) {
+        AccessToken.issue(req.client, req.user, { scope: '' }, function (err, token) {
+          if (err) { return next(err); }
+          res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
+        });
+
+        
+      } else {
+        res.redirect(req.body.redirect_uri + '#error=access_denied');
+      }
+      
     });
 
 

@@ -376,42 +376,96 @@ describe('implicit grant', function () {
 
     describe('when authorization granted', function () {
 
-//      before(function (done) {
-//        request(app)
-//          .post('/login')
-//          .send(credentials)
-//          .end(function (e,r) {
-//            agent.saveCookies(r);
-//            var req = request(app).post('/authorize')
-//            req.set('Content-type', 'application/json')
-//            req.send({ redirect_uri: 'https://localhost:3001/callback.html'})
-//            agent.attachCookies(req);
-//            req.end(function (error, response) {
-//              err = error;
-//              res = response;
-//              done();
-//            });
-//          });
-//      });
+      before(function (done) {
+        request(app)
+          .post('/login')
+          .send(credentials)
+          .end(function (e,r) {
+            agent.saveCookies(r);
+            var req = request(app).post('/authorize')
+            agent.attachCookies(req);
+            req.set('Content-type', 'application/json')
+            req.send({
+              authorized: true,
+              client_id: 'thirdparty',
+              response_type: 'token',                
+              redirect_uri: 'https://app.tld/callback' 
+            })
+            req.end(function (error, response) {
+              err = error;
+              res = response;
+
+              console.log(res.body)
+
+              done();
+            });
+          });
+      });
 
       it('should respond 302', function () {
-        //res.statusCode.should.equal(302);
+        res.statusCode.should.equal(302);
       });
 
       it('should redirect to the redirect uri', function () {
-        //res.headers.location.should.equal('https://localhost:3001/callback.html')
+        res.headers.location.should.contain('https://app.tld/callback');
       });
 
-      it('should respond with an access token');
-      it('should respond with a token type');
-      it('should respond with an expiration');
-      it('should respond with a scope');
+      it('should respond with an access token', function () {
+        res.headers.location.should.contain('access_token='); // can we use a regexp to match the token?
+      });
+      
+      it('should respond with a token type', function () {
+        res.headers.location.should.contain('token_type=bearer');
+      });
+      
+      it('should respond with an expiration', function () {
+        res.headers.location.should.contain('expires_in=3600');
+      });
+
+      it('should respond with a scope', function () {
+        res.headers.location.should.contain('scope=');
+      });
+      
       it('should respond with state');
     });
 
     describe('with "access denied" request', function () {
-      it('should redirect to the redirect uri');
-      it('should respond with an "access denied" error');
+
+      before(function (done) {
+        request(app)
+          .post('/login')
+          .send(credentials)
+          .end(function (e,r) {
+            agent.saveCookies(r);
+            var req = request(app).post('/authorize')
+            agent.attachCookies(req);
+            req.set('Content-type', 'application/json')
+            req.send({ 
+              authorized: false,
+              client_id: 'thirdparty',
+              response_type: 'token',                
+              redirect_uri: 'https://app.tld/callback'
+            })
+            req.end(function (error, response) {
+              err = error;
+              res = response;
+              done();
+            });
+          });
+      });
+
+      it('should respond 302', function () {
+        res.statusCode.should.equal(302);
+      });
+
+      it('should redirect to the redirect uri', function () {
+        res.headers.location.should.contain('https://app.tld/callback');
+      });
+
+      it('should respond with an "access denied" error', function () {
+        res.headers.location.should.contain('error=access_denied');
+      });
+
       it('should respond with an error description');
       it('should respond with an error uri');
       it('should respond with "state" provided by the client');  
