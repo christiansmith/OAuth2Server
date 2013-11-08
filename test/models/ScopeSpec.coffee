@@ -17,7 +17,7 @@ rclient   = redis.RedisClient.prototype
 
 
 chai.use sinonChai
-
+chai.should()
 
 
 describe 'Scope', ->

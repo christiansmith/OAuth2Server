@@ -23,10 +23,10 @@ module.exports = function (grunt) {
         compilers: ['coffee:coffee-script']
       },
       all: [
-        'test/models/**/*.js',
+        //'test/models/**/*.js',
         'test/models/**/*.coffee',
-        'test/routes/**/*.js',
-        'test/routes/**/*.coffee'
+        //'test/routes/**/*.js',
+        //'test/routes/**/*.coffee'
       ]
     }
   });

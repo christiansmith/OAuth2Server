@@ -11,11 +11,9 @@ var Modinha = require('modinha')
  * Model definition
  */
 
-var Scope = Modinha.extend('Scopes', null, {
-  schema: {
-    url:         { type: 'string', required: true, format: 'url' },
-    description: { type: 'string', required: true }
-  }
+var Scope = Modinha.define('scopes', {
+  url:         { type: 'string', required: true, format: 'url' },
+  description: { type: 'string', required: true }
 });
 
 
@@ -29,7 +27,7 @@ Scope.set = function (data, callback) {
 
   if (!validation.valid) { return callback(validation); }
 
-  client.hset('scopes', scope.url, JSON.stringify(scope), function (err) {
+  client.hset('scopes', scope.url, Scope.serialize(scope), function (err) {
     if (err) { return callback(err); }
     callback(null, scope);
   });
@@ -40,19 +38,23 @@ Scope.set = function (data, callback) {
  * Get scopes
  */
 
-Scope.get = function (urls, callback) {
-  client.hmget('scopes', urls, function (err, scopes) {
+Scope.get = function (ids, options, callback) {
+  var Constructor = this;
+
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
+
+  if (typeof ids === 'string') { 
+    options.first = true;
+  }
+
+  options.nullify = true;
+
+  client.hmget(Constructor.collection, ids, function (err, result) {
     if (err) { return callback(err); }
-
-    scopes = scopes.map(function (scope) {
-      return JSON.parse(scope);
-    });
-
-    if (typeof urls === 'string' && scopes.length === 1) {
-      scopes = scopes[0]
-    }
-
-    callback(null, scopes);
+    callback(null, Constructor.initialize(result, options));
   });
 }
 

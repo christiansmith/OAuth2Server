@@ -196,9 +196,7 @@ module.exports = function (app) {
     missingResponseType,
     unsupportedResponseType,
     missingRedirectURI,
-    mismatchingRedirectURI,   
-    //server.token(),
-    //server.errorHandler(), 
+    mismatchingRedirectURI,  
     function (req, res, next) {
       if (req.body.authorized) {
         AccessToken.issue(req.client, req.user, { scope: '' }, function (err, token) {
