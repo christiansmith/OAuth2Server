@@ -20,7 +20,7 @@ var redis         = require('redis')
 var Account = Modinha.define('accounts', {
   _id:      { type: 'string', default: uuid, format: 'uuid' },
   name:     { type: 'string' }, 
-  email:    { type: 'string', required: true, format: 'email' },
+  email:    { type: 'string', required: true, unique: true, format: 'email' },
   roles:    { type: 'array',  default: [] },
   hash:     { type: 'string', private: true },
   created:  { type: 'number' }, 
@@ -91,26 +91,6 @@ Account.create = function (data, callback) {
 
 
 /**
- * Find by email
- */
-
-Account.findByEmail = function (email, options, callback) {
-  if (!callback) {
-    callback = options;
-    options = {};
-  }
-
-  client.hget(this.collection + ':email', email, function (err, id) {
-    if (err) { return callback(err); }
-    Account.get(id, options, function (err, account) {
-      if (err) { return callback(err); }
-      callback(null, account);
-    });
-  });
-};
-
-
-/**
  * Verify password
  */
 
@@ -125,7 +105,7 @@ Account.prototype.verifyPassword = function (password, callback) {
  */
 
 Account.authenticate = function (email, password, callback) {
-  Account.findByEmail(email, { private: true}, function (err, account) {
+  Account.findByEmail(email, { private: true }, function (err, account) {
     if (!account) { 
       return callback(null, false, { message: 'Unknown account.' });
     }

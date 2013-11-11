@@ -37,7 +37,9 @@ describe 'RedisDocument', ->
 
   validDocument =
     description: 'about'
-    secondary:   'indexed'
+    unique:      'indexed'
+    secondary:   'value'
+    reference:   '123'
     secret:      'fact'
 
 
@@ -45,10 +47,12 @@ describe 'RedisDocument', ->
 
   before ->
     schema =
-      _id:         { type: 'string', required: true, default: Modinha.defaults.uuid },
-      description: { type: 'string', required: true },
-      secondary:   { type: 'string', index: 'secondary' },
-      secret:      { type: 'string', private: true }  
+      _id:         { type: 'string', required:  true, default: Modinha.defaults.uuid },
+      description: { type: 'string', required:  true },
+      unique:      { type: 'string', unique:    true },
+      secret:      { type: 'string', private:   true },
+      secondary:   { type: 'string', secondary: true } 
+      reference:   { type: 'string', references: { collection: 'references'} }  
 
     Document = Modinha.define 'documents', schema  
     Document.extend RedisDocument
@@ -90,15 +94,29 @@ describe 'RedisDocument', ->
           Document.initialize.restore()
           done()
 
-      it 'should store the instance in a hash by _id as JSON', ->
+      it 'should store the instance by unique identifier', ->
         multi.hset.should.have.been.calledWith 'documents', instance._id, Document.serialize(instance)
 
-      it 'should add _id to a primary index', ->
-        multi.zadd.should.have.been.calledWith 'documents:_id', instance.timestamp, instance._id
+      it 'should index unique identifier', ->
+        multi.zadd.should.have.been.calledWith 'documents:_id', instance.created, instance._id
 
-      it 'should add _id to a secondary index for each indexed attribute', ->
-        multi.hset.should.have.been.calledWith 'documents:secondary', instance.secondary, instance._id
+      it 'should index unique schema properties', ->
+        multi.hset.should.have.been.calledWith 'documents:unique', instance.unique, instance._id
 
+      it 'should index secondary properties', ->
+        multi.zadd.should.have.been.calledWith 'documents:secondary:value', instance.created, instance._id
+
+      it 'should index referenced objects', ->
+        multi.zadd.should.have.been.calledWith 'references:123:documents', instance.created, instance._id
+
+
+    describe 'with duplicate unique values', ->
+
+      it 'should check for existing documents'
+
+      it 'should provide an error'
+      
+      it 'should not provide an instance'
 
 
     describe 'with invalid data', ->
@@ -344,6 +362,69 @@ describe 'RedisDocument', ->
             done()
 
 
+      describe 'by unique value index', ->
+
+        before (done) ->
+          document = new Document validDocument
+
+          sinon.stub(rclient, 'hget')
+            .callsArgWith 2, null, document._id
+          sinon.stub(rclient, 'hmget')
+            .callsArgWith 2, null, JSON.stringify(document)
+
+          Document.findByUnique document._id, (error, result) ->
+            err = error
+            instance = result
+            done()
+
+        after ->
+          rclient.hmget.restore()
+          rclient.hget.restore()
+
+        it 'should provide a null error', ->
+          expect(err).to.be.null
+
+        it 'should provide an instance', ->
+          expect(instance).to.be.instanceof Document
+
+
+
+      describe 'by secondary index', ->
+
+        before (done) ->
+          doc1 = new Document validDocument
+          doc2 = new Document validDocument
+          docs = [JSON.stringify(doc1), JSON.stringify(doc2)]
+          ids  = [doc2._id, doc1._id]
+
+          sinon.stub(rclient, 'zrevrange')
+            .callsArgWith 3, null, ids
+          sinon.stub(rclient, 'hmget')
+            .callsArgWith 2, null, docs
+
+          Document.findBySecondary 'value', (error, results) ->
+            err = error
+            instances = results
+            done()
+
+        after ->
+          rclient.zrevrange.restore()
+          rclient.hmget.restore()        
+
+        it 'should provide a null error', ->
+          expect(err).to.be.null
+
+        it 'should provide instances', ->
+          instances.forEach (instance) ->
+            expect(instance).to.be.instanceof Document
+
+
+      describe 'by referenced object index', ->
+
+
+
+
+
 
 
 
@@ -379,7 +460,29 @@ describe 'RedisDocument', ->
 
 
     describe 'with unknown instance', ->
+
+
     describe 'with invalid data', ->
+    
+      beforeEach (done) ->
+        sinon.stub(Document, 'get')
+          .callsArgWith(1, null, Document.initialize(validDocument))
+
+        Document.update { description: null }, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      afterEach -> 
+        Document.get.restore()
+
+      it 'should provide a ValidationError', ->
+        err.should.be.instanceof Modinha.ValidationError
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.undefined
+
+
     describe 'with private option', ->
 
 
@@ -403,6 +506,6 @@ describe 'RedisDocument', ->
 
       it 'should remove the instance identifier from indexes'
 
-
+      it 'should remove keys from unique indexes'
 
 

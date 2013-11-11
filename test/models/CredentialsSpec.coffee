@@ -105,7 +105,7 @@ describe 'Credentials', ->
         multi.hset.should.have.been.calledWith 'credentials', credentials.key, Credentials.serialize(credentials)
 
       it 'should add key to a primary index', ->
-        multi.zadd.should.have.been.calledWith 'credentials:key', credentials.timestamp, credentials.key
+        multi.zadd.should.have.been.calledWith 'credentials:key', credentials.created, credentials.key
 
 
 

@@ -37,16 +37,40 @@ RedisDocument.create = function (data, callback) {
 
   // batch operations
   var multi = client.multi();
+
+  // store the instance
   multi.hset(collection, instance[uniqueId], Model.serialize(instance));
-  multi.zadd(collection + ':' + uniqueId, instance.timestamp, instance[uniqueId]);
+
+  // index the unique identifier
+  multi.zadd(collection + ':' + uniqueId, instance.created, instance[uniqueId]);
 
   // generate index meta data once when the 
   // model is defined, instead of here
   var keys = Object.keys(schema);
   keys.forEach(function (key) {
-    if (schema[key].index === 'secondary') {
+    var property = schema[key];
+
+    // unique index
+    if (property.unique) {
       multi.hset(collection + ':' + key, instance[key], instance[uniqueId]);
     }
+
+    // secondary index
+    if (property.secondary) {
+      multi.zadd(collection + ':' + key + ':' + instance[key], timestamp, instance[uniqueId])
+    }
+
+
+    // referenced object index
+    if (property.references) {
+      var index = property.references.collection;
+      index += ':'
+      index += instance[key]
+      index += ':'
+      index += collection
+      multi.zadd(index, timestamp, instance[uniqueId]);
+    }
+
   });
 
   multi.exec(function (err, result) {
@@ -145,8 +169,24 @@ RedisDocument.find = function (options, callback) {
   });
 };
 
+
 /**
  * Update
+ *
+ * Questions:
+ *
+ * 1. What guarantees should this method provide?
+ * 2. Should we bother looking up the instance and mutating?
+ *    Or should we assume we have a complete object and just write?
+ *    - overwriting would defeat the purpose of maintaining two timestamps,
+ *      but do we really need them in general?
+ * 3. Should we provide two methods for this?
+ *    Is CRUD even the right thing to be doing?
+ *    Maybe this should be closer to key/value semantics
+ * 4. How do we deal with updating affected indexes?
+ * 5. If the index is a sorted set, do we change the score? 
+ *    (reindex modified or created timestamp)
+ * 6. Exposed as a REST resource, should we have both PUT and PATCH to differentiate?
  */
 
 RedisDocument.update = function (data, callback) {
@@ -159,7 +199,13 @@ RedisDocument.update = function (data, callback) {
     if (err) { return callback(err); }
 
     // what if the instance is not found?
+    
+    // merge the new values into the instance
     instance.merge(data);
+
+    // validate the mutated instance
+    var validation = instance.validate();
+    if (!validation.valid) { return callback(validation); }
 
     client.multi()
       .hset(collection, instance[uniqueId], Model.serialize(instance))
@@ -173,6 +219,9 @@ RedisDocument.update = function (data, callback) {
 
 /**
  * Destroy
+ *
+ * Questions: 
+ * 1. how do we deal with indexes?
  */
 
 RedisDocument.destroy = function (id, callback) {
@@ -183,6 +232,87 @@ RedisDocument.destroy = function (id, callback) {
       callback(null);
     });
 };
+
+
+/**
+ * Post Extend
+ */
+
+RedisDocument.__postExtend = function () {
+  var Model = this
+    , collection = Model.collection
+    , schema = Model.schema
+    ;
+
+  Object.keys(schema).forEach(function (key) {
+    var property = schema[key];
+
+    // add a findByUnique method
+    if (property.unique) {
+      var method = 'findBy' + key.charAt(0).toUpperCase() + key.slice(1);
+      Model[method] = findByUnique(collection, key);
+    }
+
+    // add a findBySecondary method
+    if (property.secondary) {
+      var method = 'findBy' + key.charAt(0).toUpperCase() + key.slice(1);
+      Model[method] = findBySecondary(collection, key);
+    }
+  
+    // add a findReferencedObject method
+    if (property.references) {
+
+    }
+
+  });
+};
+
+
+/**
+ * Return a method to find documents by unique index
+ */
+
+function findByUnique (collection, key) {
+  var index = collection + ':' + key;
+
+  return function (value, options, callback) {
+    var Model = this;
+
+    if (!callback) {
+      callback = options;
+      options = {};
+    }
+
+    client.hget(index, value, function (err, id) {
+      if (err) { return callback(err); }
+    
+      Model.get(id, options, function (err, instance) {
+        if (err) { return callback(err); }
+        callback(null, instance);
+      });
+    });
+
+  };
+
+};
+
+
+/**
+ * Return a method to find documents by secondary index
+ */
+
+function findBySecondary (collection, key) {
+  return function (value, callback) {
+    var Model = this
+      , index = collection + ':' + key + ':' + value
+      ;
+
+    Model.find({ index: index }, function (err, instances) {
+      if (err) { return callback(err); }
+      callback(null, instances);
+    })
+  }
+}
 
 
 /**

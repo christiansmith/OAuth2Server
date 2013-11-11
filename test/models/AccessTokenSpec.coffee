@@ -128,7 +128,7 @@ describe 'AccessToken', ->
         multi.hset.should.have.been.calledWith 'tokens', token.accessToken, AccessToken.serialize(token)
 
       it 'should add accessToken to a primary index', ->
-        multi.zadd.should.have.been.calledWith 'tokens:accessToken', token.timestamp, token.accessToken
+        multi.zadd.should.have.been.calledWith 'tokens:accessToken', token.created, token.accessToken
 
 
     describe 'with invalid data', ->
@@ -168,7 +168,7 @@ describe 'AccessToken', ->
 
     it 'should store the token', ->
       multi.hset.should.have.been.calledWith 'tokens', token.accessToken, AccessToken.serialize(token)
-      multi.zadd.should.have.been.calledWith 'tokens:accessToken', token.timestamp, token.accessToken
+      multi.zadd.should.have.been.calledWith 'tokens:accessToken', token.created, token.accessToken
 
     it 'should set the app id', ->
       token.appId.should.equal 'app'
