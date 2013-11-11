@@ -71,6 +71,16 @@ describe 'RedisDocument', ->
 
 
 
+  describe 'schema', ->
+
+    it 'should have "created" timestamp', ->
+      Document.schema.created.default.should.equal Modinha.defaults.timestamp
+
+    it 'should have "modified" timestamp', ->
+      Document.schema.modified.default.should.equal Modinha.defaults.timestamp
+
+
+
   describe 'creation', ->
 
     describe 'with valid data', ->

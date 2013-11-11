@@ -265,6 +265,11 @@ RedisDocument.__postExtend = function () {
     }
 
   });
+
+  // add timestamps to schema
+  var timestamp = { type: 'number', default: Model.defaults.timestamp }
+  if (!schema.created) { schema.created = timestamp; }
+  if (!schema.modified) { schema.modified = timestamp; }
 };
 
 
