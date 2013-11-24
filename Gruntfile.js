@@ -11,7 +11,6 @@ module.exports = function (grunt) {
           'config/**/*.js',
           'models/**/*.js',
           'routes/**/*.js',
-          'test/**/*.js',
           'test/**/*.coffee'
         ],
         tasks: ['mochacov']
@@ -19,14 +18,12 @@ module.exports = function (grunt) {
     },
     mochacov: {
       options: {
-        reporter: 'spec',
+        reporter: 'dot',
         compilers: ['coffee:coffee-script']
       },
       all: [
-        //'test/models/**/*.js',
         'test/models/**/*.coffee',
-        //'test/routes/**/*.js',
-        //'test/routes/**/*.coffee'
+        'test/routes/**/*.coffee'
       ]
     }
   });

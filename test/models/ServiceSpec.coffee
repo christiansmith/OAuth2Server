@@ -19,25 +19,25 @@ chai.should()
 
 # Code under test
 Modinha     = require 'modinha'
-App         = require path.join(cwd, 'models/App')
+Service     = require path.join(cwd, 'models/Service')
 Credentials = require path.join(cwd, 'models/Credentials')
 
 
 
 
 # Redis lib for spying and stubbing
-redis   = App.__redis
-client  = App.__client
+redis   = Service.__redis
+client  = Service.__client
 multi   = redis.Multi.prototype
 rclient = redis.RedisClient.prototype
 
 
 
 
-describe 'App', ->
+describe 'Service', ->
 
 
-  {data,app,apps,jsonApps,credentials} = {}
+  {data,service,services,jsonServices,credentials} = {}
   {err,validation,instance,instances,update,deleted,original,ids} = {}
   
 
@@ -48,15 +48,14 @@ describe 'App', ->
 
     for i in [0..9]
       data.push
-        type: 'confidential'
-        name: 'ThirdPartyApp'
-        key: Faker.random.number(10).toString()
-        redirect_uri: "https://#{Faker.Internet.domainName()}/callback"
+        uri: "https://#{Faker.Internet.domainName()}"
+        key: Faker.random.number(100).toString()
+        description: Faker.Lorem.words(5).join(' ')
 
-    apps = App.initialize(data, { private: true })
-    jsonApps = apps.map (d) -> 
-      App.serialize(d)
-    ids = apps.map (d) ->
+    services = Service.initialize(data, { private: true })
+    jsonServices = services.map (d) -> 
+      Service.serialize(d)
+    ids = services.map (d) ->
       d._id
 
 
@@ -65,52 +64,31 @@ describe 'App', ->
   describe 'schema', ->
 
     before ->
-      app = new App
-      validation = app.validate()
+      service = new Service
+      validation = service.validate()
 
     it 'should have unique identifier', ->
-      App.schema[App.uniqueId].should.be.an.object
+      Service.schema[Service.uniqueId].should.be.an.object
 
     it 'should generate a uuid for unique id', ->
-      App.schema._id.default.should.equal Modinha.defaults.uuid
+      Service.schema._id.default.should.equal Modinha.defaults.uuid
 
-    it 'should require type', ->
-      validation.errors.type.attribute.should.equal 'required'
+    it 'should require uri', ->
+      validation.errors.uri.attribute.should.equal 'required'
 
-    it 'should enumerate types', ->
-      App.schema.type.enum.should.contain 'confidential'
-      App.schema.type.enum.should.contain 'public'
-      App.schema.type.enum.should.contain 'trusted'
+    it 'should have scope'
 
-    it 'should have name', ->
-      App.schema.name.type.should.be.a.string
+    it 'should have private key reference to credentials', ->
+      Service.schema.key.private.should.be.true
 
-    it 'should have website', ->
-      App.schema.website.type.should.be.a.string
-
-    it 'should have description', ->
-      App.schema.description.type.should.be.a.string
-
-    it 'should have logo image', ->
-      App.schema.logo.type.should.be.a.string
-
-    it 'should have terms accepted', ->
-      App.schema.terms.type.should.be.boolean
-
-    it 'should have redirect uri', ->
-      App.schema.redirect_uri.type.should.be.a.string
-
-    it 'should have reference to credentials', ->
-      App.schema.key.should.be.a.string
-
-    it 'should protect reference to credentials as private', ->
-      App.schema.key.private.should.be.true
+    it 'should have a description', ->
+      Service.schema.description.type.should.equal 'string'
 
     it 'should have "created" timestamp', ->
-      App.schema.created.default.should.equal Modinha.defaults.timestamp
+      Service.schema.created.default.should.equal Modinha.defaults.timestamp
 
     it 'should have "modified" timestamp', ->
-      App.schema.modified.default.should.equal Modinha.defaults.timestamp
+      Service.schema.modified.default.should.equal Modinha.defaults.timestamp
 
 
 
@@ -121,8 +99,8 @@ describe 'App', ->
 
       before (done) ->
         sinon.stub(rclient, 'zrevrange').callsArgWith 3, null, ids
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonApps
-        App.list (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonServices
+        Service.list (error, results) ->
           err = error
           instances = results
           done()
@@ -132,7 +110,7 @@ describe 'App', ->
         rclient.zrevrange.restore()
 
       it 'should query the created index', ->
-        rclient.zrevrange.should.have.been.calledWith 'apps:created', 0, 49  
+        rclient.zrevrange.should.have.been.calledWith 'services:created', 0, 49  
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -140,7 +118,7 @@ describe 'App', ->
       it 'should provide a list of instances', ->
         instances.length.should.equal 10
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof App
+          expect(instance).to.be.instanceof Service
 
       it 'should not initialize private properties', ->
         instances.forEach (instance) ->
@@ -154,8 +132,8 @@ describe 'App', ->
 
       before (done) ->
         sinon.stub(rclient, 'zrevrange').callsArgWith 3, null, ids
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonApps
-        App.list { index: 'apps:secondary:value' }, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonServices
+        Service.list { index: 'services:secondary:value' }, (error, results) ->
           err = error
           instances = results
           done()
@@ -165,7 +143,7 @@ describe 'App', ->
         rclient.zrevrange.restore()
 
       it 'should query the provided index', ->
-        rclient.zrevrange.should.have.been.calledWith 'apps:secondary:value'
+        rclient.zrevrange.should.have.been.calledWith 'services:secondary:value'
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -173,7 +151,7 @@ describe 'App', ->
       it 'should provide a list of instances', ->
         instances.length.should.equal 10      
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof App
+          expect(instance).to.be.instanceof Service
 
       it 'should not initialize private properties', ->
         instances.forEach (instance) ->
@@ -184,8 +162,8 @@ describe 'App', ->
 
       before (done) ->
         sinon.stub(rclient, 'zrevrange').callsArgWith 3, null, ids
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonApps
-        App.list { page: 2, size: 3 }, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonServices
+        Service.list { page: 2, size: 3 }, (error, results) ->
           err = error
           instances = results
           done()
@@ -195,7 +173,7 @@ describe 'App', ->
         rclient.zrevrange.restore()
 
       it 'should retrieve a range of values', ->
-        rclient.zrevrange.should.have.been.calledWith 'apps:created', 3, 5
+        rclient.zrevrange.should.have.been.calledWith 'services:created', 3, 5
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -203,14 +181,14 @@ describe 'App', ->
       it 'should provide a list of instances', ->
         instances.length.should.equal 10        
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof App
+          expect(instance).to.be.instanceof Service
 
 
     describe 'with no results', ->
 
       before (done) ->
         sinon.stub(rclient, 'zrevrange').callsArgWith(3, null, [])
-        App.list { page: 2, size: 3 }, (error, results) ->
+        Service.list { page: 2, size: 3 }, (error, results) ->
           err = error
           instances = results
           done()
@@ -230,8 +208,8 @@ describe 'App', ->
 
       before (done) ->
         sinon.stub(rclient, 'zrevrange').callsArgWith 3, null, ids
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonApps
-        App.list { private: true }, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonServices
+        Service.list { private: true }, (error, results) ->
           err = error
           instances = results
           done()
@@ -246,7 +224,7 @@ describe 'App', ->
       it 'should provide a list of instances', ->
         instances.length.should.equal 10
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof App
+          expect(instance).to.be.instanceof Service
 
       it 'should intialize private properties', ->
         instances.forEach (instance) ->
@@ -260,10 +238,10 @@ describe 'App', ->
     describe 'by string', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
         sinon.stub(rclient, 'hmget').callsArgWith 2, null, [json]
-        App.get app._id, (error, result) ->
+        Service.get service._id, (error, result) ->
           err = error
           instance = result
           done()
@@ -275,7 +253,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide an instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should not initialize private properties', ->
         expect(instance.key).to.be.undefined
@@ -284,7 +262,7 @@ describe 'App', ->
     describe 'by string not found', ->
 
       before (done) ->
-        App.get 'unknown', (error, result) ->
+        Service.get 'unknown', (error, result) ->
           err = error
           instance = result
           done()
@@ -299,8 +277,8 @@ describe 'App', ->
     describe 'by array', ->
 
       before (done) ->
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonApps
-        App.get ids, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonServices
+        Service.get ids, (error, results) ->
           err = error
           instances = results
           done()
@@ -314,7 +292,7 @@ describe 'App', ->
       it 'should provide a list of instances', ->
         instances.length.should.equal 10        
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof App
+          expect(instance).to.be.instanceof Service
 
       it 'should not initialize private properties', ->
         instances.forEach (instance) ->
@@ -331,7 +309,7 @@ describe 'App', ->
     describe 'with empty array', ->
 
       before (done) ->
-        App.get [], (error, results) ->
+        Service.get [], (error, results) ->
           err = error
           instances = results
           done()
@@ -347,10 +325,10 @@ describe 'App', ->
     describe 'with private option', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
         sinon.stub(rclient, 'hmget').callsArgWith 2, null, [json]
-        App.get app._id, { private: true }, (error, result) ->
+        Service.get service._id, { private: true }, (error, result) ->
           err = error
           instance = result
           done()
@@ -362,7 +340,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide an instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should not initialize private properties', ->
         instance.key.should.be.defined
@@ -376,14 +354,14 @@ describe 'App', ->
     describe 'with valid data', ->
 
       beforeEach (done) ->
-        credentials = new Credentials role: 'app'
+        credentials = new Credentials role: 'service'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
-        sinon.spy App, 'index'
-        sinon.stub(App, 'enforceUnique').callsArgWith(1, null)
+        sinon.spy Service, 'index'
+        sinon.stub(Service, 'enforceUnique').callsArgWith(1, null)
         sinon.stub(Credentials, 'insert').callsArgWith(1, null, credentials)
 
-        App.insert data[0], (error, result) ->
+        Service.insert data[0], (error, result) ->
           err = error
           instance = result
           done()
@@ -391,33 +369,33 @@ describe 'App', ->
       afterEach ->
         multi.hset.restore()
         multi.zadd.restore()
-        App.index.restore()
-        App.enforceUnique.restore()
+        Service.index.restore()
+        Service.enforceUnique.restore()
         Credentials.insert.restore()
 
       it 'should provide a null error', ->
         expect(err).to.be.null
 
       it 'should provide the inserted instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should store the serialized instance by unique id', ->
-        multi.hset.should.have.been.calledWith 'apps', instance._id, sinon.match('"redirect_uri":"' + instance.redirect_uri)
+        multi.hset.should.have.been.calledWith 'services', instance._id, sinon.match('"uri":"' + instance.uri)
 
       it 'should index the instance', ->
-        App.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
+        Service.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
       it 'should issue credentials', ->
-        Credentials.insert.should.have.been.calledWith { role: 'app' }
+        Credentials.insert.should.have.been.calledWith { role: 'service' }
 
-      it 'should associate credentials with app', ->
+      it 'should associate credentials with service', ->
         instance.key.should.be.a.string
 
       it 'should provide the secret with the created instance', ->
         instance.secret.should.be.a.string
 
       it 'should not store the secret', ->
-        multi.hset.should.not.have.been.calledWith 'apps', instance._id, sinon.match('"secret":"' + instance.secret + '"')
+        multi.hset.should.not.have.been.calledWith 'services', instance._id, sinon.match('"secret":"' + instance.secret + '"')
 
 
     describe 'with invalid data', ->
@@ -425,9 +403,9 @@ describe 'App', ->
       before (done) ->
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
-        sinon.spy App, 'index'
+        sinon.spy Service, 'index'
 
-        App.insert {}, (error, result) ->
+        Service.insert {}, (error, result) ->
           err = error
           instance = result
           done()
@@ -435,7 +413,7 @@ describe 'App', ->
       after ->
         multi.hset.restore()
         multi.zadd.restore() 
-        App.index.restore()   
+        Service.index.restore()   
 
       it 'should provide a validation error', ->
         err.should.be.instanceof Modinha.ValidationError
@@ -447,7 +425,7 @@ describe 'App', ->
         multi.hset.should.not.have.been.called
 
       it 'should not index the data', ->
-        App.index.should.not.have.been.called
+        Service.index.should.not.have.been.called
 
 
     describe 'with private values option', ->
@@ -455,10 +433,10 @@ describe 'App', ->
       beforeEach (done) ->
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
-        sinon.spy App, 'index'
-        sinon.stub(App, 'enforceUnique').callsArgWith(2, null)
+        sinon.spy Service, 'index'
+        sinon.stub(Service, 'enforceUnique').callsArgWith(2, null)
 
-        App.insert data[0], { private: true }, (error, result) ->
+        Service.insert data[0], { private: true }, (error, result) ->
           err = error
           instance = result
           done()
@@ -466,14 +444,14 @@ describe 'App', ->
       afterEach ->
         multi.hset.restore()
         multi.zadd.restore()
-        App.index.restore()
-        App.enforceUnique.restore()
+        Service.index.restore()
+        Service.enforceUnique.restore()
 
       it 'should provide a null error', ->
         expect(err).to.be.null
 
       it 'should provide the inserted instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should provide private properties', ->
         instance.key.should.be.defined
@@ -486,28 +464,27 @@ describe 'App', ->
     describe 'with valid data', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
-        sinon.spy App, 'reindex'
+        sinon.spy Service, 'reindex'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
         update =
-          _id: app._id
-          type: 'public'
-          redirect_uri: "https://#{Faker.Internet.domainName()}"
-          key: app.key
+          _id: service._id
+          uri: "https://#{Faker.Internet.domainName()}"
+          description: 'updated'
 
-        App.replace app._id, update, (error, result) ->
+        Service.replace service._id, update, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
         rclient.hmget.restore()
-        App.reindex.restore()
+        Service.reindex.restore()
         multi.hset.restore()
         multi.zadd.restore()
 
@@ -515,24 +492,24 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide the replaced instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should not provide private properties', ->
         expect(instance.secret).to.be.undefined
 
       it 'should replace the existing instance', ->
-        expect(instance.type).to.equal 'public'
+        expect(instance.description).to.equal 'updated'
 
       it 'should reindex the instance', ->
-        App.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), App.initialize(app)
+        Service.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), Service.initialize(service)
 
 
     describe 'with invalid data', ->
 
       before (done) ->
-        app = apps[0]
+        service = services[0]
 
-        App.replace app._id, { type: -1 }, (error, result) ->
+        Service.replace service._id, { description: -1 }, (error, result) ->
           err = error
           instance = result
           done()
@@ -547,27 +524,28 @@ describe 'App', ->
     describe 'with private values option', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
-        sinon.spy App, 'reindex'
+        sinon.spy Service, 'reindex'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
         update =
-          _id: app._id
-          type: 'trusted'
+          _id: service._id
+          uri: "https://#{Faker.Internet.domainName()}"
+          description: 'updated'
           key: 'updatedkey'
 
-        App.replace app._id, update, { private: true }, (error, result) ->
+        Service.replace service._id, update, { private: true }, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
         rclient.hmget.restore()
-        App.reindex.restore()
+        Service.reindex.restore()
         multi.hset.restore()
         multi.zadd.restore()
 
@@ -575,7 +553,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide the replaced instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should provide private properties', ->
         expect(instance.key).to.equal 'updatedkey'
@@ -588,27 +566,27 @@ describe 'App', ->
     describe 'with valid data', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
-        sinon.spy App, 'reindex'
+        sinon.spy Service, 'reindex'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
         update =
-          _id: app._id
-          type: 'trusted'
+          _id: service._id
+          description: 'updated'
 
 
-        App.patch app._id, update, (error, result) ->
+        Service.patch service._id, update, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
         rclient.hmget.restore()
-        App.reindex.restore()
+        Service.reindex.restore()
         multi.hset.restore()
         multi.zadd.restore()
 
@@ -616,29 +594,29 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide the patched instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should not provide private properties', ->
         expect(instance.key).to.be.undefined
 
       it 'should overwrite the stored data', ->
-        multi.hset.should.have.been.calledWith 'apps', instance._id, sinon.match('"type":"trusted"')
+        multi.hset.should.have.been.calledWith 'services', instance._id, sinon.match('"description":"updated"')
 
       it 'should reindex the instance', ->
-        App.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(app)
+        Service.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(service)
 
 
     describe 'with invalid data', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
-        App.patch app._id, { type: -1 }, (error, result) ->
+        Service.patch service._id, { description: -1 }, (error, result) ->
           err = error
           instance = result
           done()
@@ -658,26 +636,26 @@ describe 'App', ->
     describe 'with private values option', ->
 
       before (done) ->
-        app = apps[0]
-        json = jsonApps[0]
+        service = services[0]
+        json = jsonServices[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
-        sinon.spy App, 'reindex'
+        sinon.spy Service, 'reindex'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
         update =
-          _id: app._id
+          _id: service._id
           description: 'updated'
 
-        App.patch app._id, update, { private:true }, (error, result) ->
+        Service.patch service._id, update, { private:true }, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
         rclient.hmget.restore()
-        App.reindex.restore()
+        Service.reindex.restore()
         multi.hset.restore()
         multi.zadd.restore()
 
@@ -685,7 +663,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide the replaced instance', ->
-        expect(instance).to.be.instanceof App
+        expect(instance).to.be.instanceof Service
 
       it 'should provide private properties', ->
         instance.key.should.be.a.string
@@ -698,18 +676,18 @@ describe 'App', ->
     describe 'by string', ->
 
       before (done) ->
-        instance = apps[0]
-        sinon.spy App, 'deindex'
+        instance = services[0]
+        sinon.spy Service, 'deindex'
         sinon.spy multi, 'hdel'
-        sinon.stub(App, 'get').callsArgWith(2, null, instance)
-        App.delete instance._id, (error, result) ->
+        sinon.stub(Service, 'get').callsArgWith(2, null, instance)
+        Service.delete instance._id, (error, result) ->
           err = error
           deleted = result
           done()
 
       after ->
-        App.deindex.restore()
-        App.get.restore()
+        Service.deindex.restore()
+        Service.get.restore()
         multi.hdel.restore()
 
       it 'should provide a null error', ->
@@ -719,26 +697,26 @@ describe 'App', ->
         deleted.should.be.true
 
       it 'should remove the stored instance', ->
-        multi.hdel.should.have.been.calledWith 'apps', instance._id
+        multi.hdel.should.have.been.calledWith 'services', instance._id
 
       it 'should deindex the instance', ->
-        App.deindex.should.have.been.calledWith sinon.match.object, sinon.match(instance)
+        Service.deindex.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
 
     describe 'by array', ->
 
       beforeEach (done) ->
-        sinon.spy App, 'deindex'
+        sinon.spy Service, 'deindex'
         sinon.spy multi, 'hdel'
-        sinon.stub(App, 'get').callsArgWith(2, null, apps)
-        App.delete ids, (error, result) ->
+        sinon.stub(Service, 'get').callsArgWith(2, null, services)
+        Service.delete ids, (error, result) ->
           err = error
           deleted = result
           done()
 
       afterEach ->
-        App.deindex.restore()
-        App.get.restore()
+        Service.deindex.restore()
+        Service.get.restore()
         multi.hdel.restore()
 
       it 'should provide a null error', ->
@@ -748,11 +726,11 @@ describe 'App', ->
         deleted.should.be.true
 
       it 'should remove each stored instance', ->
-        multi.hdel.should.have.been.calledWith 'apps', ids
+        multi.hdel.should.have.been.calledWith 'services', ids
 
       it 'should deindex each instance', ->
-        apps.forEach (doc) ->
-          App.deindex.should.have.been.calledWith sinon.match.object, doc
+        services.forEach (doc) ->
+          Service.deindex.should.have.been.calledWith sinon.match.object, doc
 
 
 

@@ -1,0 +1,98 @@
+/**
+ * Module dependencies
+ */
+
+var passport      = require('passport')
+  , Account       = require('../../models/Account')
+  , NotFoundError = require('../../errors/NotFoundError')
+  ;
+
+
+/**
+ * Exports
+ */
+
+module.exports = function (app) {
+
+  /**
+   * Authentication middleware
+   */
+
+  var authenticate = passport.authenticate('basic', { 
+    session: false 
+  });
+  
+
+  /**
+   * GET /v1/accounts
+   */
+
+  app.get('/v1/accounts', authenticate, function (req, res, next) {
+    Account.list(function (err, instances) {
+      if (err) { return next(err); }
+      res.json(instances);        
+    });
+  });
+
+
+  /**
+   * GET /v1/accounts/:id
+   */
+
+  app.get('/v1/accounts/:id', authenticate, function (req, res, next) {
+    Account.get(req.params.id, function (err, instance) {
+      if (err) { return next(err); }
+      if (!instance) { return next(new NotFoundError()); }
+      res.json(instance);
+    });
+  });
+
+
+  /**
+   * POST /v1/accounts
+   */
+
+  app.post('/v1/accounts', authenticate, function (req, res, next) {
+    Account.insert(req.body, function (err, instance) {
+      if (err) { return next(err); }
+      res.json(201, Account.initialize(instance));
+    });
+  });
+
+
+  /**
+   * PUT /v1/accounts/:id
+   */
+
+  app.put('/v1/accounts/:id', authenticate, function (req, res, next) {
+    Account.replace(req.params.id, req.body, function (err, instance) {
+      if (err) { return next(err); }
+      res.json(new Account(instance));
+    });
+  });
+
+
+  /**
+   * PATCH /v1/accounts/:id
+   */
+
+  app.patch('/v1/accounts/:id', authenticate, function (req, res, next) {
+    Account.patch(req.params.id, req.body, function (err, instance) {
+      if (err) { return next(err); }
+      res.json(instance)
+    });
+  });
+
+
+  /**
+   * DELETE /v1/accounts/:id
+   */
+
+  app.del('/v1/accounts/:id', authenticate, function (req, res, next) {
+    Account.delete({ _id: req.params.id }, function (err) {
+      if (err) { return next(err); }
+      res.send(204);
+    });
+  });
+
+};

@@ -3,7 +3,7 @@
  */
 
 var Modinha = require('modinha')
-  , RedisDocument = require('./RedisDocument')
+  , Document = require('modinha-redis')
   , random  = Modinha.defaults.random
   ;
 
@@ -23,7 +23,7 @@ var Credentials = Modinha.define('credentials', {
  * Document persistence
  */
 
-Credentials.extend(RedisDocument);
+Credentials.extend(Document);
 
 
 /**

@@ -1,15 +1,18 @@
-cwd = process.cwd()
-path = require 'path'
-chai = require 'chai'
-expect = chai.expect
+cwd     = process.cwd()
+path    = require 'path'
+chai    = require 'chai'
+expect  = chai.expect
 request = require 'supertest'
-app = require path.join(cwd, 'app')
+app     = require path.join(cwd, 'app')
 
 
-{err,res} = {}
 
 
 describe 'Logout', ->
+
+
+  {err,res} = {}
+
 
   describe 'POST /logout', ->
 

@@ -2,14 +2,12 @@
  * Module dependencies
  */
 
-var redis         = require('redis')
-  , client        = redis.createClient()
-  , util          = require('util')
-  , bcrypt        = require('bcrypt')
+var bcrypt        = require('bcrypt')
   , CheckPassword = require('mellt').CheckPassword
   , Modinha       = require('modinha')
-  , RedisDocument = require('./RedisDocument')
-  , uuid          = Modinha.defaults.uuid
+  , Document      = require('modinha-redis')
+  , PasswordRequiredError = require('../errors/PasswordRequiredError')
+  , InsecurePasswordError = require('../errors/InsecurePasswordError')
   ;
 
 
@@ -18,13 +16,10 @@ var redis         = require('redis')
  */
 
 var Account = Modinha.define('accounts', {
-  _id:      { type: 'string', default: uuid, format: 'uuid' },
   name:     { type: 'string' }, 
   email:    { type: 'string', required: true, unique: true, format: 'email' },
   roles:    { type: 'array',  default: [] },
-  hash:     { type: 'string', private: true },
-  created:  { type: 'number' }, 
-  modified: { type: 'number' }
+  hash:     { type: 'string', private: true }
 });
 
 
@@ -32,18 +27,23 @@ var Account = Modinha.define('accounts', {
  * Document persistence
  */
 
-Account.extend(RedisDocument);
+Account.extend(Document);
 
 
 /**
  * Create
  */
 
-Account.create = function (data, callback) {
+Account.insert = function (data, options, callback) {
   var collection = Account.collection
-    , account    = Account.initialize(data)
+    , account    = Account.initialize(data, { private: true })
     , validation = account.validate()
     ;
+
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
 
   // require a password
   if (!data.password) {
@@ -66,26 +66,24 @@ Account.create = function (data, callback) {
     return callback(validation); 
   }
 
-  // set timestamps
-  var timestamp = Date.now();
-  if (!account.created)  { account.created  = timestamp; }
-  if (!account.modified) { account.modified = timestamp; }
+  // catch duplicate values
+  Account.enforceUnique(account, function (err) {
+    if (err) { return callback(err); }
 
-  // verify the email is unique
-  Account.findByEmail(account.email, function (err, found) {
-    if (found) { 
-      return callback(new RegisteredEmailError()); 
-    }
+    // batch operations
+    var multi = Account.__client.multi()
+    
+    // store the account
+    multi.hset(collection, account._id, Account.serialize(account))
 
-    // store and index the account
-    client.multi()
-      .hset(collection, account._id, Account.serialize(account))
-      .zadd(collection + ':_id', account.created, account._id)
-      .hset(collection + ':email', account.email, account._id)
-      .exec(function (err) {
-        if (err) { return callback(err); }
-        callback(null, account);
-      });
+    // index the account
+    Account.index(multi, account);
+
+    // execute ops
+    multi.exec(function (err) {
+      if (err) { return callback(err); }
+      callback(null, Account.initialize(account, options));
+    });
   });
 };
 
@@ -105,7 +103,7 @@ Account.prototype.verifyPassword = function (password, callback) {
  */
 
 Account.authenticate = function (email, password, callback) {
-  Account.findByEmail(email, { private: true }, function (err, account) {
+  Account.getByEmail(email, { private: true }, function (err, account) {
     if (!account) { 
       return callback(null, false, { message: 'Unknown account.' });
     }
@@ -122,48 +120,11 @@ Account.authenticate = function (email, password, callback) {
 
 
 /**
- * PasswordRequiredError
+ * Errors
  */
 
-function PasswordRequiredError() {
-  this.name = 'PasswordRequiredError';
-  this.message = 'A password is required';
-  this.statusCode = 400;
-  Error.call(this, this.message);
-  Error.captureStackTrace(this, arguments.callee);
-}
-
-util.inherits(PasswordRequiredError, Error);
-
-
-/**
- * PasswordRequiredError
- */
-
-function InsecurePasswordError() {
-  this.name = 'InsecurePasswordError';
-  this.message = 'Password must be complex.';
-  this.statusCode = 400;
-  Error.call(this, this.message);
-  Error.captureStackTrace(this, arguments.callee);
-}
-
-util.inherits(InsecurePasswordError, Error);
-
-
-/**
- * RegisteredEmailError
- */
-
-function RegisteredEmailError() {
-  this.name = 'RegisteredEmailError';
-  this.message = 'Email already registered';
-  this.statusCode = 400;
-  Error.call(this, this.message);
-  Error.captureStackTrace(this, arguments.callee);
-}
-
-util.inherits(RegisteredEmailError, Error);
+Account.PasswordRequiredError = PasswordRequiredError;
+Account.InsecurePasswordError = InsecurePasswordError;
 
 
 /**

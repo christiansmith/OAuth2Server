@@ -1,32 +1,71 @@
-cwd = process.cwd()
-path = require 'path'
-chai = require 'chai'
-expect = chai.expect
-request = require 'supertest'
-app = require path.join(cwd, 'app')
-User = require path.join(cwd, 'models/User') 
+# Test dependencies
+cwd         = process.cwd()
+path        = require 'path'
+Faker       = require 'Faker'
+chai        = require 'chai'
+sinon       = require 'sinon'
+sinonChai   = require 'sinon-chai'
+request     = require 'supertest'
+expect      = chai.expect
 
 
-{err,res,credentials} = {}
+
+
+# Assertions
+chai.use sinonChai
+chai.should()
+
+
+
+
+# Code under test
+app         = require path.join(cwd, 'app')
+Account     = require path.join(cwd, 'models/Account')
+
+
 
 
 describe 'Password Login', ->
+
+
+
+  {err,res,account} = {}
+  {validLogin,missingCredentialsLogin,unknownAccountLogin,invalidPasswordLogin} = {}
+  {successInfo,missingCredentialsInfo,unknownAccountInfo,invalidPasswordInfo} = {}
+
+
+
+  before ->
+    account = new Account email: 'valid@example.com'
+    
+    validLogin              = email: account.email, password: 'secret1337'
+    missingCredentialsLogin = {}
+    unknownAccountLogin     = email: 'unknown@example.com', password: 'doesntmatter'
+    invalidPasswordLogin    = email: account.email, password: 'wrong'
+    
+    successInfo         = message: 'Authenticated successfully!'
+    unknownAccountInfo  = message: 'Unknown account.'
+    invalidPasswordInfo = message: 'Invalid password.'
+
+
+
 
   describe 'POST /login', ->
 
     describe 'with valid credentials', ->
       
       before (done) ->
-        credentials = { email: 'smith@anvil.io', password: 'secret' }
-        User.backend.reset()
-        User.create credentials, ->
-          request(app)
-            .post('/login')
-            .send(credentials)
-            .end (error, response) ->
-              err = error
-              res = response
-              done()
+        sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
+        request(app)
+          .post('/login')
+          .send(validLogin)
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Account.authenticate.restore()
 
       it 'should respond 200', ->
         res.statusCode.should.equal 200
@@ -34,9 +73,11 @@ describe 'Password Login', ->
       it 'should respond with JSON', ->
         res.headers['content-type'].should.contain 'application/json'      
 
-      it 'should respond with a user', ->
+      it 'should respond with an account', ->
         res.body.authenticated.should.equal true
-        res.body.user.email.should.equal credentials.email
+        res.body.account.email.should.equal account.email
+
+
 
 
     describe 'without credentials', ->
@@ -59,16 +100,22 @@ describe 'Password Login', ->
         res.body.error.should.contain 'Missing credentials'
 
 
-    describe 'with an unknown user', ->
+
+
+    describe 'with an unknown account', ->
 
       before (done) ->
+        sinon.stub(Account, 'authenticate').callsArgWith(2, null, false, unknownAccountInfo)
         request(app)
           .post('/login')
-          .send({ email: 'unknown@example.com', password: 'secret' })
+          .send(unknownAccountLogin)
           .end (error, response) ->
             err = error
             res = response
             done()
+
+      after ->
+        Account.authenticate.restore()
 
       it 'should respond 400', ->
         res.statusCode.should.equal 400
@@ -76,22 +123,26 @@ describe 'Password Login', ->
       it 'should respond with JSON', ->
         res.headers['content-type'].should.contain 'application/json'
 
-      it 'should respond with "Unknown user" error', ->
-        res.body.error.should.contain 'Unknown user'
+      it 'should respond with "Unknown account" error', ->
+        res.body.error.should.contain 'Unknown account.'
+
+
 
 
     describe 'with an invalid password', ->
 
       before (done) ->
-        User.backend.reset()
-        User.create { email: 'smith@anvil.io', password: 'secret' }, ->
-          request(app)
-            .post('/login')
-            .send({ email: 'smith@anvil.io', password: 'wrong' })
-            .end (error, response) ->
-              err = error
-              res = response
-              done()
+        sinon.stub(Account, 'authenticate').callsArgWith(2, null, false, invalidPasswordInfo)
+        request(app)
+          .post('/login')
+          .send(invalidPasswordLogin)
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Account.authenticate.restore()
 
       it 'should respond 400', ->
         res.statusCode.should.equal 400

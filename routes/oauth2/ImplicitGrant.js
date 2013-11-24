@@ -2,93 +2,21 @@
  * Module dependencies
  */
 
-var util           = require('util')
-  , oauth2         = require('oauth2orize')
-  , passport       = require('passport')
-  , User           = require('../models/User')
-  , Client         = require('../models/Client')
-  , Scope          = require('../models/Scope')   
-  , AccessToken    = require('../models/AccessToken')  
+var App            = require('../../models/App')
+  , Scope          = require('../../models/Scope')   
+  , Token          = require('../../models/Token')  
   , FormUrlencoded = require('form-urlencoded')
+  , AuthorizationError = require('../../errors/AuthorizationError')  
   ;
 
 
 module.exports = function (app) {
-  var server = oauth2.createServer();
-
-
-  /**
-   * Exchange user password credentials for an access token
-   */
-
-  server.exchange(oauth2.exchange.password(function(client, email, password, scope, done) {
-    User.find({ email: email }, { private: true }, function (err, user) {
-      if (err) { return done(err); }
-      
-      if (!user) { return done(null, false) }
-      user.verifyPassword(password, function (err, verified) {
-        if (err) { return done(err); }
-      
-        if (!verified) { return done(null, false); }
-        AccessToken.issue(client, user, { scope: scope.join(' ') }, function (err, token) {
-          if (err) { return done(err); }
-      
-          done(null, token.access_token, token.refresh_token);
-        });
-      })
-    });
-  }));
-
-
-  server.grant(oauth2.grant.token(function(client, user, ares, done) {
-    AccessToken.issue(client, user, { scope: ares.scope }, function(err, accessToken) {
-      if (err) { return done(err); }
-      done(null, accessToken);
-    });
-  }));
-
-
-  /**
-   * Authentication middleware
-   */
-
-  var authenticate = passport.authenticate('basic', { session: false });
-
-
-  /**
-   * Token endpoint
-   */
-
-  app.post('/token', 
-    authenticate, 
-    server.token(),
-    server.errorHandler());
-
-
-  /**
-   * Access token validation endpoint
-   */
-
-  app.post('/access', authenticate, function (req, res, next) {
-    var token  = req.body.access_token
-      , scope  = req.body.scope
-      ;
-
-    AccessToken.verify(token, scope, function (err, verified) {
-      if (err) { return next(err); }
-      res.json({ authorized: true });
-    });
-  });
-
-
-
 
   /**
    * Authorization UI
    */
 
-  var ui = require('./ui')(app);
-
+  var ui = require('../ui')(app);
 
   /**
    * Parameter lookup helper
@@ -118,7 +46,7 @@ module.exports = function (app) {
   };
 
   function unknownClient (req, res, next) {
-    Client.find({ _id: req[methodObject[req.method]].client_id }, function (err, client) {
+    App.get(req[methodObject[req.method]].client_id, function (err, client) {
       if (!client) { 
         next(new AuthorizationError('unauthorized_client', 'Unknown client', 403)); 
       } else {
@@ -184,7 +112,7 @@ module.exports = function (app) {
     scopeDetails,
     function (req, res, next) {
       res.json({ 
-        client: req.client, 
+        app: req.client, 
         scope: req.scope
       });
     });
@@ -199,32 +127,13 @@ module.exports = function (app) {
     mismatchingRedirectURI,  
     function (req, res, next) {
       if (req.body.authorized) {
-        AccessToken.issue(req.client, req.user, { scope: '' }, function (err, token) {
+        Token.issue(req.client, req.user, { scope: '' }, function (err, token) {
           if (err) { return next(err); }
           res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
-        });
-
-        
+        }); 
       } else {
         res.redirect(req.body.redirect_uri + '#error=access_denied');
       }
-      
     });
-
-
-  /**
-   * AuthorizationError
-   */
-
-  function AuthorizationError(message, description, status) {
-    this.name = 'AuthorizationError';
-    this.message = message || 'invalid_request';
-    this.description = description;
-    this.statusCode = status || 400;
-    Error.call(this, this.message);
-    Error.captureStackTrace(this, arguments.callee);
-  }
-
-  util.inherits(AuthorizationError, Error);
 
 };

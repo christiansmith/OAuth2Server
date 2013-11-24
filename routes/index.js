@@ -45,23 +45,26 @@ module.exports = function (app) {
    * RESTful routes
    */
 
-  require('./users')(app);
-  require('./clients')(app);
-  require('./resources')(app);
+  require('./rest/accounts')(app);
+  require('./rest/apps')(app);
+  require('./rest/services')(app);
+  require('./rest/scopes')(app);
 
 
   /**
    * OAuth 2.0 Routes
    */
 
-  require('./oauth2')(app);
+  require('./oauth2/PasswordGrant')(app);
+  require('./oauth2/ImplicitGrant')(app);
+  require('./oauth2/ValidateToken')(app);
 
 
   /**
-   * Protected resource routes (user)
+   * Protected resource routes (account)
    */
 
-  require('./user')(app);
+  require('./account')(app);
 
 
   /**

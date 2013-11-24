@@ -2,11 +2,9 @@
  * Module dependencies
  */
 
-var redis         = require('redis')
-  , client        = redis.createClient()
-  , Modinha       = require('modinha')
-  , Credentials   = require('./Credentials')
-  , RedisDocument = require('./RedisDocument')
+var Modinha     = require('modinha')
+  , Credentials = require('./Credentials')
+  , Document    = require('modinha-redis')
   ;
 
 
@@ -15,7 +13,6 @@ var redis         = require('redis')
  */
 
 var App = Modinha.define('apps', {
-  _id:          { type: 'string', default: Modinha.defaults.uuid, format: 'uuid' },
   type:         { 
                   type: 'string', 
                   required: true, 
@@ -31,9 +28,7 @@ var App = Modinha.define('apps', {
   logo:         { type: 'string' },
   terms:        { type: 'boolean' },
   redirect_uri: { type: 'string' },
-  key:          { type: 'string', private: true },
-  created:      { type: 'number' },
-  modified:     { type: 'number' }
+  key:          { type: 'string', private: true, unique: true }
 });
 
 
@@ -41,37 +36,38 @@ var App = Modinha.define('apps', {
  * Document persistence
  */
 
-App.extend(RedisDocument);
+App.extend(Document);
 
 
 /**
  * Create app
  */
 
-App.create = function (data, callback) {
+App.insert = function (data, options, callback) {
   var collection = this.collection
     , app        = App.initialize(data, {private: true})
     , validation = app.validate()
     ;
 
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
+
   // handle invalid data
   if (!validation.valid) { return callback(validation); }
 
-  // set timestamps
-  var timestamp = Date.now();
-  if (!app.created)  { app.created  = timestamp; }
-  if (!app.modified) { app.modified = timestamp; }  
-
-  Credentials.create({ role: 'app' }, function (err, credentials) {
+  Credentials.insert({ role: 'app' }, function (err, credentials) {
     if (err) { return callback(err); }
 
     // associate the app with new credentials
     app.key = credentials.key;
 
     // store and index 
-    var multi = client.multi();
+    var multi = App.__client.multi();
     multi.hset(collection, app._id, App.serialize(app));
-    multi.zadd(collection + ':_id', timestamp, app._id);
+
+    App.index(multi, app);
 
     multi.exec(function (err, result) {
       if (err) { return callback(err); }

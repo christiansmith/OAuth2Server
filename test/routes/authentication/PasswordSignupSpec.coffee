@@ -1,30 +1,75 @@
-cwd = process.cwd()
-path = require 'path'
-chai = require 'chai'
-expect = chai.expect
-request = require 'supertest'
-app = require path.join(cwd, 'app')
-User = require path.join(cwd, 'models/User') 
+# Test dependencies
+cwd         = process.cwd()
+path        = require 'path'
+Faker       = require 'Faker'
+chai        = require 'chai'
+sinon       = require 'sinon'
+sinonChai   = require 'sinon-chai'
+request     = require 'supertest'
+expect      = chai.expect
 
 
-{err,res} = {}
+
+
+# Assertions
+chai.use sinonChai
+chai.should()
+
+
+
+
+# Code under test
+app         = require path.join(cwd, 'app')
+Account     = require path.join(cwd, 'models/Account')
+
+
+
+# Errors
+{UniqueValueError} = require 'modinha-redis'
+{ValidationError}  = Account
 
 
 describe 'Password Signup', ->
+
+
+
+
+  {err,res,account} = {}
+  {validSignup,invalidSignup} = {}
+  {successInfo} = {}
+
+
+  before ->
+    account = new Account email: 'valid@example.com'
+
+    validSignup   = email: 'valid@example.com', password: 'secret1337'
+    invalidSignup = email: 'not-email', password: 'secret1337'
+
+    successInfo         = message: 'Authenticated successfully!'
+    unknownAccountInfo  = message: 'Unknown account.'
+    invalidPasswordInfo = message: 'Invalid password.'
+
+
+
 
   describe 'POST /signup', ->
 
     describe 'with valid details', ->
 
       before (done) ->
-        User.backend.reset()
+        sinon.stub(Account, 'insert').callsArgWith(1, null, account)
+        sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
         request(app)
           .post('/signup')
-          .send({ email: 'smith@anvil.io', password: 'secret' })
+          .send(validSignup)
           .end (error, response) ->
             err = error
             res = response
             done()
+
+      after ->
+        Account.insert.restore()
+        Account.authenticate.restore()
 
       it 'should respond 201', ->
         res.statusCode.should.equal 201
@@ -34,59 +79,28 @@ describe 'Password Signup', ->
 
       it 'should respond with the user', ->
         res.body.authenticated.should.equal true
-        res.body.user.email.should.equal 'smith@anvil.io'
+        res.body.account.email.should.equal account.email
 
       it 'should not expose private user properties', ->
-        expect(res.body.user.hash).equals undefined
+        expect(res.body.account.hash).to.be.undefined
 
 
-    describe 'with an existing username', ->
-
-      before (done) ->
-        signup = 
-          username: 'anvilhacks'
-          email: 'smith@anvil.io'
-          password: 'secret'
-
-        User.backend.reset()
-        User.create signup, ->
-          signup.email = 'other@anvil.io'
-          request(app)
-            .post('/signup')
-            .send(signup)
-            .end (error, response) ->
-              err = error
-              res = response
-              done()
-
-      it 'should respond 400', ->
-        res.statusCode.should.equal 400
-
-      it 'should respond with JSON', ->
-        res.headers['content-type'].should.contain 'application/json'
-
-      it 'should respond with "RegisteredUsernameError"', ->
-        res.body.error.should.contain 'Username already registered'
 
 
     describe 'with a registered email', ->
 
       before (done) ->
-        signup = 
-          username: 'anvilhacks'
-          email: 'smith@anvil.io'
-          password: 'secret'
+        sinon.stub(Account, 'insert').callsArgWith(1, new UniqueValueError('email'))
+        request(app)
+          .post('/signup')
+          .send(validSignup)
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
 
-        User.backend.reset()
-        User.create signup, ->
-          signup.username = 'other'
-          request(app)
-            .post('/signup')
-            .send(signup)
-            .end (error, response) ->
-              err = error
-              res = response
-              done()
+      after ->
+        Account.insert.restore()
 
       it 'should respond 400', ->
         res.statusCode.should.equal 400
@@ -94,23 +108,26 @@ describe 'Password Signup', ->
       it 'should respond with JSON', ->
         res.headers['content-type'].should.contain 'application/json'
 
-      it 'should respond with "RegisteredEmailError"', ->
-        res.body.error.should.contain 'Email already registered'
+      it 'should respond with "UniqueValueError"', ->
+        res.body.error.should.contain 'email must be unique'
+
+
 
 
     describe 'with invalid details', ->
 
       before (done) ->
+        sinon.stub(Account, 'insert').callsArgWith(1, new ValidationError())
         request(app)
           .post('/signup')
-          .send({
-            email: 'not-email'
-            password: 'secret'
-          })
+          .send(invalidSignup)
           .end (error, response) ->
             err = error
             res = response
             done()
+
+      after ->
+        Account.insert.restore()
 
       it 'should respond 400', ->
         res.statusCode.should.equal 400
@@ -119,4 +136,8 @@ describe 'Password Signup', ->
         res.headers['content-type'].should.contain 'application/json'
 
       it 'should respond with validation errors', ->
-        res.body.errors.email.attribute.should.equal 'format'
+        res.body.error.should.equal 'Validation error.'
+
+
+
+

@@ -1,18 +1,12 @@
 # Test dependencies
 cwd       = process.cwd()
 path      = require 'path'
+Faker     = require 'Faker'
 chai      = require 'chai'
 async     = require 'async'
 sinon     = require 'sinon'
 sinonChai = require 'sinon-chai'
-Scope     = require path.join(cwd, 'models/Scope')  
 expect    = chai.expect
-
-
-
-redis     = require 'redis'
-multi     = redis.Multi.prototype
-rclient   = redis.RedisClient.prototype
 
 
 
@@ -20,19 +14,39 @@ chai.use sinonChai
 chai.should()
 
 
+
+
+Modinha   = require 'modinha'
+Scope     = require path.join(cwd, 'models/Scope')  
+
+
+
+
+redis     = Scope.__redis
+multi     = redis.Multi.prototype
+rclient   = redis.RedisClient.prototype
+
+
+
+
 describe 'Scope', ->
 
 
-
-  {err,scope,validation} = {}
-
+  {data,scopes,jsonScopes,err,instance,instances,scope,validation,update,deleted,urls} = {}
 
 
-  beforeEach ->
-    sinon.spy rclient, 'hset'
+  before ->
+    data = []
+    for i in [0..9]
+      data.push
+        url: "https://#{Faker.Internet.domainName()}"
+        serviceId: Modinha.defaults.uuid()
+        description: Faker.Lorem.words(5).join(' ')
 
-  afterEach ->
-    rclient.hset.restore()
+    scopes = Scope.initialize(data)
+    jsonScopes = scopes.map (s) -> Scope.serialize(s)
+    urls = scopes.map (s) -> s.url
+
 
 
 
@@ -45,8 +59,11 @@ describe 'Scope', ->
     it 'should have a url', ->
       Scope.schema.url.type.should.equal 'string'
 
+    it 'should use url as unique identifier', ->
+      Scope.schema.url.uniqueId.should.be.true
+
     it 'should require a url', ->
-      Scope.schema.url.required.should.equal true
+      Scope.schema.url.required.should.be.true
 
     it 'should require url to be a valid url', ->
       validation.errors.url.attribute.should.equal 'format'
@@ -57,74 +74,475 @@ describe 'Scope', ->
     it 'should require a description', ->
       validation.errors.description.attribute.should.equal 'required'
 
+    it 'should have a service id', ->
+      Scope.schema.serviceId.should.be.an.object
+
+    it 'should have "created" timestamp', ->
+      Scope.schema.created.default.should.equal Modinha.defaults.timestamp
+
+    it 'should have "modified" timestamp', ->
+      Scope.schema.modified.default.should.equal Modinha.defaults.timestamp
 
 
-  describe 'creation', ->
 
+
+  describe 'list', ->
+
+    describe 'by default', ->
+
+      before (done) ->
+        sinon.spy rclient, 'zrevrange'
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
+        Scope.list (error, results) ->
+          err = error
+          instances = results
+          done()
+
+      after ->
+        rclient.hmget.restore()
+        rclient.zrevrange.restore()
+
+      it 'should query the created index', ->
+        rclient.zrevrange.should.have.been.calledWith 'scopes:created', 0, 49  
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide a list of instances', ->
+        instances.forEach (instance) ->
+          expect(instance).to.be.instanceof Scope
+
+      it 'should provide the list in reverse chronological order', ->
+        rclient.zrevrange.should.have.been.called
+
+
+    describe 'by index', ->
+
+      before (done) ->
+        sinon.spy rclient, 'zrevrange'
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
+        Scope.list { index: 'scopes:modified' }, (error, results) ->
+          err = error
+          instances = results
+          done()
+
+      after ->
+        rclient.hmget.restore()
+        rclient.zrevrange.restore()
+
+      it 'should query the provided index', ->
+        rclient.zrevrange.should.have.been.calledWith 'scopes:modified'
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide a list of instances', ->
+        instances.forEach (instance) ->
+          expect(instance).to.be.instanceof Scope
+
+
+    describe 'with paging', ->
+
+      before (done) ->
+        sinon.spy rclient, 'zrevrange'
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
+        Scope.list { page: 2, size: 3 }, (error, results) ->
+          err = error
+          instances = results
+          done()
+
+      after ->
+        rclient.hmget.restore()
+        rclient.zrevrange.restore()
+
+      it 'should retrieve a range of values', ->
+        rclient.zrevrange.should.have.been.calledWith 'scopes:created', 3, 5
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide a list of instances', ->
+        instances.forEach (instance) ->
+          expect(instance).to.be.instanceof Scope
+
+
+    describe 'with no results', ->
+
+      before (done) ->
+        sinon.stub(rclient, 'zrevrange').callsArgWith(3, null, [])
+        Scope.list { page: 2, size: 3 }, (error, results) ->
+          err = error
+          instances = results
+          done()
+
+      after ->
+        rclient.zrevrange.restore()
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide an empty list', ->
+        Array.isArray(instances).should.be.true
+        instances.length.should.equal 0
+
+
+
+
+  describe 'get', ->
+
+    describe 'by string', ->
+
+      before (done) ->
+        scope = scopes[0]
+        json = jsonScopes[0]
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, [json]
+        Scope.get scopes[0].url, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        rclient.hmget.restore()
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide an instance', ->
+        expect(instance).to.be.instanceof Scope
+
+      it 'should not initialize private properties', ->
+        expect(instance.secret).to.be.undefined
+
+
+    describe 'by string not found', ->
+
+      before (done) ->
+        Scope.get 'unknown', (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide a null result', ->
+        expect(instance).to.be.null
+
+
+    describe 'by array', ->
+
+      before (done) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
+        Scope.get urls, (error, results) ->
+          err = error
+          instances = results
+          done()
+
+      after ->
+        rclient.hmget.restore()
+
+      it 'should provide null error', ->
+        expect(err).to.be.null
+
+      it 'should provide a list of instances', ->
+        instances.forEach (instance) ->
+          expect(instance).to.be.instanceof Scope
+
+      it 'should not initialize private properties', ->
+        instances.forEach (instance) ->
+          expect(instance.secret).to.be.undefined
+
+
+#    describe 'by array not found', ->
+#
+#      it 'should provide a null error'
+#      it 'should provide a list of instances'
+#      it 'should not provide null values in the list'
+
+
+    describe 'with empty array', ->
+
+      before (done) ->
+        Scope.get [], (error, results) ->
+          err = error
+          instances = results
+          done()
+
+      it 'should provide a null error', ->
+        expect(err).to.be.null
+
+      it 'should provide an empty array', ->
+        Array.isArray(instances).should.be.true
+        instances.length.should.equal 0     
+
+
+
+
+  describe 'insert', ->
 
     describe 'with valid data', ->
 
-      beforeEach (done) -> 
-        data =
-          url: 'https://service.tld/resource'
-          description: 'operate on the resource'
+      beforeEach (done) ->
+        sinon.spy multi, 'hset'
+        sinon.spy multi, 'zadd'
+        sinon.spy Scope, 'index'
+        sinon.stub(Scope, 'enforceUnique').callsArgWith(1, null)
 
-        Scope.set data, (error, instance) ->
+        Scope.insert data[0], (error, result) ->
           err = error
-          scope = instance
+          instance = result
           done()
 
-      it 'should provide the callback a null error', ->
-        expect(err).equals null
+      afterEach ->
+        multi.hset.restore()
+        multi.zadd.restore()
+        Scope.index.restore()
+        Scope.enforceUnique.restore()
 
-      it 'should provide the callback a scope instance', ->
-        expect(scope instanceof Scope).equals true
+      it 'should provide a null error', ->
+        expect(err).to.be.null
 
-      it 'should store the scope', ->
-        rclient.hset.should.have.been.calledWith 'scopes', scope.url, JSON.stringify(scope)
+      it 'should provide the inserted instance', ->
+        expect(instance).to.be.instanceof Scope
+
+      it 'should not provide private properties', ->
+        expect(instance.secret).to.be.undefined
+
+      it 'should store the serialized instance by url', ->
+        multi.hset.should.have.been.calledWith 'scopes', instance.url, Scope.serialize(instance)
+
+      it 'should index the instance', ->
+        Scope.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
 
     describe 'with invalid data', ->
 
-      beforeEach (done) ->
-        Scope.set {}, (error, instance) ->
+      before (done) ->
+        sinon.spy multi, 'hset'
+        sinon.spy multi, 'zadd'
+        sinon.spy Scope, 'index'
+
+        Scope.insert {}, (error, result) ->
           err = error
-          scope = instance
-          done()  
+          instance = result
+          done()
 
-      it 'should provide the callback a validation error', ->
-        err.message.should.equal 'Validation error.'    
+      after ->
+        multi.hset.restore()
+        multi.zadd.restore() 
+        Scope.index.restore()   
 
-      it 'should not provide a scope instance', ->
-        expect(scope).equals undefined
+      it 'should provide a validation error', ->
+        err.should.be.instanceof Modinha.ValidationError
 
+      it 'should not provide an instance', ->
+        expect(instance).to.be.undefined
 
+      it 'should not store the data', ->
+        multi.hset.should.not.have.been.called
 
-  describe 'retrieval', ->
-
-    scopes = [
-      { url: 'https://api.tld/resource1', description: 'access stuff at this url' }
-      { url: 'https://api.tld/resource2', description: 'access other stuff' }
-    ]
-
-    setter = (scope, callback) ->
-      Scope.set scope, (err) ->
-        if err then return callback err
-        callback()
-
-    before (done) ->
-      async.each scopes, setter, done
-
-    it 'should get a scope by url', ->
-      Scope.get scopes[0].url, (err, result) ->
-        result.description.should.equal scopes[0].description
-
-    it 'should get a list of scopes by url', ->
-      Scope.get [scopes[0].url, scopes[1].url], (err, result) ->
-        result[0].description.should.equal scopes[0].description
-        result[1].description.should.equal scopes[1].description
-
-    it 'should get scopes by role'
-    it 'should get scopes by service'
+      it 'should not index the data', ->
+        Scope.index.should.not.have.been.called
 
 
+
+
+  describe 'replace', ->
+
+    describe 'with valid data', ->
+
+      before (done) ->
+        scope = scopes[0]
+        json = jsonScopes[0]
+
+        sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
+        sinon.spy Scope, 'reindex'
+        sinon.spy multi, 'hset'
+        sinon.spy multi, 'zadd'
+
+        update =
+          url: scope.url
+          serviceId: scope.serviceId
+          description: 'updated'
+          created: scope.created
+          modified: scope.modified
+
+        Scope.replace scope.url, update, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        rclient.hmget.restore()
+        Scope.reindex.restore()
+        multi.hset.restore()
+        multi.zadd.restore()
+
+      it 'should provide a null error', ->
+        expect(err).to.be.null
+
+      it 'should provide the replaced instance', ->
+        expect(instance).to.be.instanceof Scope
+
+      it 'should not provide private properties', ->
+        expect(instance.secret).to.be.undefined
+
+      it 'should replace the existing instance', ->
+        expect(instance.description).to.equal 'updated'
+
+      it 'should reindex the instance', ->
+        Scope.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(scope)
+
+
+    describe 'with invalid data', ->
+
+      before (done) ->
+        scope = scopes[0]
+
+        Scope.replace scope.url, { description: -1 }, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      it 'should provide a validation error', ->
+        expect(err).to.be.instanceof Modinha.ValidationError
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.undefined
+
+
+
+
+  describe 'patch', ->
+
+    describe 'with valid data', ->
+
+      before (done) ->
+        scope = scopes[0]
+        json = jsonScopes[0]
+
+        sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
+        sinon.spy Scope, 'reindex'
+        sinon.spy multi, 'hset'
+        sinon.spy multi, 'zadd'
+
+        update =
+          description: 'updated'
+
+
+        Scope.patch scope.url, update, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        rclient.hmget.restore()
+        Scope.reindex.restore()
+        multi.hset.restore()
+        multi.zadd.restore()
+
+      it 'should provide a null error', ->
+        expect(err).to.be.null
+
+      it 'should provide the patched instance', ->
+        expect(instance).to.be.instanceof Scope
+
+      it 'should not provide private properties', ->
+        expect(instance.secret).to.be.undefined
+
+      it 'should overwrite the stored data', ->
+        multi.hset.should.have.been.calledWith 'scopes', instance.url, sinon.match('"description":"updated"')
+
+      it 'should reindex the instance', ->
+        Scope.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(scopes[0])
+
+
+    describe 'with invalid data', ->
+
+      before (done) ->
+        scope = scopes[0]
+        json = jsonScopes[0]
+
+        sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
+        sinon.spy multi, 'hset'
+        sinon.spy multi, 'zadd'
+
+        Scope.patch scope.url, { description: -1 }, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        rclient.hmget.restore()
+        multi.hset.restore()
+        multi.zadd.restore()
+
+      it 'should provide a validation error', ->
+        expect(err).to.be.instanceof Modinha.ValidationError
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.undefined
+
+
+
+
+  describe 'delete', ->
+
+    describe 'by string', ->
+
+      before (done) ->
+        scope = scopes[0]
+        sinon.spy Scope, 'deindex'
+        sinon.spy multi, 'hdel'
+        sinon.stub(Scope, 'get').callsArgWith(2, null, scope)
+        Scope.delete scope.url, (error, result) ->
+          err = error
+          deleted = result
+          done()
+
+      after ->
+        Scope.deindex.restore()
+        Scope.get.restore()
+        multi.hdel.restore()
+
+      it 'should provide a null error', ->
+        expect(err).to.be.null
+
+      it 'should provide confirmation', ->
+        deleted.should.be.true
+
+      it 'should remove the stored instance', ->
+        multi.hdel.should.have.been.calledWith 'scopes', scope.url
+
+      it 'should deindex the instance', ->
+        Scope.deindex.should.have.been.calledWith sinon.match.object, sinon.match(scope)
+
+
+    describe 'by array', ->
+
+      beforeEach (done) ->
+        sinon.spy Scope, 'deindex'
+        sinon.spy multi, 'hdel'
+        sinon.stub(Scope, 'get').callsArgWith(2, null, scopes)
+        Scope.delete urls, (error, result) ->
+          err = error
+          deleted = result
+          done()
+
+      afterEach ->
+        Scope.deindex.restore()
+        Scope.get.restore()
+        multi.hdel.restore()
+
+      it 'should provide a null error', ->
+        expect(err).to.be.null
+
+      it 'should provide confirmation', ->
+        deleted.should.be.true
+
+      it 'should remove each stored instance', ->
+        multi.hdel.should.have.been.calledWith 'scopes', urls
+
+      it 'should deindex each instance', ->
+        scopes.forEach (doc) ->
+          Scope.deindex.should.have.been.calledWith sinon.match.object, doc
