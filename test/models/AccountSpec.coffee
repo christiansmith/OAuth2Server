@@ -335,10 +335,14 @@ describe 'Account', ->
     describe 'by string not found', ->
 
       before (done) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, null
         Account.get 'unknown', (error, result) ->
           err = error
           instance = result
           done()
+
+      after ->
+        rclient.hmget.restore()
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -462,6 +466,7 @@ describe 'Account', ->
         sinon.spy multi, 'zadd'
         sinon.spy Account, 'index'
         sinon.stub(Account, 'enforceUnique').callsArgWith(1, null)
+        sinon.stub(multi, 'exec').callsArgWith 0, null
 
         Account.insert data[0], (error, result) ->
           err = error
@@ -473,6 +478,7 @@ describe 'Account', ->
         multi.zadd.restore()
         Account.index.restore()
         Account.enforceUnique.restore()
+        multi.exec.restore()
 
       it 'should provide a null error', ->
         expect(err).to.be.null
