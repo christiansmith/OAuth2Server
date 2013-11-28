@@ -476,6 +476,25 @@ describe 'Scope', ->
         Scope.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(scopes[0])
 
 
+    describe 'with unknown scope', ->
+
+      before (done) ->
+        sinon.stub(Scope, 'get').callsArgWith(2, null, null)
+        Scope.patch 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Scope.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null 
+
+
     describe 'with invalid data', ->
 
       before (done) ->

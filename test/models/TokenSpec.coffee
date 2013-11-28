@@ -487,6 +487,25 @@ describe 'Token', ->
         Token.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(tokens[0])
 
 
+    describe 'with unknown token', ->
+
+      before (done) ->
+        sinon.stub(Token, 'get').callsArgWith(2, null, null)
+        Token.patch 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Token.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null 
+
+
     describe 'with invalid data', ->
 
       before (done) ->

@@ -620,6 +620,25 @@ describe 'Service', ->
         Service.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(service)
 
 
+    describe 'with unknown service', ->
+
+      before (done) ->
+        sinon.stub(Service, 'get').callsArgWith(2, null, null)
+        Service.patch 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Service.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null 
+
+
     describe 'with invalid data', ->
 
       before (done) ->
