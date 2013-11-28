@@ -475,6 +475,34 @@ describe 'Scopes REST Routes', ->
         res.body.should.have.property 'url'
 
 
+    describe 'with unknown scope', ->
+
+      before (done) ->
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
+        sinon.stub(Scope, 'patch').callsArgWith(2, null, null)
+        request(app)
+          .patch("/v1/scopes/id")
+          .set('Authorization', 'Basic ' + validCredentials)
+          .send({})
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Credentials.get.restore()
+        Scope.patch.restore()
+
+      it 'should respond 404', ->
+        res.statusCode.should.equal 404
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.contain 'application/json'
+
+      it 'should respond with "Not found" error', ->
+        res.body.error.should.equal 'Not found.'
+
+
     describe 'with invalid data', ->
 
       before (done) ->

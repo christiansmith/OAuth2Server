@@ -80,6 +80,7 @@ module.exports = function (app) {
   app.patch('/v1/apps/:id', authenticate, function (req, res, next) {
     App.patch(req.params.id, req.body, function (err, instance) {
       if (err) { return next(err); }
+      if (!instance) { return next(new NotFoundError()); }
       res.json(instance)
     });
   });
