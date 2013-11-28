@@ -364,6 +364,34 @@ describe 'Apps REST Routes', ->
         res.body.should.have.property 'redirect_uri'
 
 
+    describe 'with unknown app', ->
+
+      before (done) ->
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
+        sinon.stub(App, 'replace').callsArgWith(2, null, null)
+        request(app)
+          .put("/v1/apps/#{apps[0]._id}")
+          .set('Authorization', 'Basic ' + validCredentials)
+          .send({})
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Credentials.get.restore()
+        App.replace.restore()
+
+      it 'should respond 404', ->
+        res.statusCode.should.equal 404
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.contain 'application/json'
+
+      it 'should respond with "Not found" error', ->
+        res.body.error.should.equal 'Not found.'
+
+
     describe 'with invalid data', ->
 
       before (done) ->

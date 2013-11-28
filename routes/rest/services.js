@@ -67,6 +67,7 @@ module.exports = function (app) {
   app.put('/v1/services/:id', authenticate, function (req, res, next) {
     Service.replace(req.params.id, req.body, function (err, instance) {
       if (err) { return next(err); }
+      if (!instance) { return next(new NotFoundError()); }
       res.json(new Service(instance));
     });
   });
@@ -89,7 +90,7 @@ module.exports = function (app) {
    */
 
   app.del('/v1/services/:id', authenticate, function (req, res, next) {
-    Service.delete({ _id: req.params.id }, function (err) {
+    Service.delete(req.params.id, function (err) {
       if (err) { return next(err); }
       res.send(204);
     });
