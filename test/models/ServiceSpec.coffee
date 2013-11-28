@@ -465,12 +465,9 @@ describe 'Service', ->
 
       before (done) ->
         service = services[0]
-        json = jsonServices[0]
 
-        sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
+        sinon.stub(Service, 'get').callsArgWith(2, null, service)
         sinon.spy Service, 'reindex'
-        sinon.spy multi, 'hset'
-        sinon.spy multi, 'zadd'
 
         update =
           _id: service._id
@@ -483,10 +480,8 @@ describe 'Service', ->
           done()
 
       after ->
-        rclient.hmget.restore()
+        Service.get.restore()
         Service.reindex.restore()
-        multi.hset.restore()
-        multi.zadd.restore()
 
       it 'should provide a null error', ->
         expect(err).to.be.null
@@ -501,7 +496,26 @@ describe 'Service', ->
         expect(instance.description).to.equal 'updated'
 
       it 'should reindex the instance', ->
-        Service.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), Service.initialize(service)
+        Service.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), service
+
+
+    describe 'with unknown service', ->
+
+      before (done) ->
+        sinon.stub(Service, 'get').callsArgWith(2, null, null)
+        Service.replace 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Service.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
 
 
     describe 'with invalid data', ->

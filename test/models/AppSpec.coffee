@@ -487,12 +487,9 @@ describe 'App', ->
 
       before (done) ->
         app = apps[0]
-        json = jsonApps[0]
 
-        sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
+        sinon.stub(App, 'get').callsArgWith(2, null, app)
         sinon.spy App, 'reindex'
-        sinon.spy multi, 'hset'
-        sinon.spy multi, 'zadd'
 
         update =
           _id: app._id
@@ -506,10 +503,9 @@ describe 'App', ->
           done()
 
       after ->
-        rclient.hmget.restore()
+        App.get.restore()
         App.reindex.restore()
-        multi.hset.restore()
-        multi.zadd.restore()
+
 
       it 'should provide a null error', ->
         expect(err).to.be.null
@@ -524,7 +520,26 @@ describe 'App', ->
         expect(instance.type).to.equal 'public'
 
       it 'should reindex the instance', ->
-        App.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), App.initialize(app)
+        App.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), app
+
+
+    describe 'with unknown app', ->
+
+      before (done) ->
+        sinon.stub(App, 'get').callsArgWith(2, null, null)
+        App.replace 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        App.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
 
 
     describe 'with invalid data', ->

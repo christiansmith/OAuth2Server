@@ -663,7 +663,26 @@ describe 'Account', ->
         expect(instance.name).to.equal 'George Jetson'
 
       it 'should reindex the instance', ->
-        Account.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), Account.initialize(accounts[0])
+        Account.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), accounts[0]
+
+
+    describe 'with unknown account', ->
+
+      before (done) ->
+        sinon.stub(Account, 'get').callsArgWith(2, null, null)
+        Account.replace 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Account.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
 
 
     describe 'with invalid data', ->
@@ -727,9 +746,9 @@ describe 'Account', ->
         account1 = accounts[0]
         account2 = Account.initialize(accounts[1])
         account2.email = account1.email
-        sinon.spy multi, 'hset'
-        sinon.spy multi, 'zadd'
         sinon.spy Account, 'index'
+        sinon.stub(Account, 'get')
+          .callsArgWith 2, null, account2
         sinon.stub(Account, 'getByEmail')
           .callsArgWith 1, null, account1       
 
@@ -739,8 +758,7 @@ describe 'Account', ->
           done()
 
       afterEach ->
-        multi.hset.restore()
-        multi.zadd.restore()
+        Account.get.restore()
         Account.index.restore()
         Account.getByEmail.restore()
 

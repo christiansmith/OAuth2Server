@@ -3,6 +3,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-mocha-cov');
   grunt.loadNpmTasks('grunt-release');
+  grunt.loadNpmTasks('grunt-retire');
 
   grunt.initConfig({
     watch: {
@@ -25,6 +26,9 @@ module.exports = function (grunt) {
         'test/models/**/*.coffee',
         'test/routes/**/*.coffee'
       ]
+    },
+    retire: {
+      node: ['.']
     }
   });
 

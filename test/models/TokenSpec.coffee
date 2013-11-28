@@ -404,15 +404,38 @@ describe 'Token', ->
         Token.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(token)
 
 
+    describe 'with unknown token', ->
+
+      before (done) ->
+        sinon.stub(Token, 'get').callsArgWith(2, null, null)
+        Token.replace 'unknown', {}, (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Token.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
+
+
     describe 'with invalid data', ->
 
       before (done) ->
         token = tokens[0]
 
+        sinon.stub(Token, 'get').callsArgWith(2, null, token)
         Token.replace token.url, { description: -1 }, (error, result) ->
           err = error
           instance = result
           done()
+
+      after ->
+        Token.get.restore()
 
       it 'should provide a validation error', ->
         expect(err).to.be.instanceof Modinha.ValidationError

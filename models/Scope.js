@@ -4,6 +4,7 @@
 
 var Modinha = require('modinha')
   , Document = require('modinha-redis')
+  , Service = require('./Service')
   ;
 
 
@@ -14,7 +15,7 @@ var Modinha = require('modinha')
 var Scope = Modinha.define('scopes', {
   url:         { type: 'string', required: true, format: 'url', uniqueId: true },
   description: { type: 'string', required: true },
-  serviceId:   { type: 'string' }
+  serviceId:   { type: 'string', reference: Service }
 });
 
 

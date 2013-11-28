@@ -6,11 +6,11 @@
 var async       = require('async')
   , Faker       = require('Faker')
   , app         = require('./app')
-  , User        = require('./models/User')
-  , Client      = require('./models/Client')
-  , Resource    = require('./models/Resource')
-  , AccessToken = require('./models/AccessToken')
-  , Credentials = require('./models/HTTPCredentials')
+  , Account     = require('./models/Account')
+  , App         = require('./models/App')
+  , Service     = require('./models/Service')
+  , Token       = require('./models/Token')
+  , Credentials = require('./models/Credentials')
   , Scope       = require('./models/Scope')
   ;
 
@@ -22,8 +22,8 @@ async.waterfall([
   },
 
   function (callback) {
-    Credentials.create({
-      role: 'administrator'
+    Credentials.insert({
+      role: 'admin'
     }, function (err, credentials) {
       console.log('CREDENTIALS', err || credentials);
       if (err) { return callback(err); }
@@ -32,32 +32,32 @@ async.waterfall([
   },
 
   function (credentials, callback) {
-    User.create({
-      username: Faker.Internet.userName(),
+    Account.insert({
+      accountname: Faker.Internet.userName(),
       email: Faker.Internet.email(),
-      password: 'secret'
-    }, function (err, user) {
-      console.log('USER', err || user);
+      password: 'secret1337'
+    }, function (err, account) {
+      console.log('ACCOUNT', err || account);
       if (err) { return callback(err); }
-      callback(null, user);      
+      callback(null, account);      
     });
   },
 
-  function (user, callback) {
-    Client.create({
-      user_id: user._id,
+  function (account, callback) {
+    App.insert({
+      account_id: account._id,
       type: 'confidential',
       name: Faker.Company.companyName(),
       redirect_uri: 'someuri'
-    }, function (err, client) {
-      console.log('CLIENT', err || client);
+    }, function (err, app) {
+      console.log('APP', err || app);
       if (err) { return callback(err); }
-      callback(null, user, client);      
+      callback(null, account, app);      
     });
   },
 
-  function (user, client, callback) {
-    Resource.create({
+  function (account, app, callback) {
+    Service.insert({
       uri: 'https://protected.tld',
       scopes: [
         { 'https://protected.tld': 'access everything on this server' }
@@ -65,12 +65,12 @@ async.waterfall([
     }, function (err, resource) {
       console.log('RESOURCE', err || resource);
       if (err) { return callback(err); }
-      callback(null, user, client, resource);
+      callback(null, account, app, resource);
     });
   },
 
-  function (user, client, resource, callback) {
-    AccessToken.issue(client, user, { scope: 'https://authorizationserver.tld' }, function (err, token) {
+  function (account, app, resource, callback) {
+    Token.issue(app, account, { scope: 'https://authorizationserver.tld' }, function (err, token) {
       console.log('ACCESS TOKEN', err || token);
       if (err) { return callback(err); }
       callback(null);
