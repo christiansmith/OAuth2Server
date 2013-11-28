@@ -567,6 +567,25 @@ describe 'Token', ->
         Token.deindex.should.have.been.calledWith sinon.match.object, sinon.match(token)
 
 
+    describe 'with unknown token', ->
+
+      before (done) ->
+        sinon.stub(Token, 'get').callsArgWith(2, null, null)
+        Token.delete 'unknown', (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Token.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
+
+
     describe 'by array', ->
 
       beforeEach (done) ->

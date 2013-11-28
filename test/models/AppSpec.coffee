@@ -759,6 +759,25 @@ describe 'App', ->
         App.deindex.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
 
+    describe 'with unknown app', ->
+
+      before (done) ->
+        sinon.stub(App, 'get').callsArgWith(2, null, null)
+        App.delete 'unknown', (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        App.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
+
+
     describe 'by array', ->
 
       beforeEach (done) ->

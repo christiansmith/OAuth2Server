@@ -736,6 +736,25 @@ describe 'Service', ->
         Service.deindex.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
 
+    describe 'with unknown service', ->
+
+      before (done) ->
+        sinon.stub(Service, 'get').callsArgWith(2, null, null)
+        Service.delete 'unknown', (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Service.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
+
+
     describe 'by array', ->
 
       beforeEach (done) ->

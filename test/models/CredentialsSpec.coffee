@@ -536,6 +536,25 @@ describe 'Credentials', ->
         Credentials.deindex.should.have.been.calledWith sinon.match.object, sinon.match(credential)
 
 
+    describe 'with unknown credentials', ->
+
+      before (done) ->
+        sinon.stub(Credentials, 'get').callsArgWith(2, null, null)
+        Credentials.delete 'unknown', (error, result) ->
+          err = error
+          instance = result
+          done()
+
+      after ->
+        Credentials.get.restore()
+
+      it 'should provide an null error', ->
+        expect(err).to.be.null
+
+      it 'should not provide an instance', ->
+        expect(instance).to.be.null  
+
+
     describe 'by array', ->
 
       beforeEach (done) ->
