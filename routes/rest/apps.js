@@ -91,8 +91,9 @@ module.exports = function (app) {
    */
 
   app.del('/v1/apps/:id', authenticate, function (req, res, next) {
-    App.delete(req.params.id, function (err) {
+    App.delete(req.params.id, function (err, result) {
       if (err) { return next(err); }
+      if (!result) { return next(new NotFoundError()); }
       res.send(204);
     });
   });

@@ -558,6 +558,34 @@ describe 'Accounts REST Routes', ->
         res.text.should.equal 'Unauthorized'
 
 
+    describe 'with unknown account', ->
+
+      before (done) ->
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
+        sinon.stub(Account, 'delete').callsArgWith(1, null, null)
+        request(app)
+          .del("/v1/accounts/id")
+          .set('Authorization', 'Basic ' + validCredentials)
+          .send({})
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Credentials.get.restore()
+        Account.delete.restore()
+
+      it 'should respond 404', ->
+        res.statusCode.should.equal 404
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.contain 'application/json'
+
+      it 'should respond with "Not found" error', ->
+        res.body.error.should.equal 'Not found.'
+
+
     describe 'with valid request', ->
 
       before (done) ->
