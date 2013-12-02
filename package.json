@@ -37,7 +37,7 @@
     "modinha": "~0.0.18",
     "async": "~0.2.9",
     "cors": "~1.0.1",
-    "oauth2ui": "0.0.2",
+    "oauth2ui": "0.0.3",
     "redis": "~0.9.0",
     "form-urlencoded": "0.0.3",
     "mellt": "~1.0.0",
