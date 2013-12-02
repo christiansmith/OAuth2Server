@@ -16,7 +16,7 @@ OAuth2Server is available as an npm package.
 
     $ npm install oauth2server --save
 
-Only two files are required to set up your own instance locally, `app.js` and `config.json`. For [deployment](https://github.com/christiansmith/OAuth2Server/wiki/Deployment) to [Modulus.io](http://modulus.io), the only additional requirement is a `package.json` file listing OAuth2Server (~0.0.3) as a dependency.
+Only two files are required to set up your own instance locally, `app.js` and `config.development.json`. For [deployment](https://github.com/christiansmith/OAuth2Server/wiki/Deployment) to [Modulus.io](http://modulus.io), the only additional requirements are `config.production.json` with a valid Redis configuration and a `package.json` file listing OAuth2Server as a dependency.
 
 
 #### app.js
@@ -25,13 +25,14 @@ Only two files are required to set up your own instance locally, `app.js` and `c
 require('oauth2server').start();
 ```
 
-#### config.json
+#### config.production.json
 
 ```json
 {
-  "adapter": {
-    "type": "modinha-mongodb",
-    "uri": "mongodb://USERNAME:PASSWORD@mongo.onmodulus.net:27017/DATABASE"
+  "local-ui": "path/to/ui/build",
+  "redis": {
+    "url": "redis://HOST:PORT",
+    "auth": "PASSWORD"
   }
 }
 ```
@@ -44,6 +45,8 @@ require('oauth2server').start();
 Please fork the repository if you intend to contribute. Otherwise just clone this repo. 
 
     $ git clone https://github.com/christiansmith/OAuth2Server.git
+
+You'll need to create a configuration file for development. Config files are loaded based on the NODE_ENV setting. By default, config.development.json is loaded and the server will look for a redis instance at localhost.
 
 To get started experimenting, there's a script for generating sample data in your configured storage target.
 
@@ -64,16 +67,16 @@ To help us **build the thing right**:
 * *Promote the project* and help us find more early users by blogging, tweeting, +1-ing, starring, gossiping and anything else you think might help.
 
 
-## Sponsorship
+## Sponsorship & Consulting
 
-Accelerate development of features you need by sponsoring the project. Contact Christian Smith for more information (smith at anvil dot io).
+Accelerate development of features you need by sponsoring the project, or get help integrating OAuth2Server into your architecture. Contact Christian Smith for more information (smith at anvil dot io).
 
 
 ## Related Projects
 
 * [OAuth2Resource](https://github.com/christiansmith/OAuth2Resource) provides Express middleware for authorizing access to resource servers protected by OAuth2Server.
 * [OAuth2Admin](https://github.com/christiansmith/OAuth2Admin) is a standalone AngularJS application for administration of a running OAuth2Server instance.
-* [Modinha](https://github.com/christiansmith/Modinha) Schema-based data modeling with swappable storage adapters. Extracted from OAuth2Server
+* [Modinha](https://github.com/christiansmith/Modinha) Schema-based data modeling. Extracted from OAuth2Server
 
 
 ## Acknowledgements
