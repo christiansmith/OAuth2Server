@@ -22,10 +22,11 @@ Token     = require path.join(cwd, 'models/Token')
 
 
 
-redis     = Token.__redis
-multi     = redis.Multi.prototype
-rclient   = redis.RedisClient.prototype
-
+redis   = require('redis')
+client  = redis.createClient()
+multi   = redis.Multi.prototype
+rclient = redis.RedisClient.prototype
+Token.__client = client
 
 
 

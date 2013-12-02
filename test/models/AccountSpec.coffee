@@ -25,11 +25,11 @@ Account = require path.join(cwd, 'models/Account')
 
 
 # Redis lib for spying and stubbing
-redis   = Account.__redis
-client  = Account.__client
+redis   = require('redis')
+client  = redis.createClient()
 multi   = redis.Multi.prototype
 rclient = redis.RedisClient.prototype
-
+Account.__client = client
 
 
 

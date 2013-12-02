@@ -55,7 +55,7 @@ module.exports = function (app) {
   app.post('/v1/accounts', authenticate, function (req, res, next) {
     Account.insert(req.body, function (err, instance) {
       if (err) { return next(err); }
-      res.json(201, Account.initialize(instance));
+      res.json(201, instance);
     });
   });
 
@@ -68,7 +68,7 @@ module.exports = function (app) {
     Account.replace(req.params.id, req.body, function (err, instance) {
       if (err) { return next(err); }
       if (!instance) { return next(new NotFoundError()); }
-      res.json(new Account(instance));
+      res.json(instance);
     });
   });
 

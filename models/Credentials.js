@@ -2,9 +2,10 @@
  * Module dependencies
  */
 
-var Modinha = require('modinha')
+var client   = require('../config/redis')
+  , Modinha  = require('modinha')
   , Document = require('modinha-redis')
-  , random  = Modinha.defaults.random
+  , random   = Modinha.defaults.random
   ;
 
 
@@ -24,7 +25,7 @@ var Credentials = Modinha.define('credentials', {
  */
 
 Credentials.extend(Document);
-
+Credentials.__client = client;
 
 /**
  * Exports

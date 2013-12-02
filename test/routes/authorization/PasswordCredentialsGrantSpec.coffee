@@ -71,7 +71,7 @@ describe 'resource owner password credentials grant', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'getByKey').callsArgWith(1, null, application)
-        sinon.stub(Account, 'getByEmail').callsArgWith(1, null, account)
+        sinon.stub(Account, 'getByEmail').callsArgWith(2, null, account)
         sinon.stub(Account.prototype, 'verifyPassword').callsArgWith(1, null, true)
         request(app)
           .post('/token')
@@ -110,7 +110,7 @@ describe 'resource owner password credentials grant', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)      
-        sinon.stub(Account, 'getByEmail').callsArgWith(1, null, null)
+        sinon.stub(Account, 'getByEmail').callsArgWith(2, null, null)
         request(app)
           .post('/token')
           .set('Authorization', 'Basic ' + validCredentials)
@@ -178,7 +178,7 @@ describe 'resource owner password credentials grant', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)      
-        sinon.stub(Account, 'getByEmail').callsArgWith(1, null, account)
+        sinon.stub(Account, 'getByEmail').callsArgWith(2, null, account)
         sinon.stub(Account.prototype, 'verifyPassword').callsArgWith(1, null, false)
         request(app)
           .post('/token')

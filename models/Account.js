@@ -2,7 +2,8 @@
  * Module dependencies
  */
 
-var bcrypt        = require('bcrypt')
+var client        = require('../config/redis')
+  , bcrypt        = require('bcrypt')
   , CheckPassword = require('mellt').CheckPassword
   , Modinha       = require('modinha')
   , Document      = require('modinha-redis')
@@ -28,17 +29,14 @@ var Account = Modinha.define('accounts', {
  */
 
 Account.extend(Document);
-
+Account.__client = client;
 
 /**
  * Create
  */
 
 Account.insert = function (data, options, callback) {
-  var collection = Account.collection
-    , account    = Account.initialize(data, { private: true })
-    , validation = account.validate()
-    ;
+  var collection = Account.collection;
 
   if (!callback) {
     callback = options;
@@ -55,11 +53,16 @@ Account.insert = function (data, options, callback) {
     return callback(new InsecurePasswordError());
   }
 
+  // create an instance
+  var account = Account.initialize(data, { private: true });
+
   // hash the password
   if (data.password) {
     data.salt    = bcrypt.genSaltSync(10)
     account.hash = bcrypt.hashSync(data.password, data.salt);
   }
+
+  var validation = account.validate()
 
   // require a valid account
   if (!validation.valid) { 

@@ -2,13 +2,16 @@
  * Configuration dependencies
  */
 
-var cwd      = process.cwd()
-  , path     = require('path')  
-  , config   = require(path.join(cwd, 'config.json'))
-  , express  = require('express')
-  , passport = require('passport') 
-  , Modinha  = require('modinha')
-  , cors     = require('cors')
+var cwd          = process.cwd()
+  , env          = process.env.NODE_ENV || 'development'
+  , path         = require('path')  
+  , config       = require(path.join(cwd, 'config.' + env + '.json'))
+  , client       = require('./redis')(config.redis)
+  , express      = require('express')
+  , passport     = require('passport')
+  , RedisStore   = require('connect-redis')(express)
+  , sessionStore = new RedisStore({ client: client })
+  , cors         = require('cors')
   ;
 
 
@@ -34,12 +37,16 @@ module.exports = function (app) {
     app.use(express.bodyParser());
     
     // express session
-    app.use(express.session());
+    app.use(express.session({
+      store: sessionStore,
+      secret: 'asdf'
+    }));
 
     // passport authentication middleware
     app.use(passport.initialize());
     app.use(passport.session());
 
+    // cross-origin support
     app.use(cors());
 
     // Explicitly register app.router
@@ -53,8 +60,6 @@ module.exports = function (app) {
         : { error: err.message, error_description: err.description };
       res.send(err.statusCode || 500, error);
     });
-
-    Modinha.adapter = config.adapter;
 
     // Static file server for UI
     if (app.settings['local-ui'] !== false) {

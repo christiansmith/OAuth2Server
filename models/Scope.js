@@ -2,9 +2,10 @@
  * Module dependencies
  */
 
-var Modinha = require('modinha')
+var client   = require('../config/redis')
+  , Modinha  = require('modinha')
   , Document = require('modinha-redis')
-  , Service = require('./Service')
+  , Service  = require('./Service')
   ;
 
 
@@ -24,6 +25,7 @@ var Scope = Modinha.define('scopes', {
  */
 
 Scope.extend(Document);
+Scope.__client = client;
 
 
 /**

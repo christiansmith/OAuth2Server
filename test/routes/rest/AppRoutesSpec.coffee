@@ -278,7 +278,7 @@ describe 'Apps REST Routes', ->
 
       it 'should respond with the resource', ->
         res.body.should.have.property 'redirect_uri'
-
+        
 
     describe 'with invalid data', ->
 

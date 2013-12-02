@@ -26,7 +26,7 @@ module.exports = function (app) {
   }
 
   function unknownUsername (req, res, next) {
-    Account.getByEmail(req.body.username, function (err, account) {
+    Account.getByEmail(req.body.username, {private:true}, function (err, account) {
       if (!account) { 
         next(new AuthorizationError('invalid_grant', 'invalid resource owner credentials'))
       } else {
@@ -51,7 +51,7 @@ module.exports = function (app) {
   }
 
   function lookupClient (req, res, next) {
-    App.getByKey(req.user._id, function (err, application) {
+    App.getByKey(req.user.key, function (err, application) {
       if (err) { return next(err); }
       req.client = application;
       next();

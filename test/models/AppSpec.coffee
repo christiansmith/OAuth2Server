@@ -26,11 +26,11 @@ Credentials = require path.join(cwd, 'models/Credentials')
 
 
 # Redis lib for spying and stubbing
-redis   = App.__redis
-client  = App.__client
+redis   = require('redis')
+client  = redis.createClient()
 multi   = redis.Multi.prototype
 rclient = redis.RedisClient.prototype
-
+App.__client = client
 
 
 

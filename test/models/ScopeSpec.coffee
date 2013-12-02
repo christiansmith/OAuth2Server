@@ -22,10 +22,11 @@ Scope     = require path.join(cwd, 'models/Scope')
 
 
 
-redis     = Scope.__redis
-multi     = redis.Multi.prototype
-rclient   = redis.RedisClient.prototype
-
+redis   = require('redis')
+client  = redis.createClient()
+multi   = redis.Multi.prototype
+rclient = redis.RedisClient.prototype
+Scope.__client = client
 
 
 

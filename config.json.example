@@ -1,6 +1,7 @@
 {
-  "adapter": {
-    "type": "modinha-mongodb",
-    "uri": "mongodb://USERNAME:PASSWORD@mongo.onmodulus.net:27017/DATABASE"
+  "local-ui": "node_modules/oauth2ui/dist",
+  "redis": {
+    "url": "redis://HOST:PORT",
+    "auth": "PASSWORD"
   }
 }

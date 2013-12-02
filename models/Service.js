@@ -2,7 +2,8 @@
  * Module dependencies
  */
 
-var Modinha     = require('modinha')
+var client      = require('../config/redis')
+  , Modinha     = require('modinha')
   , Credentials = require('./Credentials')
   , Document    = require('modinha-redis')
   ;
@@ -24,6 +25,7 @@ var Service = Modinha.define('services', {
  */
 
 Service.extend(Document);
+Service.__client = client;
 
 
 /**

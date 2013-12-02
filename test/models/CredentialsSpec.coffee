@@ -22,10 +22,11 @@ Credentials = require path.join(cwd, 'models/Credentials')
 
 
 
-redis     = Credentials.__redis
-multi     = redis.Multi.prototype
-rclient   = redis.RedisClient.prototype
-
+redis   = require('redis')
+client  = redis.createClient()
+multi   = redis.Multi.prototype
+rclient = redis.RedisClient.prototype
+Credentials.__client = client
 
 
 

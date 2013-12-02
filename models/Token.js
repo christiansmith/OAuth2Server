@@ -2,7 +2,8 @@
  * Module dependencies
  */
 
-var Modinha  = require('modinha')
+var client   = require('../config/redis')
+  , Modinha  = require('modinha')
   , Document = require('modinha-redis')
   , random   = Modinha.defaults.random
   , InvalidTokenError = require('../errors/InvalidTokenError')
@@ -28,7 +29,7 @@ var Token = Modinha.define('tokens', {
  */
 
 Token.extend(Document);
-
+Token.__client = client;
 
 /**
  * Issue mapping

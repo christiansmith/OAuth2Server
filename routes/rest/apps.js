@@ -55,7 +55,7 @@ module.exports = function (app) {
   app.post('/v1/apps', authenticate, function (req, res, next) {
     App.insert(req.body, function (err, instance) {
       if (err) { return next(err); }
-      res.json(201, App.initialize(instance));
+      res.json(201, instance);
     });
   });
 
