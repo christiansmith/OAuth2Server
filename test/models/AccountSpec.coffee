@@ -89,6 +89,10 @@ describe 'Account', ->
     it 'should have hash', ->
       Account.schema.hash.type.should.equal 'string'
 
+    it 'should hash a password', ->
+      account = new Account { password: 'secret1337' }, { private: true }
+      expect(typeof account.hash).equals 'string'
+
     it 'should protect hash', ->
       Account.schema.hash.private.should.equal true
 
@@ -268,7 +272,7 @@ describe 'Account', ->
 
       it 'should intialize private properties', ->
         instances.forEach (instance) ->
-          instance.hash.should.equal 'private'
+          expect(typeof instance.hash).equals('string')
 
 
     describe 'in chronological order', ->
@@ -452,7 +456,7 @@ describe 'Account', ->
         expect(instance).to.be.instanceof Account
 
       it 'should initialize private properties', ->
-        expect(instance.hash).to.equal 'private'
+        expect(typeof instance.hash).equals('string')
 
 
 

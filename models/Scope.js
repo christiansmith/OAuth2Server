@@ -14,10 +14,34 @@ var client   = require('../config/redis')
  */
 
 var Scope = Modinha.define('scopes', {
-  url:         { type: 'string', required: true, format: 'url', uniqueId: true },
-  description: { type: 'string', required: true },
-  serviceId:   { type: 'string', reference: Service }
+  _id: {
+    type: 'string'
+  },
+  url: {
+    type: 'string',
+    uniqueId: true,
+    required: true,
+    format: 'url',
+    after: encodeUrlBase64
+  },
+  description: {
+    type: 'string',
+    required: true
+  },
+  serviceId: {
+    type: 'string',
+    reference: Service
+  }
 });
+
+
+/**
+ * Encode URL Base64
+ */
+
+function encodeUrlBase64 (data) {
+  this._id = new Buffer(this.url).toString('base64');
+}
 
 
 /**

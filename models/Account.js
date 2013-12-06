@@ -20,8 +20,26 @@ var Account = Modinha.define('accounts', {
   name:     { type: 'string' }, 
   email:    { type: 'string', required: true, unique: true, format: 'email' },
   roles:    { type: 'array',  default: [] },
-  hash:     { type: 'string', private: true }
+  hash:     { type: 'string', private: true, set: hashPassword }
 });
+
+
+/**
+ * Hash Password Setter
+ */
+
+function hashPassword (data) {
+  var password = data.password
+    , hash     = data.hash
+    ;
+
+  if (password) {
+    var salt = bcrypt.genSaltSync(10);
+    hash = bcrypt.hashSync(password, salt);
+  }
+  
+  this.hash = hash;
+}
 
 
 /**
@@ -54,15 +72,9 @@ Account.insert = function (data, options, callback) {
   }
 
   // create an instance
-  var account = Account.initialize(data, { private: true });
-
-  // hash the password
-  if (data.password) {
-    data.salt    = bcrypt.genSaltSync(10)
-    account.hash = bcrypt.hashSync(data.password, data.salt);
-  }
-
-  var validation = account.validate()
+  var account = Account.initialize(data, { private: true })
+    , validation = account.validate()
+    ;
 
   // require a valid account
   if (!validation.valid) { 

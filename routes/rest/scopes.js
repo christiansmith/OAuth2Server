@@ -40,7 +40,8 @@ module.exports = function (app) {
    */
 
   app.get('/v1/scopes/:id', authenticate, function (req, res, next) {
-    Scope.get(req.params.id, function (err, instance) {
+    var url = new Buffer(req.params.id, 'base64').toString();
+    Scope.get(url, function (err, instance) {
       if (err) { return next(err); }
       if (!instance) { return next(new NotFoundError()); }
       res.json(instance);
@@ -65,7 +66,8 @@ module.exports = function (app) {
    */
 
   app.put('/v1/scopes/:id', authenticate, function (req, res, next) {
-    Scope.replace(req.params.id, req.body, function (err, instance) {
+    var url = new Buffer(req.params.id, 'base64').toString();
+    Scope.replace(url, req.body, function (err, instance) {
       if (err) { return next(err); }
       if (!instance) { return next(new NotFoundError()); }
       res.json(new Scope(instance));
@@ -78,7 +80,8 @@ module.exports = function (app) {
    */
 
   app.patch('/v1/scopes/:id', authenticate, function (req, res, next) {
-    Scope.patch(req.params.id, req.body, function (err, instance) {
+    var url = new Buffer(req.params.id, 'base64').toString();
+    Scope.patch(url, req.body, function (err, instance) {
       if (err) { return next(err); }
       if (!instance) { return next(new NotFoundError()); }
       res.json(instance)
@@ -91,7 +94,8 @@ module.exports = function (app) {
    */
 
   app.del('/v1/scopes/:id', authenticate, function (req, res, next) {
-    Scope.delete(req.params.id, function (err, result) {
+    var url = new Buffer(req.params.id, 'base64').toString();
+    Scope.delete(url, function (err, result) {
       if (err) { return next(err); }
       if (!result) { return next(new NotFoundError()); }
       res.send(204);

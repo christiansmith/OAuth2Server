@@ -57,6 +57,10 @@ describe 'Scope', ->
       scope = new Scope { url: 'wrong' }
       validation = scope.validate()
 
+
+    it 'should have an _id', ->
+      Scope.schema._id.type.should.equal 'string'
+
     it 'should have a url', ->
       Scope.schema.url.type.should.equal 'string'
 
@@ -68,6 +72,10 @@ describe 'Scope', ->
 
     it 'should require url to be a valid url', ->
       validation.errors.url.attribute.should.equal 'format'
+
+    it 'should set _id to base64 encoded url', ->
+      scope = new Scope { url: 'http://api.tld/resource' }
+      scope._id.should.equal new Buffer(scope.url).toString('base64')
 
     it 'should have a description', ->
       Scope.schema.description.type.should.equal 'string'
@@ -310,7 +318,7 @@ describe 'Scope', ->
         expect(instance.secret).to.be.undefined
 
       it 'should store the serialized instance by url', ->
-        multi.hset.should.have.been.calledWith 'scopes', instance.url, Scope.serialize(instance)
+        multi.hset.should.have.been.calledWith 'scopes', instance.url, sinon.match(instance.url)
 
       it 'should index the instance', ->
         Scope.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
