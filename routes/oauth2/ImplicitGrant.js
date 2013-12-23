@@ -127,7 +127,7 @@ module.exports = function (app) {
     mismatchingRedirectURI,  
     function (req, res, next) {
       if (req.body.authorized) {
-        Token.issue(req.client, req.user, { scope: '' }, function (err, token) {
+        Token.issue(req.client, req.user, { scope: req.body.scope }, function (err, token) {
           if (err) { return next(err); }
           res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
         }); 

@@ -681,7 +681,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(mismatchingRedirectUri)
         req.end (error, response) ->
@@ -718,7 +718,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(missingRedirectUri)
         req.end (error, response) ->
