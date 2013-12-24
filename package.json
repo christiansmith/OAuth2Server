@@ -18,7 +18,8 @@
     "Faker": "~0.5.11",
     "grunt-release": "~0.5.1",
     "sinon": "~1.7.3",
-    "sinon-chai": "~2.4.0"
+    "sinon-chai": "~2.4.0",
+    "coffee-script": "~1.6.3"
   },
   "repository": {
     "type": "git",
