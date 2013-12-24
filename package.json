@@ -19,7 +19,8 @@
     "grunt-release": "~0.5.1",
     "sinon": "~1.7.3",
     "sinon-chai": "~2.4.0",
-    "coffee-script": "~1.6.3"
+    "coffee-script": "~1.6.3",
+    "grunt-retire": "~0.1.21"
   },
   "repository": {
     "type": "git",
