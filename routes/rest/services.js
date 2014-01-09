@@ -55,7 +55,7 @@ module.exports = function (app) {
   app.post('/v1/services', authenticate, function (req, res, next) {
     Service.insert(req.body, function (err, instance) {
       if (err) { return next(err); }
-      res.json(201, Service.initialize(instance));
+      res.json(201, instance);
     });
   });
 
