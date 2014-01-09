@@ -85,6 +85,8 @@ describe 'Access Token Validation', ->
       it 'should respond with confirmation', ->
         res.body.authorized.should.be.true
 
+      it 'should respond with account id', ->
+        res.body.account_id.should.equal token.accountId
 
 
 

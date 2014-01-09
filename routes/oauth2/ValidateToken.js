@@ -21,13 +21,16 @@ module.exports = function (app) {
    */
 
   app.post('/access', authenticateBasic, function (req, res, next) {
-    var token  = req.body.access_token
+    var access_token  = req.body.access_token
       , scope  = req.body.scope
       ;
 
-    Token.verify(token, scope, function (err, verified) {
+    Token.verify(access_token, scope, function (err, token) {
       if (err) { return next(err); }
-      res.json({ authorized: true });
+      res.json({
+        authorized: true,
+        account_id: token.accountId
+      });
     });
   });
 
