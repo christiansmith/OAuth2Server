@@ -22,6 +22,7 @@ module.exports = function (app) {
 
   app.get('/signin', ui);
   app.get('/signup', ui);
+  app.get('/account', ui);
 
 
   /**
