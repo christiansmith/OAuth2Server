@@ -69,12 +69,12 @@ Token.issue = function (app, account, options, callback) {
 
 Token.verify = function (access, scope, callback) {
   this.get(access, function (err, token) {
-    if (!token) { 
-      return callback(new InvalidTokenError('Unknown access token')); 
+    if (!token) {
+      return callback(new InvalidTokenError('Unknown access token'));
     }
-    
-    if (new Date() > token.expires_at) { 
-      return callback(new InvalidTokenError('Expired access token')); 
+
+    if (new Date() > token.expires_at) {
+      return callback(new InvalidTokenError('Expired access token'));
     }
 
     if (token.scope.indexOf(scope) === -1) {

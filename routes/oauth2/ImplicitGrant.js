@@ -3,10 +3,10 @@
  */
 
 var App            = require('../../models/App')
-  , Scope          = require('../../models/Scope')   
-  , Token          = require('../../models/Token')  
+  , Scope          = require('../../models/Scope')
+  , Token          = require('../../models/Token')
   , FormUrlencoded = require('form-urlencoded')
-  , AuthorizationError = require('../../errors/AuthorizationError')  
+  , AuthorizationError = require('../../errors/AuthorizationError')
   ;
 
 
@@ -42,13 +42,13 @@ module.exports = function (app) {
   function missingClient (req, res, next) {
     next((!req[methodObject[req.method]].client_id)
       ? new AuthorizationError('unauthorized_client', 'Missing client id', 403)
-      : null); 
+      : null);
   };
 
   function unknownClient (req, res, next) {
     App.get(req[methodObject[req.method]].client_id, function (err, client) {
-      if (!client) { 
-        next(new AuthorizationError('unauthorized_client', 'Unknown client', 403)); 
+      if (!client) {
+        next(new AuthorizationError('unauthorized_client', 'Unknown client', 403));
       } else {
         req.client = client;
         next();
@@ -101,36 +101,36 @@ module.exports = function (app) {
    * Authorize endpoints
    */
 
-  app.get('/authorize', 
-    ui, 
-    missingClient, 
+  app.get('/authorize',
+    ui,
+    missingClient,
     unknownClient,
-    missingResponseType, 
+    missingResponseType,
     unsupportedResponseType,
     missingRedirectURI,
     mismatchingRedirectURI,
     scopeDetails,
     function (req, res, next) {
-      res.json({ 
-        app: req.client, 
+      res.json({
+        app: req.client,
         scope: req.scope
       });
     });
-  
-  app.post('/authorize', 
-    authenticateUser, 
-    missingClient,     
+
+  app.post('/authorize',
+    authenticateUser,
+    missingClient,
     unknownClient,
     missingResponseType,
     unsupportedResponseType,
     missingRedirectURI,
-    mismatchingRedirectURI,  
+    mismatchingRedirectURI,
     function (req, res, next) {
       if (req.body.authorized) {
         Token.issue(req.client, req.user, { scope: req.body.scope }, function (err, token) {
           if (err) { return next(err); }
           res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
-        }); 
+        });
       } else {
         res.redirect(req.body.redirect_uri + '#error=access_denied');
       }

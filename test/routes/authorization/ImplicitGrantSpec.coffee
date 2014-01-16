@@ -93,6 +93,11 @@ describe 'implicit grant', ->
 
 
 
+      #describe 'with valid
+
+
+
+
       describe 'with unsupported response type', ->
 
         before (done) ->
@@ -116,7 +121,7 @@ describe 'implicit grant', ->
           res.headers['content-type'].should.contain 'application/json'
 
         it 'should redirect to the redirect uri'
-        
+
         it 'should respond with an error', ->
           res.body.error.should.equal 'unsupported_response_type'
 
@@ -152,7 +157,7 @@ describe 'implicit grant', ->
           res.headers['content-type'].should.contain 'application/json'
 
         it 'should redirect to the redirect uri'
-        
+
         it 'should respond with an error', ->
           res.body.error.should.equal 'invalid_request'
 
@@ -397,13 +402,13 @@ describe 'implicit grant', ->
         response_type: 'token'
         redirect_uri: application.redirect_uri
 
-      unsupportedResponseType = 
+      unsupportedResponseType =
         authorized: true
         client_id: application._id
         response_type: 'invalid'
         redirect_uri: application.redirect_uri
 
-      missingResponseType = 
+      missingResponseType =
         authorized: true
         client_id: application._id
         redirect_uri: application.redirect_uri
@@ -412,12 +417,12 @@ describe 'implicit grant', ->
         authorized: true
         client_id: application._id
         response_type: 'token'
-        redirect_uri: application.redirect_uri        
+        redirect_uri: application.redirect_uri
 
       missingClientId =
         authorized: true
         response_type: 'token'
-        redirect_uri: application.redirect_uri  
+        redirect_uri: application.redirect_uri
 
       mismatchingRedirectUri =
         authorized: true
@@ -472,7 +477,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(accessGranted)
         req.end (error, response) ->
@@ -507,7 +512,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(accessDenied)
         req.end (error, response) ->
@@ -539,7 +544,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(unsupportedResponseType)
         req.end (error, response) ->
@@ -557,7 +562,7 @@ describe 'implicit grant', ->
         res.headers['content-type'].should.contain 'application/json'
 
       it 'should redirect to the redirect uri'
-      
+
       it 'should respond with an error', ->
         res.body.error.should.equal 'unsupported_response_type'
 
@@ -575,7 +580,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(missingResponseType)
         req.end (error, response) ->
@@ -593,7 +598,7 @@ describe 'implicit grant', ->
         res.headers['content-type'].should.contain 'application/json'
 
       it 'should redirect to the redirect uri'
-      
+
       it 'should respond with an error', ->
         res.body.error.should.equal 'invalid_request'
 
@@ -611,7 +616,7 @@ describe 'implicit grant', ->
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, null)
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(invalidClientId)
         req.end (error, response) ->
@@ -630,7 +635,7 @@ describe 'implicit grant', ->
 
       it 'should NOT redirect', ->
         res.statusCode.should.not.equal 302
-      
+
       it 'should respond with an error', ->
         res.body.error.should.equal 'unauthorized_client'
 
@@ -647,7 +652,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         req = request(app).post('/authorize')
-        agent.attachCookies req      
+        agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(missingClientId)
         req.end (error, response) ->
@@ -663,7 +668,7 @@ describe 'implicit grant', ->
 
       it 'should NOT redirect', ->
         res.statusCode.should.not.equal 302
-      
+
       it 'should respond with an error', ->
         res.body.error.should.equal 'unauthorized_client'
 
@@ -700,7 +705,7 @@ describe 'implicit grant', ->
 
       it 'should NOT redirect', ->
         res.statusCode.should.not.equal 302
-      
+
       it 'should respond with an error', ->
         res.body.error.should.equal 'invalid_request'
 
@@ -737,7 +742,7 @@ describe 'implicit grant', ->
 
       it 'should NOT redirect', ->
         res.statusCode.should.not.equal 302
-      
+
       it 'should respond with an error', ->
         res.body.error.should.equal 'invalid_request'
 

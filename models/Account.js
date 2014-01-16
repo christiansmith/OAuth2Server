@@ -17,7 +17,7 @@ var client        = require('../config/redis')
  */
 
 var Account = Modinha.define('accounts', {
-  name:     { type: 'string' }, 
+  name:     { type: 'string' },
   email:    { type: 'string', required: true, unique: true, format: 'email' },
   roles:    { type: 'array',  default: [] },
   hash:     { type: 'string', private: true, set: hashPassword }
@@ -37,7 +37,7 @@ function hashPassword (data) {
     var salt = bcrypt.genSaltSync(10);
     hash = bcrypt.hashSync(password, salt);
   }
-  
+
   this.hash = hash;
 }
 
@@ -77,8 +77,8 @@ Account.insert = function (data, options, callback) {
     ;
 
   // require a valid account
-  if (!validation.valid) { 
-    return callback(validation); 
+  if (!validation.valid) {
+    return callback(validation);
   }
 
   // catch duplicate values
@@ -87,7 +87,7 @@ Account.insert = function (data, options, callback) {
 
     // batch operations
     var multi = Account.__client.multi()
-    
+
     // store the account
     multi.hset(collection, account._id, Account.serialize(account))
 
@@ -119,7 +119,7 @@ Account.prototype.verifyPassword = function (password, callback) {
 
 Account.authenticate = function (email, password, callback) {
   Account.getByEmail(email, { private: true }, function (err, account) {
-    if (!account) { 
+    if (!account) {
       return callback(null, false, { message: 'Unknown account.' });
     }
 

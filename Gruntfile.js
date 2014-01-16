@@ -19,7 +19,7 @@ module.exports = function (grunt) {
     },
     mochacov: {
       options: {
-        reporter: 'dot',
+        reporter: 'spec',
         compilers: ['coffee:coffee-script']
       },
       all: [
@@ -33,5 +33,5 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', ['mochacov', 'watch:test']);
-  
+
 };
