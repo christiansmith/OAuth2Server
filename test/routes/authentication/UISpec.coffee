@@ -87,6 +87,25 @@ describe 'UI', ->
 
 
 
+  describe 'GET /account/apps', ->
+
+    before (done) ->
+      request(app)
+        .get('/account/apps')
+        .end (error, response) ->
+          err = error
+          res = response
+          done()
+
+    it 'should respond 200', ->
+      res.statusCode.should.equal 200
+
+    it 'should respond with HTML', ->
+      res.headers['content-type'].should.contain 'text/html'
+
+
+
+
   describe 'GET /authorize', ->
 
     before (done) ->
