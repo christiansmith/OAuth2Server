@@ -77,4 +77,16 @@ module.exports = function (app) {
     }
   });
 
+
+  /**
+   * Session apps
+   */
+
+  app.get('/session/apps', app.authenticateUser, function (req, res, next) {
+    Account.listApps(req.user._id, function (err, apps) {
+      if (err) { return next(err); }
+      res.json(apps);
+    })
+  });
+
 };

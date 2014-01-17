@@ -5,7 +5,7 @@
 var cwd      = process.cwd()
   , path     = require('path')
   , passport = require('passport')
-  , pkg      = require('../package.json')  
+  , pkg      = require('../package.json')
   ;
 
 
@@ -16,19 +16,30 @@ var cwd      = process.cwd()
 module.exports = function (app) {
 
   /**
-   * Authentication middleware
+   * Basic authentication middleware
    */
 
-  app.authenticate = passport.authenticate('basic', { 
-    session: false 
+  app.authenticate = passport.authenticate('basic', {
+    session: false
   });
+
+
+  /**
+   * Local user authentication middleware
+   */
+
+  app.authenticateUser = function authenticateUser (req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    res.send(401, 'Unauthorized');
+  };
+
 
   /**
    * Welcome
    */
 
-  app.get('/', function (req, res) { 
-    res.json({ "Welcome": "OAuth2Server v" + pkg.version }); 
+  app.get('/', function (req, res) {
+    res.json({ "Welcome": "OAuth2Server v" + pkg.version });
   });
 
 
@@ -70,9 +81,9 @@ module.exports = function (app) {
   /**
    * Authentication routes
    */
-  
+
   if (app.settings['local-ui'] !== false) {
     require('./authentication')(app);
   }
-  
+
 };
