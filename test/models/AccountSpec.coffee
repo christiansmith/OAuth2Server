@@ -20,6 +20,7 @@ chai.should()
 # Code under test
 Modinha = require 'modinha'
 Account = require path.join(cwd, 'models/Account')
+App     = require path.join(cwd, 'models/App')
 
 
 
@@ -38,10 +39,10 @@ describe 'Account', ->
 
   {data,account,accounts,jsonAccounts} = {}
   {err,validation,instance,instances,update,deleted,original,ids,info} = {}
-  
+
 
   before ->
-  
+
     # Mock data
     data = []
 
@@ -53,7 +54,7 @@ describe 'Account', ->
         password: 'secret1337'
 
     accounts = Account.initialize(data, { private: true })
-    jsonAccounts = accounts.map (d) -> 
+    jsonAccounts = accounts.map (d) ->
       Account.serialize(d)
     ids = accounts.map (d) ->
       d._id
@@ -122,7 +123,7 @@ describe 'Account', ->
         rclient.zrevrange.restore()
 
       it 'should query the created index', ->
-        rclient.zrevrange.should.have.been.calledWith 'accounts:created', 0, 49  
+        rclient.zrevrange.should.have.been.calledWith 'accounts:created', 0, 49
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -234,7 +235,7 @@ describe 'Account', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10  
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof Account
 
@@ -266,7 +267,7 @@ describe 'Account', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10  
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof Account
 
@@ -290,13 +291,13 @@ describe 'Account', ->
         rclient.zrange.restore()
 
       it 'should query the created index', ->
-        rclient.zrange.should.have.been.calledWith 'accounts:created', 0, 49  
+        rclient.zrange.should.have.been.calledWith 'accounts:created', 0, 49
 
       it 'should provide null error', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10  
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof Account
 
@@ -400,7 +401,7 @@ describe 'Account', ->
 
       it 'should provide an empty array', ->
         Array.isArray(instances).should.be.true
-        instances.length.should.equal 0     
+        instances.length.should.equal 0
 
 
     describe 'with selection', ->
@@ -421,7 +422,7 @@ describe 'Account', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10  
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof Account
 
@@ -521,8 +522,8 @@ describe 'Account', ->
 
       after ->
         multi.hset.restore()
-        multi.zadd.restore() 
-        Account.index.restore()   
+        multi.zadd.restore()
+        Account.index.restore()
 
       it 'should provide a validation error', ->
         err.should.be.instanceof Modinha.ValidationError
@@ -686,7 +687,7 @@ describe 'Account', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null  
+        expect(instance).to.be.null
 
 
     describe 'with invalid data', ->
@@ -754,7 +755,7 @@ describe 'Account', ->
         sinon.stub(Account, 'get')
           .callsArgWith 2, null, account2
         sinon.stub(Account, 'getByEmail')
-          .callsArgWith 1, null, account1       
+          .callsArgWith 1, null, account1
 
         Account.replace account2._id, account2, (error, result) ->
           err = error
@@ -836,7 +837,7 @@ describe 'Account', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null 
+        expect(instance).to.be.null
 
 
     describe 'with invalid data', ->
@@ -911,7 +912,7 @@ describe 'Account', ->
         sinon.spy multi, 'zadd'
         sinon.spy Account, 'index'
         sinon.stub(Account, 'getByEmail')
-          .callsArgWith 1, new Account.UniqueValueError()        
+          .callsArgWith 1, new Account.UniqueValueError()
 
         Account.patch account._id, account, (error, result) ->
           err = error
@@ -981,7 +982,7 @@ describe 'Account', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null  
+        expect(instance).to.be.null
 
 
     describe 'by array', ->
@@ -1101,7 +1102,7 @@ describe 'Account', ->
       before (done) ->
         {email} = data[0]
         sinon.stub(Account, 'getByEmail').callsArgWith(2, null, accounts[0])
-        sinon.stub(Account.prototype, 'verifyPassword').callsArgWith(1, null, false)        
+        sinon.stub(Account.prototype, 'verifyPassword').callsArgWith(1, null, false)
 
         Account.authenticate email, 'wrong', (error, instance, information) ->
           err = error
@@ -1134,4 +1135,21 @@ describe 'Account', ->
 
 
 
+  describe 'list apps', ->
 
+    {options} = {}
+
+    before (done) ->
+      account = new Account
+      application = new App
+      options =  { index: 'accounts:' + account._id + ':apps' }
+      sinon.spy(App, 'list')
+      Account.listApps account._id, ->
+        done()
+
+    after ->
+      App.list.restore()
+
+    it 'should list apps', (done) ->
+      App.list.should.have.been.calledWith options
+      done()

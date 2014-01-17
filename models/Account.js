@@ -7,6 +7,7 @@ var client        = require('../config/redis')
   , CheckPassword = require('mellt').CheckPassword
   , Modinha       = require('modinha')
   , Document      = require('modinha-redis')
+  , App           = require('./App')
   , PasswordRequiredError = require('../errors/PasswordRequiredError')
   , InsecurePasswordError = require('../errors/InsecurePasswordError')
   ;
@@ -132,6 +133,28 @@ Account.authenticate = function (email, password, callback) {
     })
   })
 };
+
+
+
+/**
+ * Account apps
+ */
+
+Account.listApps = function (accountId, options, callback) {
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
+
+  options.index = 'accounts:' + accountId + ':apps';
+
+  App.list(options, function (err, apps) {
+    if (err) { return callback(err); }
+    callback(null, apps);
+  });
+
+};
+
 
 
 /**

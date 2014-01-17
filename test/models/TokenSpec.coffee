@@ -17,7 +17,7 @@ chai.should()
 
 
 Modinha   = require 'modinha'
-Token     = require path.join(cwd, 'models/Token')  
+Token     = require path.join(cwd, 'models/Token')
 
 
 
@@ -65,7 +65,7 @@ describe 'Token', ->
 
     it 'should use access token as unique id', ->
       Token.uniqueId.should.equal 'access'
-    
+
     it 'should have a token type', ->
       Token.schema.type.type.should.equal 'string'
 
@@ -84,7 +84,7 @@ describe 'Token', ->
 
     it 'should have an expiration'
     it 'should have a refresh token'
-    
+
     it 'should have scope', ->
       Token.schema.scope.type.should.equal 'string'
 
@@ -117,7 +117,7 @@ describe 'Token', ->
         rclient.zrevrange.restore()
 
       it 'should query the created index', ->
-        rclient.zrevrange.should.have.been.calledWith 'tokens:created', 0, 49  
+        rclient.zrevrange.should.have.been.calledWith 'tokens:created', 0, 49
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -262,7 +262,7 @@ describe 'Token', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10  
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof Token
 
@@ -287,7 +287,7 @@ describe 'Token', ->
 
       it 'should provide an empty array', ->
         Array.isArray(instances).should.be.true
-        instances.length.should.equal 0     
+        instances.length.should.equal 0
 
 
 
@@ -343,8 +343,8 @@ describe 'Token', ->
 
       after ->
         multi.hset.restore()
-        multi.zadd.restore() 
-        Token.index.restore()   
+        multi.zadd.restore()
+        Token.index.restore()
 
       it 'should provide a validation error', ->
         err.should.be.instanceof Modinha.ValidationError
@@ -421,7 +421,7 @@ describe 'Token', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null  
+        expect(instance).to.be.null
 
 
     describe 'with invalid data', ->
@@ -504,7 +504,7 @@ describe 'Token', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null 
+        expect(instance).to.be.null
 
 
     describe 'with invalid data', ->
@@ -584,7 +584,7 @@ describe 'Token', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null  
+        expect(instance).to.be.null
 
 
     describe 'by array', ->

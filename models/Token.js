@@ -31,6 +31,18 @@ var Token = Modinha.define('tokens', {
 Token.extend(Document);
 Token.__client = client;
 
+
+/**
+ * Indices
+ */
+
+Token.indexSet({
+  params: 'accountId',
+  key:    'accounts:$:apps',
+  value:  'appId'
+});
+
+
 /**
  * Issue mapping
  */
