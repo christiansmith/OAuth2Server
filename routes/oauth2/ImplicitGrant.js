@@ -80,6 +80,25 @@ module.exports = function (app) {
       : null);
   }
 
+
+  /**
+   * Validate authorization params
+   */
+
+  var validateRequest = [
+    missingClient,
+    unknownClient,
+    missingResponseType,
+    unsupportedResponseType,
+    missingRedirectURI,
+    mismatchingRedirectURI,
+  ];
+
+
+  /**
+   * Get scope details for authorize view
+   */
+
   function scopeDetails (req, res, next) {
     var scope = (req.query.scope)
               ? req.query.scope.split(' ')
@@ -97,43 +116,104 @@ module.exports = function (app) {
     }
   }
 
+
   /**
-   * Authorize endpoints
+   * Issue Access Token
    */
 
-  app.get('/authorize',
-    ui,
-    missingClient,
-    unknownClient,
-    missingResponseType,
-    unsupportedResponseType,
-    missingRedirectURI,
-    mismatchingRedirectURI,
-    scopeDetails,
-    function (req, res, next) {
-      res.json({
-        app: req.client,
-        scope: req.scope
-      });
-    });
+  function issueToken (req, res, next) {
+    if (req.body.authorized) {
+      Token.issue(req.client, req.user, { scope: req.body.scope }, function (err, token) {
+        req.token = token;
+        next(err);
+      })
+    } else {
+      next();
+    }
+  }
 
-  app.post('/authorize',
-    authenticateUser,
-    missingClient,
-    unknownClient,
-    missingResponseType,
-    unsupportedResponseType,
-    missingRedirectURI,
-    mismatchingRedirectURI,
-    function (req, res, next) {
-      if (req.body.authorized) {
-        Token.issue(req.client, req.user, { scope: req.body.scope }, function (err, token) {
-          if (err) { return next(err); }
-          res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
-        });
-      } else {
-        res.redirect(req.body.redirect_uri + '#error=access_denied');
-      }
+
+  /**
+   * Redirect to client app
+   */
+
+  function redirectToClient (req, res, next) {
+    if (req.token) {
+      res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(req.token));
+    } else if (req.body.authorized === false) {
+      res.redirect(req.body.redirect_uri + '#error=access_denied');
+    } else {
+      next();
+    }
+  }
+
+
+  /**
+   * Find existing access token
+   */
+
+  //function findExistingToken (req, res, next) {
+  //  if (req.user && req.query.client_id) {
+  //    Token.getByUserAndClient(req.user._id, req.query.client_id, function (err, token) {
+  //      req.token = token;
+  //      next(err);
+  //    });
+  //  } else {
+  //    next();
+  //  }
+  //}
+
+
+  /**
+   * GET /authorize
+   */
+
+  app.get('/authorize', ui, validateRequest, scopeDetails, function (req, res, next) {
+    res.json({
+      app: req.client,
+      scope: req.scope
     });
+  });
+
+
+  /**
+   * POST /authorize
+   */
+
+  app.post('/authorize', authenticateUser, validateRequest, issueToken, redirectToClient);
 
 };
+
+
+
+  //// sketch
+  //function reuseToken (req, res, next) {
+
+  //  // the user is authenticated
+  //  // check for an existing access token that matches
+  //  // the user account and client app.
+  //  if (req.user) {
+  //    Token.getByUserAndClient(user._id, req.params.client_id, function (err, token) {
+  //      if (err) { return next(err); }
+
+  //      // provide the app with existing access token
+  //      if (token) {
+  //        //validateRequest(req, res, next);
+  //        res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
+  //      }
+
+  //      // there is no existing token
+  //      // pass to the next middleware
+  //      else {
+  //        return next();
+  //      }
+
+  //    });
+  //  }
+
+  //  // the user isn't authenticated
+  //  // pass to the next middleware
+  //  else {
+  //    return next();
+  //  }
+  //}

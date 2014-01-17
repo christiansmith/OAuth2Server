@@ -59,6 +59,58 @@ describe 'implicit grant', ->
 
 
 
+    #describe 'with valid request, existing session and existing access token', ->
+
+
+
+    #  before (done) ->
+
+    #    application = new App redirect_uri: "https://#{Faker.Internet.domainName()}/callback"
+    #    account = new Account
+    #    token = new Token appId: application._id, accountId: account._id, scope: Faker.Internet.domainName()
+    #    sinon.stub(Token, 'get').callsArgWith(1, null, token)
+    #    successInfo = message: 'Authenticated successfully!'
+
+    #    agent = request.agent()
+    #    login = email: 'valid@example.com', password: 'secret1337'
+    #    #sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
+    #    #sinon.stub(passport, 'deserializeUser').callsArgWith(1, null, account)
+    #    request(app).post('/login').send(login).end (err, res) ->
+    #      agent.saveCookies res
+    #      #sinon.stub(App, 'get').callsArgWith(1, null, application)
+    #      req = request(app).get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
+    #      agent.attachCookies req
+    #      req.set('Content-type', 'application/json')
+    #      #req.send(accessGranted)
+    #      req.end (error, response) ->
+    #          err = error
+    #          res = response
+    #          done()
+
+
+
+    #  after ->
+    #    #Token.insert.restore()
+    #    #Account.authenticate.restore()
+    #    #passport.deserializeUser.restore()
+    #    #App.get.restore()
+
+    #  it 'should respond 302', ->
+    #    res.statusCode.should.equal 302
+
+    #  it 'should redirect to the redirect uri', ->
+    #    res.headers.location.should.contain application.redirect_uri
+
+    #  it 'should respond with access token', ->
+    #    res.headers.location.should.contain "access_token=#{token.access}"
+
+    #  it 'should respond with token type', ->
+    #    res.headers.location.should.contain "token_type=#{token.type}"
+
+    #  it 'should respond with expriration'
+    #  it 'should respond with scope'
+    #  it 'should respond with state'
+
 
     describe 'with application/json', ->
 
@@ -93,7 +145,6 @@ describe 'implicit grant', ->
 
 
 
-      #describe 'with valid
 
 
 
