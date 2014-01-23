@@ -36,10 +36,11 @@ Token.__client = client;
  * Indices
  */
 
-Token.indexSet({
-  params: 'accountId',
-  key:    'accounts:$:apps',
-  value:  'appId'
+Token.defineIndex({
+  type: 'sorted',
+  key: ['accounts:$:apps', 'accountId'],
+  score: 'created',
+  value: 'appId'
 });
 
 
