@@ -328,6 +328,9 @@ describe 'Token', ->
       it 'should index the instance', ->
         Token.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
+      it 'should index the instance by account and app id pair', ->
+        multi.hset.should.have.been.calledWith 'account:app:token', "#{instance.accountId}:#{instance.appId}", instance.access
+
 
     describe 'with invalid data', ->
 
@@ -615,6 +618,35 @@ describe 'Token', ->
       it 'should deindex each instance', ->
         tokens.forEach (doc) ->
           Token.deindex.should.have.been.calledWith sinon.match.object, doc
+
+
+
+
+  describe 'existing', ->
+
+
+    beforeEach (done) ->
+      token = tokens[0]
+      console.log 'TOKEN', token
+      sinon.stub(client, 'hget').callsArgWith 2, null, token.access
+      sinon.stub(Token, 'get').callsArgWith 1, null, token
+      Token.existing token.appId, token.accountId, (error, instance) ->
+        err = error
+        token = instance
+        done()
+
+    afterEach ->
+      Token.get.restore()
+      client.hget.restore()
+
+    it 'should provide a null error', ->
+      expect(err).to.be.null
+
+    it 'should provide a projection', ->
+      expect(token).not.to.be.instanceof Token
+
+    it 'should have an access_token', ->
+      token.access_token.should.equal tokens[0].access
 
 
 

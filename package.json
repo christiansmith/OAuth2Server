@@ -43,6 +43,6 @@
     "redis": "~0.9.0",
     "form-urlencoded": "0.0.3",
     "mellt": "~1.0.0",
-    "modinha-redis": "0.0.5"
+    "modinha-redis": "0.0.6"
   }
 }

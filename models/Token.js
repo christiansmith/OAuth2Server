@@ -43,6 +43,36 @@ Token.defineIndex({
   value: 'appId'
 });
 
+/**
+ * Index a token by it's account/app pair.
+ * This makes it possible to resuse an access token
+ * instead of issuing a new one.
+ */
+
+Token.defineIndex({
+  type: 'hash',
+  key: 'account:app:token',
+  field: ['$:$', 'accountId', 'appId'],
+  value: 'access'
+});
+
+
+Token.existing = function (accountId, appId, callback) {
+  var key = 'account:app:token'
+    , field = accountId + ':' + appId
+    ;
+
+  this.__client.hget(key, field, function (err, id) {
+    if (err) { return callback(err); }
+    if (!id) { return callback(null, null); }
+
+    Token.get(id, function (err, token) {
+      if (err) { return callback(err); }
+      callback(null, token.project('issue'));
+    });
+  });
+};
+
 
 /**
  * Issue mapping
@@ -52,7 +82,7 @@ Token.mappings.issue = {
   'access': 'access_token',
   'type': 'token_type',
   'scope': 'scope'
-}
+};
 
 
 /**
