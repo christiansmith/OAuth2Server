@@ -68,6 +68,7 @@ Token.existing = function (accountId, appId, callback) {
 
     Token.get(id, function (err, token) {
       if (err) { return callback(err); }
+      if (!token) { return callback(null, null); }
       callback(null, token.project('issue'));
     });
   });
