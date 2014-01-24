@@ -19,7 +19,7 @@ module.exports = function (grunt) {
     },
     mochacov: {
       options: {
-        reporter: 'spec',
+        reporter: 'dot',
         compilers: ['coffee:coffee-script']
       },
       all: [

@@ -627,7 +627,6 @@ describe 'Token', ->
 
     beforeEach (done) ->
       token = tokens[0]
-      console.log 'TOKEN', token
       sinon.stub(client, 'hget').callsArgWith 2, null, token.access
       sinon.stub(Token, 'get').callsArgWith 1, null, token
       Token.existing token.appId, token.accountId, (error, instance) ->

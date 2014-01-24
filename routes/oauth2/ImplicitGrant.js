@@ -136,7 +136,7 @@ module.exports = function (app) {
 
   function redirectToClient (req, res, next) {
     if (req.token) {
-      res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(req.token));
+      res.redirect(req[methodObject[req.method]].redirect_uri + '#' + FormUrlencoded.encode(req.token));
     } else if (req.body.authorized === false) {
       res.redirect(req.body.redirect_uri + '#error=access_denied');
     } else {
@@ -149,23 +149,23 @@ module.exports = function (app) {
    * Find existing access token
    */
 
-  //function findExistingToken (req, res, next) {
-  //  if (req.user && req.query.client_id) {
-  //    Token.getByUserAndClient(req.user._id, req.query.client_id, function (err, token) {
-  //      req.token = token;
-  //      next(err);
-  //    });
-  //  } else {
-  //    next();
-  //  }
-  //}
+  function findExistingToken (req, res, next) {
+    if (req.isAuthenticated() && req.query.client_id) {
+      Token.existing(req.user._id, req.query.client_id, function (err, token) {
+        req.token = token;
+        next(err);
+      });
+    } else {
+      next();
+    }
+  }
 
 
   /**
    * GET /authorize
    */
 
-  app.get('/authorize', ui, validateRequest, scopeDetails, function (req, res, next) {
+  app.get('/authorize', findExistingToken, redirectToClient, ui, validateRequest, scopeDetails, function (req, res, next) {
     res.json({
       app: req.client,
       scope: req.scope
