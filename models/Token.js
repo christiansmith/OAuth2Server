@@ -108,6 +108,28 @@ Token.issue = function (app, account, options, callback) {
 
 
 /**
+ * Revoke access token
+ */
+
+Token.revoke = function (accountId, appId, callback) {
+   var key = 'account:app:token'
+    , field = accountId + ':' + appId
+    ;
+
+  this.__client.hget(key, field, function (err, id) {
+    if (err) { return callback(err); }
+    if (!id) { return callback(null, null); }
+
+    Token.delete(id, function (err, result) {
+      if (err) { return callback(err); }
+      callback(null, result);
+    });
+  });
+
+};
+
+
+/**
  * Verify access token
  */
 

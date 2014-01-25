@@ -696,6 +696,26 @@ describe 'Token', ->
 
 
 
+  describe 'revoke', ->
+
+    beforeEach (done) ->
+      token =  tokens[0]
+      sinon.stub(Token, 'delete').callsArgWith 1, null, true
+      Token.revoke token.accountId, token.appId, (error, result) ->
+        err = error
+        deleted = result
+        done()
+
+    afterEach ->
+      Token.delete.restore()
+
+    it 'should provide a null error', ->
+      expect(err).to.be.null
+
+    it 'should provide confirmation', ->
+      deleted.should.be.true
+
+
 
   describe 'verification', ->
 

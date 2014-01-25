@@ -5,6 +5,7 @@
 var path     = require('path')
   , passport = require('passport')
   , Account  = require('../models/Account')
+  , Token    = require('../models/Token')
   ;
 
 
@@ -88,6 +89,18 @@ module.exports = function (app) {
       if (err) { return next(err); }
       res.json(apps);
     })
+  });
+
+
+  /**
+   * Revoke access
+   */
+
+  app.del('/session/apps/:id', app.authenticateUser, function (req, res, next) {
+    Token.revoke(req.user._id, req.params.id, function (err, result) {
+      if (err) { return next(err); }
+      res.send(204);
+    });
   });
 
 };
