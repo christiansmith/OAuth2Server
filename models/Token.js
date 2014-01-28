@@ -40,7 +40,7 @@ Token.defineIndex({
   type: 'sorted',
   key: ['accounts:$:apps', 'accountId'],
   score: 'created',
-  value: 'appId'
+  member: 'appId'
 });
 
 /**
