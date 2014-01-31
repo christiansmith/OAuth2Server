@@ -135,8 +135,13 @@ module.exports = function (app) {
    */
 
   function redirectToClient (req, res, next) {
-    if (req.token) {
-      res.redirect(req[methodObject[req.method]].redirect_uri + '#' + FormUrlencoded.encode(req.token));
+    if (req.token && req.isAuthenticated()) {
+      var redirect_uri = req[methodObject[req.method]].redirect_uri + '#' + FormUrlencoded.encode(req.token);
+      if (req.is('json') && req.method === 'GET') {
+        res.json({ redirect_uri: redirect_uri });
+      } else {
+        res.redirect(redirect_uri);
+      }
     } else if (req.body.authorized === false) {
       res.redirect(req.body.redirect_uri + '#error=access_denied');
     } else {

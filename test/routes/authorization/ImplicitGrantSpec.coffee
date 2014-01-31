@@ -59,6 +59,14 @@ describe 'implicit grant', ->
 
 
 
+
+
+    describe 'with valid request, unauthenticated user and existing access token', ->
+
+
+
+
+
     describe 'with valid request, existing session and existing access token', ->
 
       before (done) ->
