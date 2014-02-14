@@ -112,7 +112,7 @@ Token.issue = function (app, account, options, callback) {
  */
 
 Token.revoke = function (accountId, appId, callback) {
-   var key = 'account:app:token'
+  var key = 'account:app:token'
     , field = accountId + ':' + appId
     ;
 
@@ -125,7 +125,6 @@ Token.revoke = function (accountId, appId, callback) {
       callback(null, result);
     });
   });
-
 };
 
 

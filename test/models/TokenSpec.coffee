@@ -700,6 +700,7 @@ describe 'Token', ->
 
     beforeEach (done) ->
       token =  tokens[0]
+      sinon.stub(client, 'hget').callsArgWith 2, null, 'fakeId'
       sinon.stub(Token, 'delete').callsArgWith 1, null, true
       Token.revoke token.accountId, token.appId, (error, result) ->
         err = error
@@ -707,6 +708,7 @@ describe 'Token', ->
         done()
 
     afterEach ->
+      client.hget.restore()
       Token.delete.restore()
 
     it 'should provide a null error', ->
