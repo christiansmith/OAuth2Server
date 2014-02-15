@@ -21,6 +21,7 @@ chai.should()
 Modinha = require 'modinha'
 Account = require path.join(cwd, 'models/Account')
 App     = require path.join(cwd, 'models/App')
+Group   = require path.join(cwd, 'models/Group')
 
 
 
@@ -31,13 +32,14 @@ client  = redis.createClient()
 multi   = redis.Multi.prototype
 rclient = redis.RedisClient.prototype
 Account.__client = client
+Group.__client   = client
 
 
 
 describe 'Account', ->
 
 
-  {data,account,accounts,jsonAccounts} = {}
+  {data,account,accounts,group,jsonAccounts} = {}
   {err,validation,instance,instances,update,deleted,original,ids,info} = {}
 
 
@@ -1153,3 +1155,64 @@ describe 'Account', ->
     it 'should list apps', (done) ->
       App.list.should.have.been.calledWith options
       done()
+
+
+
+  #
+
+
+  describe 'add groups', ->
+
+    before (done) ->
+      account = accounts[0]
+      group = new Group
+
+      sinon.spy multi, 'zadd'
+      Account.addGroups account, group, done
+
+    after ->
+      multi.zadd.restore()
+
+    it 'should index the group by the account', ->
+      multi.zadd.should.have.been.calledWith "accounts:#{account._id}:groups", group.created, group._id
+
+    it 'should index the account by the group', ->
+      multi.zadd.should.have.been.calledWith "groups:#{group._id}:accounts", account.created, account._id
+
+
+
+  describe 'remove groups', ->
+
+    before (done) ->
+      account = accounts[1]
+      group = new Group
+
+      sinon.spy multi, 'zrem'
+      Account.removeGroups account, group, done
+
+    after ->
+      multi.zrem.restore()
+
+    it 'should deindex the group by the account', ->
+      multi.zrem.should.have.been.calledWith "accounts:#{account._id}:groups", group._id
+
+    it 'should deindex the account by the group', ->
+      multi.zrem.should.have.been.calledWith "groups:#{group._id}:accounts", account._id
+
+
+
+  describe 'list by groups', ->
+
+    before (done) ->
+      group = new Group
+      sinon.spy Account, 'list'
+      Account.listByGroups group, done
+
+    after ->
+      Account.list.restore()
+
+    it 'should look in the accounts index', ->
+      Account.list.should.have.been.calledWith { index: "groups:#{group._id}:accounts" }
+
+
+

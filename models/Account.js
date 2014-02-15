@@ -50,6 +50,14 @@ function hashPassword (data) {
 Account.extend(Document);
 Account.__client = client;
 
+
+/**
+ * Account groups
+ */
+
+Account.intersects('groups');
+
+
 /**
  * Create
  */
