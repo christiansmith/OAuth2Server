@@ -53,6 +53,17 @@ Scope.__client = client;
 
 
 /**
+ * Scope intersections
+ */
+
+// this syntax is a little ugly. might want
+// to refactor RedisDocument.intersects() to
+// optionally take a config object for
+// clarity.
+Scope.intersects('roles', '_id', '_id');
+
+
+/**
  * Exports
  */
 

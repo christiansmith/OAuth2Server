@@ -52,9 +52,10 @@ Account.__client = client;
 
 
 /**
- * Account groups
+ * Account intersections
  */
 
+Account.intersects('roles');
 Account.intersects('groups');
 
 

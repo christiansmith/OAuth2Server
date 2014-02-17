@@ -16,9 +16,10 @@ chai.should()
 
 
 
-Modinha   = require 'modinha'
-Scope     = require path.join(cwd, 'models/Scope')
-Role      = require path.join(cwd, 'models/Role')
+Modinha = require 'modinha'
+Role   = require path.join(cwd, 'models/Role')
+Account = require path.join(cwd, 'models/Account')
+Scope = require path.join(cwd, 'models/Scope')
 
 
 
@@ -27,27 +28,26 @@ redis   = require('redis')
 client  = redis.createClient()
 multi   = redis.Multi.prototype
 rclient = redis.RedisClient.prototype
-Scope.__client = client
+Role.__client   = client
+Account.__client = client
 
 
 
-describe 'Scope', ->
+describe 'Role', ->
 
 
-  {data,scopes,jsonScopes,err,instance,instances,scope,role,validation,update,deleted,urls} = {}
+  {data,roles,jsonRoles,err,instance,instances,role,account,scope,validation,update,deleted,keys} = {}
 
 
   before ->
     data = []
     for i in [0..9]
       data.push
-        url: "https://#{Faker.Internet.domainName()}"
-        serviceId: Modinha.defaults.uuid()
-        description: Faker.Lorem.words(5).join(' ')
+        name: "role#{i}"
 
-    scopes = Scope.initialize(data)
-    jsonScopes = scopes.map (s) -> Scope.serialize(s)
-    urls = scopes.map (s) -> s.url
+    roles = Role.initialize(data)
+    jsonRoles = roles.map (s) -> Role.serialize(s)
+    keys = roles.map (s) -> s.key
 
 
 
@@ -55,43 +55,17 @@ describe 'Scope', ->
   describe 'schema', ->
 
     beforeEach ->
-      scope = new Scope { url: 'wrong' }
-      validation = scope.validate()
+      instance = new Role
+      validation = instance.validate()
 
-
-    it 'should have an _id', ->
-      Scope.schema._id.type.should.equal 'string'
-
-    it 'should have a url', ->
-      Scope.schema.url.type.should.equal 'string'
-
-    it 'should use url as unique identifier', ->
-      Scope.schema.url.uniqueId.should.be.true
-
-    it 'should require a url', ->
-      Scope.schema.url.required.should.be.true
-
-    it 'should require url to be a valid url', ->
-      validation.errors.url.attribute.should.equal 'format'
-
-    it 'should set _id to base64 encoded url', ->
-      scope = new Scope { url: 'http://api.tld/resource' }
-      scope._id.should.equal new Buffer(scope.url).toString('base64')
-
-    it 'should have a description', ->
-      Scope.schema.description.type.should.equal 'string'
-
-    it 'should require a description', ->
-      validation.errors.description.attribute.should.equal 'required'
-
-    it 'should have a service id', ->
-      Scope.schema.serviceId.should.be.an.object
+    it 'should require name', ->
+      validation.errors.name.attribute.should.equal 'required'
 
     it 'should have "created" timestamp', ->
-      Scope.schema.created.default.should.equal Modinha.defaults.timestamp
+      Role.schema.created.default.should.equal Modinha.defaults.timestamp
 
     it 'should have "modified" timestamp', ->
-      Scope.schema.modified.default.should.equal Modinha.defaults.timestamp
+      Role.schema.modified.default.should.equal Modinha.defaults.timestamp
 
 
 
@@ -102,8 +76,8 @@ describe 'Scope', ->
 
       before (done) ->
         sinon.spy rclient, 'zrevrange'
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
-        Scope.list (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonRoles
+        Role.list (error, results) ->
           err = error
           instances = results
           done()
@@ -113,14 +87,14 @@ describe 'Scope', ->
         rclient.zrevrange.restore()
 
       it 'should query the created index', ->
-        rclient.zrevrange.should.have.been.calledWith 'scopes:created', 0, 49
+        rclient.zrevrange.should.have.been.calledWith 'roles:created', 0, 49
 
       it 'should provide null error', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof Scope
+          expect(instance).to.be.instanceof Role
 
       it 'should provide the list in reverse chronological order', ->
         rclient.zrevrange.should.have.been.called
@@ -130,8 +104,8 @@ describe 'Scope', ->
 
       before (done) ->
         sinon.spy rclient, 'zrevrange'
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
-        Scope.list { index: 'scopes:modified' }, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonRoles
+        Role.list { index: 'roles:modified' }, (error, results) ->
           err = error
           instances = results
           done()
@@ -141,22 +115,22 @@ describe 'Scope', ->
         rclient.zrevrange.restore()
 
       it 'should query the provided index', ->
-        rclient.zrevrange.should.have.been.calledWith 'scopes:modified'
+        rclient.zrevrange.should.have.been.calledWith 'roles:modified'
 
       it 'should provide null error', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof Scope
+          expect(instance).to.be.instanceof Role
 
 
     describe 'with paging', ->
 
       before (done) ->
         sinon.spy rclient, 'zrevrange'
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
-        Scope.list { page: 2, size: 3 }, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonRoles
+        Role.list { page: 2, size: 3 }, (error, results) ->
           err = error
           instances = results
           done()
@@ -166,21 +140,21 @@ describe 'Scope', ->
         rclient.zrevrange.restore()
 
       it 'should retrieve a range of values', ->
-        rclient.zrevrange.should.have.been.calledWith 'scopes:created', 3, 5
+        rclient.zrevrange.should.have.been.calledWith 'roles:created', 3, 5
 
       it 'should provide null error', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof Scope
+          expect(instance).to.be.instanceof Role
 
 
     describe 'with no results', ->
 
       before (done) ->
         sinon.stub(rclient, 'zrevrange').callsArgWith(3, null, [])
-        Scope.list { page: 2, size: 3 }, (error, results) ->
+        Role.list { page: 2, size: 3 }, (error, results) ->
           err = error
           instances = results
           done()
@@ -203,12 +177,13 @@ describe 'Scope', ->
     describe 'by string', ->
 
       before (done) ->
-        scope = scopes[0]
-        json = jsonScopes[0]
+        role = roles[0]
+        json = jsonRoles[0]
         sinon.stub(rclient, 'hmget').callsArgWith 2, null, [json]
-        Scope.get scopes[0].url, (error, result) ->
+        Role.get role[Role.uniqueId], (error, result) ->
           err = error
           instance = result
+
           done()
 
       after ->
@@ -218,16 +193,13 @@ describe 'Scope', ->
         expect(err).to.be.null
 
       it 'should provide an instance', ->
-        expect(instance).to.be.instanceof Scope
-
-      it 'should not initialize private properties', ->
-        expect(instance.secret).to.be.undefined
+        expect(instance).to.be.instanceof Role
 
 
     describe 'by string not found', ->
 
       before (done) ->
-        Scope.get 'unknown', (error, result) ->
+        Role.get 'unknown', (error, result) ->
           err = error
           instance = result
           done()
@@ -242,8 +214,8 @@ describe 'Scope', ->
     describe 'by array', ->
 
       before (done) ->
-        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonScopes
-        Scope.get urls, (error, results) ->
+        sinon.stub(rclient, 'hmget').callsArgWith 2, null, jsonRoles
+        Role.get keys, (error, results) ->
           err = error
           instances = results
           done()
@@ -255,12 +227,9 @@ describe 'Scope', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
+        instances.length.should.equal 10
         instances.forEach (instance) ->
-          expect(instance).to.be.instanceof Scope
-
-      it 'should not initialize private properties', ->
-        instances.forEach (instance) ->
-          expect(instance.secret).to.be.undefined
+          expect(instance).to.be.instanceof Role
 
 
 #    describe 'by array not found', ->
@@ -273,7 +242,7 @@ describe 'Scope', ->
     describe 'with empty array', ->
 
       before (done) ->
-        Scope.get [], (error, results) ->
+        Role.get [], (error, results) ->
           err = error
           instances = results
           done()
@@ -295,10 +264,10 @@ describe 'Scope', ->
       beforeEach (done) ->
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
-        sinon.spy Scope, 'index'
-        sinon.stub(Scope, 'enforceUnique').callsArgWith(1, null)
+        sinon.spy Role, 'index'
+        sinon.stub(Role, 'enforceUnique').callsArgWith(1, null)
 
-        Scope.insert data[0], (error, result) ->
+        Role.insert data[0], (error, result) ->
           err = error
           instance = result
           done()
@@ -306,23 +275,20 @@ describe 'Scope', ->
       afterEach ->
         multi.hset.restore()
         multi.zadd.restore()
-        Scope.index.restore()
-        Scope.enforceUnique.restore()
+        Role.index.restore()
+        Role.enforceUnique.restore()
 
       it 'should provide a null error', ->
         expect(err).to.be.null
 
       it 'should provide the inserted instance', ->
-        expect(instance).to.be.instanceof Scope
+        expect(instance).to.be.instanceof Role
 
-      it 'should not provide private properties', ->
-        expect(instance.secret).to.be.undefined
-
-      it 'should store the serialized instance by url', ->
-        multi.hset.should.have.been.calledWith 'scopes', instance.url, sinon.match(instance.url)
+      it 'should store the serialized instance by key', ->
+        multi.hset.should.have.been.calledWith 'roles', instance[Role.uniqueId], Role.serialize(instance)
 
       it 'should index the instance', ->
-        Scope.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
+        Role.index.should.have.been.calledWith sinon.match.object, sinon.match(instance)
 
 
     describe 'with invalid data', ->
@@ -330,9 +296,9 @@ describe 'Scope', ->
       before (done) ->
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
-        sinon.spy Scope, 'index'
+        sinon.spy Role, 'index'
 
-        Scope.insert {}, (error, result) ->
+        Role.insert {}, (error, result) ->
           err = error
           instance = result
           done()
@@ -340,7 +306,7 @@ describe 'Scope', ->
       after ->
         multi.hset.restore()
         multi.zadd.restore()
-        Scope.index.restore()
+        Role.index.restore()
 
       it 'should provide a validation error', ->
         err.should.be.instanceof Modinha.ValidationError
@@ -352,7 +318,7 @@ describe 'Scope', ->
         multi.hset.should.not.have.been.called
 
       it 'should not index the data', ->
-        Scope.index.should.not.have.been.called
+        Role.index.should.not.have.been.called
 
 
 
@@ -362,29 +328,25 @@ describe 'Scope', ->
     describe 'with valid data', ->
 
       before (done) ->
-        scope = scopes[0]
-        json = jsonScopes[0]
+        role = roles[0]
+        json = jsonRoles[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
-        sinon.spy Scope, 'reindex'
+        sinon.spy Role, 'reindex'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
         update =
-          url: scope.url
-          serviceId: scope.serviceId
-          description: 'updated'
-          created: scope.created
-          modified: scope.modified
+          name: 'updated'
 
-        Scope.replace scope.url, update, (error, result) ->
+        Role.replace role[Role.uniqueId], update, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
         rclient.hmget.restore()
-        Scope.reindex.restore()
+        Role.reindex.restore()
         multi.hset.restore()
         multi.zadd.restore()
 
@@ -392,29 +354,26 @@ describe 'Scope', ->
         expect(err).to.be.null
 
       it 'should provide the replaced instance', ->
-        expect(instance).to.be.instanceof Scope
-
-      it 'should not provide private properties', ->
-        expect(instance.secret).to.be.undefined
+        expect(instance).to.be.instanceof Role
 
       it 'should replace the existing instance', ->
-        expect(instance.description).to.equal 'updated'
+        expect(instance.name).to.equal 'updated'
 
       it 'should reindex the instance', ->
-        Scope.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(scope)
+        Role.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(role)
 
 
-    describe 'with unknown scope', ->
+    describe 'with unknown roles', ->
 
       before (done) ->
-        sinon.stub(Scope, 'get').callsArgWith(2, null, null)
-        Scope.replace 'unknown', {}, (error, result) ->
+        sinon.stub(Role, 'get').callsArgWith(2, null, null)
+        Role.replace 'unknown', {}, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
-        Scope.get.restore()
+        Role.get.restore()
 
       it 'should provide an null error', ->
         expect(err).to.be.null
@@ -426,9 +385,9 @@ describe 'Scope', ->
     describe 'with invalid data', ->
 
       before (done) ->
-        scope = scopes[0]
+        role = roles[0]
 
-        Scope.replace scope.url, { description: -1 }, (error, result) ->
+        Role.replace role[Role.uniqueId], { role: -1 }, (error, result) ->
           err = error
           instance = result
           done()
@@ -447,26 +406,25 @@ describe 'Scope', ->
     describe 'with valid data', ->
 
       before (done) ->
-        scope = scopes[0]
-        json = jsonScopes[0]
+        role = roles[0]
+        json = jsonRoles[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
-        sinon.spy Scope, 'reindex'
+        sinon.spy Role, 'reindex'
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
         update =
-          description: 'updated'
+          name: 'patched'
 
-
-        Scope.patch scope.url, update, (error, result) ->
+        Role.patch role[Role.uniqueId], update, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
         rclient.hmget.restore()
-        Scope.reindex.restore()
+        Role.reindex.restore()
         multi.hset.restore()
         multi.zadd.restore()
 
@@ -474,29 +432,26 @@ describe 'Scope', ->
         expect(err).to.be.null
 
       it 'should provide the patched instance', ->
-        expect(instance).to.be.instanceof Scope
-
-      it 'should not provide private properties', ->
-        expect(instance.secret).to.be.undefined
+        expect(instance).to.be.instanceof Role
 
       it 'should overwrite the stored data', ->
-        multi.hset.should.have.been.calledWith 'scopes', instance.url, sinon.match('"description":"updated"')
+        multi.hset.should.have.been.calledWith 'roles', instance[Role.uniqueId], sinon.match('"name":"patched"')
 
       it 'should reindex the instance', ->
-        Scope.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(scopes[0])
+        Role.reindex.should.have.been.calledWith sinon.match.object, sinon.match(update), sinon.match(roles[0])
 
 
-    describe 'with unknown scope', ->
+    describe 'with unknown role', ->
 
       before (done) ->
-        sinon.stub(Scope, 'get').callsArgWith(2, null, null)
-        Scope.patch 'unknown', {}, (error, result) ->
+        sinon.stub(Role, 'get').callsArgWith(2, null, null)
+        Role.patch 'unknown', {}, (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
-        Scope.get.restore()
+        Role.get.restore()
 
       it 'should provide an null error', ->
         expect(err).to.be.null
@@ -508,14 +463,14 @@ describe 'Scope', ->
     describe 'with invalid data', ->
 
       before (done) ->
-        scope = scopes[0]
-        json = jsonScopes[0]
+        role = roles[0]
+        json = jsonRoles[0]
 
         sinon.stub(rclient, 'hmget').callsArgWith(2, null, [json])
         sinon.spy multi, 'hset'
         sinon.spy multi, 'zadd'
 
-        Scope.patch scope.url, { description: -1 }, (error, result) ->
+        Role.patch role[Role.uniqueId], { name: -1 }, (error, result) ->
           err = error
           instance = result
           done()
@@ -539,18 +494,18 @@ describe 'Scope', ->
     describe 'by string', ->
 
       before (done) ->
-        scope = scopes[0]
-        sinon.spy Scope, 'deindex'
+        role = roles[0]
+        sinon.spy Role, 'deindex'
         sinon.spy multi, 'hdel'
-        sinon.stub(Scope, 'get').callsArgWith(2, null, scope)
-        Scope.delete scope.url, (error, result) ->
+        sinon.stub(Role, 'get').callsArgWith(2, null, roles)
+        Role.delete role.key, (error, result) ->
           err = error
           deleted = result
           done()
 
       after ->
-        Scope.deindex.restore()
-        Scope.get.restore()
+        Role.deindex.restore()
+        Role.get.restore()
         multi.hdel.restore()
 
       it 'should provide a null error', ->
@@ -560,23 +515,23 @@ describe 'Scope', ->
         deleted.should.be.true
 
       it 'should remove the stored instance', ->
-        multi.hdel.should.have.been.calledWith 'scopes', scope.url
+        multi.hdel.should.have.been.calledWith 'roles', role.key
 
       it 'should deindex the instance', ->
-        Scope.deindex.should.have.been.calledWith sinon.match.object, sinon.match(scope)
+        Role.deindex.should.have.been.calledWith sinon.match.object, sinon.match(role)
 
 
-    describe 'with unknown scope', ->
+    describe 'with unknown role', ->
 
       before (done) ->
-        sinon.stub(Scope, 'get').callsArgWith(2, null, null)
-        Scope.delete 'unknown', (error, result) ->
+        sinon.stub(Role, 'get').callsArgWith(2, null, null)
+        Role.delete 'unknown', (error, result) ->
           err = error
           instance = result
           done()
 
       after ->
-        Scope.get.restore()
+        Role.get.restore()
 
       it 'should provide an null error', ->
         expect(err).to.be.null
@@ -588,17 +543,17 @@ describe 'Scope', ->
     describe 'by array', ->
 
       beforeEach (done) ->
-        sinon.spy Scope, 'deindex'
+        sinon.spy Role, 'deindex'
         sinon.spy multi, 'hdel'
-        sinon.stub(Scope, 'get').callsArgWith(2, null, scopes)
-        Scope.delete urls, (error, result) ->
+        sinon.stub(Role, 'get').callsArgWith(2, null, roles)
+        Role.delete keys, (error, result) ->
           err = error
           deleted = result
           done()
 
       afterEach ->
-        Scope.deindex.restore()
-        Scope.get.restore()
+        Role.deindex.restore()
+        Role.get.restore()
         multi.hdel.restore()
 
       it 'should provide a null error', ->
@@ -608,24 +563,79 @@ describe 'Scope', ->
         deleted.should.be.true
 
       it 'should remove each stored instance', ->
-        multi.hdel.should.have.been.calledWith 'scopes', urls
+        multi.hdel.should.have.been.calledWith 'roles', keys
 
       it 'should deindex each instance', ->
-        scopes.forEach (doc) ->
-          Scope.deindex.should.have.been.calledWith sinon.match.object, doc
+        roles.forEach (doc) ->
+          Role.deindex.should.have.been.calledWith sinon.match.object, doc
 
 
 
 
-
-  describe 'add roles', ->
+  describe 'add accounts', ->
 
     before (done) ->
-      scope = scopes[0]
-      role = new Role
+      role = roles[0]
+      account = new Account
 
       sinon.spy multi, 'zadd'
-      Scope.addRoles scope, role, done
+      Role.addAccounts role, account, done
+
+    after ->
+      multi.zadd.restore()
+
+    it 'should index the role by the account', ->
+      multi.zadd.should.have.been.calledWith "accounts:#{account._id}:roles", role.created, role._id
+
+    it 'should index the account by the role', ->
+      multi.zadd.should.have.been.calledWith "roles:#{role._id}:accounts", account.created, account._id
+
+
+
+  describe 'remove accounts', ->
+
+    before (done) ->
+      role = roles[1]
+      account = new Account
+
+      sinon.spy multi, 'zrem'
+      Role.removeAccounts role, account, done
+
+    after ->
+      multi.zrem.restore()
+
+    it 'should deindex the role by the account', ->
+      multi.zrem.should.have.been.calledWith "accounts:#{account._id}:roles", role._id
+
+    it 'should deindex the account by the role', ->
+      multi.zrem.should.have.been.calledWith "roles:#{role._id}:accounts", account._id
+
+
+
+  describe 'list by account', ->
+
+    before (done) ->
+      account = new Account
+      sinon.spy Role, 'list'
+      Role.listByAccounts account, done
+
+    after ->
+      Role.list.restore()
+
+    it 'should look in the accounts index', ->
+      Role.list.should.have.been.calledWith { index: "accounts:#{account._id}:roles" }
+
+
+
+
+  describe 'add scopes', ->
+
+    before (done) ->
+      role = roles[0]
+      scope = new Scope url: 'https://resource.tld'
+
+      sinon.spy multi, 'zadd'
+      Role.addScopes role, scope, done
 
     after ->
       multi.zadd.restore()
@@ -633,19 +643,18 @@ describe 'Scope', ->
     it 'should index the role by the scope', ->
       multi.zadd.should.have.been.calledWith "scopes:#{scope._id}:roles", role.created, role._id
 
-    it 'should index the scope by the role', ->
+    it 'should index the account by the role', ->
       multi.zadd.should.have.been.calledWith "roles:#{role._id}:scopes", scope.created, scope._id
 
 
-
-  describe 'remove roles', ->
+  describe 'remove scopes', ->
 
     before (done) ->
-      scope = scopes[1]
-      role = new Role
+      role = roles[1]
+      scope = new Scope url: 'https://resource.tld'
 
       sinon.spy multi, 'zrem'
-      Scope.removeRoles scope, role, done
+      Role.removeScopes role, scope, done
 
     after ->
       multi.zrem.restore()
@@ -658,17 +667,18 @@ describe 'Scope', ->
 
 
 
-  describe 'list by roles', ->
+  describe 'list by scope', ->
 
     before (done) ->
-      role = new Role
-      sinon.spy Scope, 'list'
-      Scope.listByRoles role, done
+      scope = new Scope url: 'https://resource.tld'
+      sinon.spy Role, 'list'
+      Role.listByScopes scope, done
 
     after ->
-      Scope.list.restore()
+      Role.list.restore()
 
     it 'should look in the scopes index', ->
-      Scope.list.should.have.been.calledWith { index: "roles:#{role._id}:scopes" }
+      Role.list.should.have.been.calledWith sinon.match({ index: "scopes:#{scope._id}:roles" })
+
 
 

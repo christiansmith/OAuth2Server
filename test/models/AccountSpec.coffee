@@ -22,6 +22,7 @@ Modinha = require 'modinha'
 Account = require path.join(cwd, 'models/Account')
 App     = require path.join(cwd, 'models/App')
 Group   = require path.join(cwd, 'models/Group')
+Role    = require path.join(cwd, 'models/Role')
 
 
 
@@ -39,7 +40,7 @@ Group.__client   = client
 describe 'Account', ->
 
 
-  {data,account,accounts,group,jsonAccounts} = {}
+  {data,account,accounts,group,role,jsonAccounts} = {}
   {err,validation,instance,instances,update,deleted,original,ids,info} = {}
 
 
@@ -1159,6 +1160,69 @@ describe 'Account', ->
 
 
   #
+
+
+  describe 'add roles', ->
+
+    before (done) ->
+      account = accounts[0]
+      role = new Role
+
+      sinon.spy multi, 'zadd'
+      Account.addRoles account, role, done
+
+    after ->
+      multi.zadd.restore()
+
+    it 'should index the role by the account', ->
+      multi.zadd.should.have.been.calledWith "accounts:#{account._id}:roles", role.created, role._id
+
+    it 'should index the account by the role', ->
+      multi.zadd.should.have.been.calledWith "roles:#{role._id}:accounts", account.created, account._id
+
+
+
+  describe 'remove roles', ->
+
+    before (done) ->
+      account = accounts[1]
+      role = new Role
+
+      sinon.spy multi, 'zrem'
+      Account.removeRoles account, role, done
+
+    after ->
+      multi.zrem.restore()
+
+    it 'should deindex the role by the account', ->
+      multi.zrem.should.have.been.calledWith "accounts:#{account._id}:roles", role._id
+
+    it 'should deindex the account by the role', ->
+      multi.zrem.should.have.been.calledWith "roles:#{role._id}:accounts", account._id
+
+
+
+  describe 'list by roles', ->
+
+    before (done) ->
+      role = new Role
+      sinon.spy Account, 'list'
+      Account.listByRoles role, done
+
+    after ->
+      Account.list.restore()
+
+    it 'should look in the accounts index', ->
+      Account.list.should.have.been.calledWith { index: "roles:#{role._id}:accounts" }
+
+
+
+
+
+
+
+
+
 
 
   describe 'add groups', ->
