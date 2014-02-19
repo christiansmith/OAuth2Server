@@ -5,7 +5,7 @@
 var LocalStrategy = require('passport-local').Strategy
   , BasicStrategy = require('passport-http').BasicStrategy
   , Account       = require('../models/Account')
-  , Credentials   = require('../models/Credentials') 
+  , Credentials   = require('../models/Credentials')
   ;
 
 
@@ -31,8 +31,8 @@ module.exports = function (passport) {
    * Password Login Stratety
    */
 
-  passport.use('local', new LocalStrategy({ 
-    usernameField: 'email' 
+  passport.use('local', new LocalStrategy({
+    usernameField: 'email'
   }, function (email, password, done) {
     Account.authenticate(email, password, function (err, account, info) {
       return done(err, account, info);

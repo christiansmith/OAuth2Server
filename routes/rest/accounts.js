@@ -18,10 +18,10 @@ module.exports = function (app) {
    * Authentication middleware
    */
 
-  var authenticate = passport.authenticate('basic', { 
-    session: false 
+  var authenticate = passport.authenticate('basic', {
+    session: false
   });
-  
+
 
   /**
    * GET /v1/accounts
@@ -30,7 +30,7 @@ module.exports = function (app) {
   app.get('/v1/accounts', authenticate, function (req, res, next) {
     Account.list(function (err, instances) {
       if (err) { return next(err); }
-      res.json(instances);        
+      res.json(instances);
     });
   });
 
