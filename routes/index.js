@@ -60,6 +60,7 @@ module.exports = function (app) {
   require('./rest/apps')(app);
   require('./rest/services')(app);
   require('./rest/scopes')(app);
+  require('./rest/roles')(app);
 
 
   /**
