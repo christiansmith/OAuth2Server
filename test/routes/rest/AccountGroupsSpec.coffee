@@ -208,12 +208,13 @@ describe 'Account Groups REST Routes', ->
 
       before (done) ->
         account = accounts[0]
+        group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Account, 'get').callsArgWith(1, null, account)
+        sinon.stub(Group, 'get').callsArgWith(1, null, group)
         request(app)
-          .put("/v1/accounts/#{accounts[0]._id}/groups/#{groups[0]._id}")
+          .put("/v1/accounts/#{account._id}/groups/#{group._id}")
           .set('Authorization', 'Basic ' + validCredentials)
-          .send({})
           .end (error, response) ->
             err = error
             res = response
@@ -222,6 +223,7 @@ describe 'Account Groups REST Routes', ->
       after ->
         Credentials.get.restore()
         Account.get.restore()
+        Group.get.restore()
 
       it 'should respond 200', ->
         res.statusCode.should.equal 200
@@ -241,7 +243,6 @@ describe 'Account Groups REST Routes', ->
         request(app)
           .put("/v1/accounts/#{accounts[0]._id}/groups/#{groups[1]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
-          .send({})
           .end (error, response) ->
             err = error
             res = response
@@ -249,6 +250,36 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
+        Account.get.restore()
+
+      it 'should respond 404', ->
+        res.statusCode.should.equal 404
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.contain 'application/json'
+
+      it 'should respond with "Not found" error', ->
+        res.body.error.should.equal 'Not found.'
+
+
+    describe 'with unknown group', ->
+
+      before (done) ->
+        account = accounts[3]
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
+        sinon.stub(Account, 'get').callsArgWith(1, null, account)
+        sinon.stub(Group, 'get').callsArgWith(1, null, null)
+        request(app)
+          .put("/v1/accounts/#{account._id}/groups/unknown")
+          .set('Authorization', 'Basic ' + validCredentials)
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Credentials.get.restore()
+        Group.get.restore()
         Account.get.restore()
 
       it 'should respond 404', ->

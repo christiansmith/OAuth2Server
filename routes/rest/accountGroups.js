@@ -55,9 +55,14 @@ module.exports = function (app) {
         if (err)       { return next(err); }
         if (!instance) { return next(new NotFoundError()); }
 
-        instance.addGroups(req.body, function (err, result) {
+        Group.get(req.params.groupId, function (err, group) {
           if (err) { return next(err); }
-          res.json({ added: true });
+          if (!group) { return next(new NotFoundError()); }
+
+          instance.addGroups(req.params.groupId, function (err, result) {
+            if (err) { return next(err); }
+            res.json({ added: true });
+          });
         });
       });
     });
