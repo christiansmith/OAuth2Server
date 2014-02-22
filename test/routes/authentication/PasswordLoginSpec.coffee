@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -25,6 +25,12 @@ Account     = require path.join(cwd, 'models/Account')
 
 
 
+# HTTP Client
+request = supertest(app)
+
+
+
+
 describe 'Password Login', ->
 
 
@@ -37,12 +43,12 @@ describe 'Password Login', ->
 
   before ->
     account = new Account email: 'valid@example.com'
-    
+
     validLogin              = email: account.email, password: 'secret1337'
     missingCredentialsLogin = {}
     unknownAccountLogin     = email: 'unknown@example.com', password: 'doesntmatter'
     invalidPasswordLogin    = email: account.email, password: 'wrong'
-    
+
     successInfo         = message: 'Authenticated successfully!'
     unknownAccountInfo  = message: 'Unknown account.'
     invalidPasswordInfo = message: 'Invalid password.'
@@ -53,10 +59,10 @@ describe 'Password Login', ->
   describe 'POST /login', ->
 
     describe 'with valid credentials', ->
-      
+
       before (done) ->
         sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
-        request(app)
+        request
           .post('/login')
           .send(validLogin)
           .end (error, response) ->
@@ -71,7 +77,7 @@ describe 'Password Login', ->
         res.statusCode.should.equal 200
 
       it 'should respond with JSON', ->
-        res.headers['content-type'].should.contain 'application/json'      
+        res.headers['content-type'].should.contain 'application/json'
 
       it 'should respond with an account', ->
         res.body.authenticated.should.equal true
@@ -83,7 +89,7 @@ describe 'Password Login', ->
     describe 'without credentials', ->
 
       before (done) ->
-        request(app)
+        request
           .post('/login')
           .send({})
           .end (err, _res) ->
@@ -106,7 +112,7 @@ describe 'Password Login', ->
 
       before (done) ->
         sinon.stub(Account, 'authenticate').callsArgWith(2, null, false, unknownAccountInfo)
-        request(app)
+        request
           .post('/login')
           .send(unknownAccountLogin)
           .end (error, response) ->
@@ -133,7 +139,7 @@ describe 'Password Login', ->
 
       before (done) ->
         sinon.stub(Account, 'authenticate').callsArgWith(2, null, false, invalidPasswordInfo)
-        request(app)
+        request
           .post('/login')
           .send(invalidPasswordLogin)
           .end (error, response) ->

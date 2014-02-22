@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -22,6 +22,13 @@ chai.should()
 app      = require path.join(cwd, 'app')
 Account  = require path.join(cwd, 'models/Account')
 passport = require 'passport'
+
+
+
+
+# HTTP Client
+request = supertest(app)
+
 
 
 
@@ -43,33 +50,33 @@ describe 'Session', ->
 
     describe 'for authenticated user', ->
 
-      agent = request.agent()
+      agent = supertest.agent()
 
       before (done) ->
         sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
         sinon.stub(passport, 'deserializeUser').callsArgWith(1, null, account)
 
-        request(app)
+        request
           .post('/login')
           .send(validLogin)
           .end (e,r) ->
             agent.saveCookies r
-            req = request(app).get('/session')
+            req = supertest(app).get('/session')
             agent.attachCookies req
             req.end (error, response) ->
               err = error
               res = response
               done()
-   
+
       after ->
         Account.authenticate.restore()
         passport.deserializeUser.restore()
 
       it 'should respond 200', ->
         res.statusCode.should.equal 200
-    
+
       it 'should respond with JSON', ->
-        res.headers['content-type'].should.contain 'application/json' 
+        res.headers['content-type'].should.contain 'application/json'
 
       it 'should respond with the user', ->
         res.body.authenticated.should.equal true
@@ -81,12 +88,12 @@ describe 'Session', ->
     describe 'for unauthenticated user', ->
 
       before (done) ->
-        request(app)
+        request
           .get('/session')
           .end (error, response) ->
             err = error
             res = response
-            done()   
+            done()
 
       it 'should respond 200', ->
         res.statusCode.should.eql 200
@@ -94,7 +101,7 @@ describe 'Session', ->
       it 'should respond with JSON', ->
         res.headers['content-type'].should.include 'application/json'
 
-      it 'should respond with authenticated as false', -> 
+      it 'should respond with authenticated as false', ->
         res.body.authenticated.should.be.false
 
 

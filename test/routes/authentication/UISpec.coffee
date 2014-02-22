@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -24,6 +24,12 @@ app     = require path.join(cwd, 'app')
 
 
 
+# HTTP Client
+request = supertest(app)
+
+
+
+
 describe 'UI', ->
 
 
@@ -33,7 +39,7 @@ describe 'UI', ->
   describe 'GET /signin', ->
 
     before (done) ->
-      request(app)
+      request
         .get('/signin')
         .end (error, response) ->
           err = error
@@ -52,7 +58,7 @@ describe 'UI', ->
   describe 'GET /signup', ->
 
     before (done) ->
-      request(app)
+      request
         .get('/signup')
         .end (error, response) ->
           err = error
@@ -71,7 +77,7 @@ describe 'UI', ->
   describe 'GET /account', ->
 
     before (done) ->
-      request(app)
+      request
         .get('/account')
         .end (error, response) ->
           err = error
@@ -90,7 +96,7 @@ describe 'UI', ->
   describe 'GET /account/apps', ->
 
     before (done) ->
-      request(app)
+      request
         .get('/account/apps')
         .end (error, response) ->
           err = error
@@ -109,7 +115,7 @@ describe 'UI', ->
   describe 'GET /authorize', ->
 
     before (done) ->
-      request(app)
+      request
         .get('/authorize')
         .end (error, response) ->
           err = error

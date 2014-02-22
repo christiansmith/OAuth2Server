@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -25,6 +25,12 @@ Account     = require path.join(cwd, 'models/Account')
 App         = require path.join(cwd, 'models/App')
 Service     = require path.join(cwd, 'models/Service')
 Token       = require path.join(cwd, 'models/Token')
+
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -63,7 +69,7 @@ describe 'Access Token Validation', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Token, 'verify').callsArgWith(2, null, token)
-        request(app)
+        request
           .post('/access')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('access_token=' + token.access + '&scope=' + token.scope)
@@ -94,7 +100,7 @@ describe 'Access Token Validation', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        request(app)
+        request
           .post('/access')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send('access_token=' + token.access + '&scope=' + token.scope)
@@ -131,7 +137,7 @@ describe 'Access Token Validation', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Token, 'verify').callsArgWith(2, new InvalidTokenError('Unknown access token'))
-        request(app)
+        request
           .post('/access')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('access_token=' + token.access + '&scope=' + token.scope)
@@ -156,7 +162,7 @@ describe 'Access Token Validation', ->
       it 'should respond with an error description', ->
         res.body.error_description.should.equal 'Unknown access token'
 
-      it 'should respond with an error uri'      
+      it 'should respond with an error uri'
 
 
 
@@ -166,7 +172,7 @@ describe 'Access Token Validation', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Token, 'verify').callsArgWith(2, new InvalidTokenError('Expired access token'))
-        request(app)
+        request
           .post('/access')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('access_token=' + token.access + '&scope=' + token.scope)
@@ -191,7 +197,7 @@ describe 'Access Token Validation', ->
       it 'should respond with an error description', ->
         res.body.error_description.should.equal 'Expired access token'
 
-      it 'should respond with an error uri'      
+      it 'should respond with an error uri'
 
 
 
@@ -201,7 +207,7 @@ describe 'Access Token Validation', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Token, 'verify').callsArgWith(2, new InsufficientScopeError())
-        request(app)
+        request
           .post('/access')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('access_token=' + token.access + '&scope=' + token.scope)

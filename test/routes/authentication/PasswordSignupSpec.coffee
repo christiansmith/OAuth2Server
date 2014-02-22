@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -21,6 +21,13 @@ chai.should()
 # Code under test
 app         = require path.join(cwd, 'app')
 Account     = require path.join(cwd, 'models/Account')
+
+
+
+
+# HTTP Client
+request = supertest(app)
+
 
 
 
@@ -59,7 +66,7 @@ describe 'Password Signup', ->
       before (done) ->
         sinon.stub(Account, 'insert').callsArgWith(1, null, account)
         sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
-        request(app)
+        request
           .post('/signup')
           .send(validSignup)
           .end (error, response) ->
@@ -91,7 +98,7 @@ describe 'Password Signup', ->
 
       before (done) ->
         sinon.stub(Account, 'insert').callsArgWith(1, new UniqueValueError('email'))
-        request(app)
+        request
           .post('/signup')
           .send(validSignup)
           .end (error, response) ->
@@ -118,7 +125,7 @@ describe 'Password Signup', ->
 
       before (done) ->
         sinon.stub(Account, 'insert').callsArgWith(1, new ValidationError())
-        request(app)
+        request
           .post('/signup')
           .send(invalidSignup)
           .end (error, response) ->

@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -27,8 +27,14 @@ App         = require path.join(cwd, 'models/App')
 
 
 
+# HTTP Client
+request = supertest(app)
+
+
+
+
 describe 'resource owner password credentials grant', ->
-  
+
 
   {err,res} = {}
   {credentials,validCredentials,invalidCredentials} = {}
@@ -49,7 +55,7 @@ describe 'resource owner password credentials grant', ->
     describe 'without app authentication', ->
 
       before (done) ->
-        request(app)
+        request
           .post('/token')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -73,7 +79,7 @@ describe 'resource owner password credentials grant', ->
         sinon.stub(App, 'getByKey').callsArgWith(1, null, application)
         sinon.stub(Account, 'getByEmail').callsArgWith(2, null, account)
         sinon.stub(Account.prototype, 'verifyPassword').callsArgWith(1, null, true)
-        request(app)
+        request
           .post('/token')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('grant_type=password&username=valid@example.com&password=secret&scope=https://domain.tld/resource')
@@ -109,9 +115,9 @@ describe 'resource owner password credentials grant', ->
     describe 'with unknown username', ->
 
       before (done) ->
-        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)      
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Account, 'getByEmail').callsArgWith(2, null, null)
-        request(app)
+        request
           .post('/token')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('grant_type=password&username=unknown@example.com&password=secret&scope=https://resourceserver.tld')
@@ -144,8 +150,8 @@ describe 'resource owner password credentials grant', ->
     describe 'with missing username', ->
 
       before (done) ->
-        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)      
-        request(app)
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
+        request
           .post('/token')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('grant_type=password&password=secret&scope=https://resourceserver.tld')
@@ -177,10 +183,10 @@ describe 'resource owner password credentials grant', ->
     describe 'with mismatching password', ->
 
       before (done) ->
-        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)      
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Account, 'getByEmail').callsArgWith(2, null, account)
         sinon.stub(Account.prototype, 'verifyPassword').callsArgWith(1, null, false)
-        request(app)
+        request
           .post('/token')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('grant_type=password&username=valid@example.com&password=wrong&scope=https://resourceserver.tld')
@@ -217,9 +223,9 @@ describe 'resource owner password credentials grant', ->
     describe 'with missing password', ->
 
       before (done) ->
-        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)      
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Account, 'getByEmail').callsArgWith(1, null, account)
-        request(app)
+        request
           .post('/token')
           .set('Authorization', 'Basic ' + validCredentials)
           .send('grant_type=password&username=valid@example.com&scope=https://resourceserver.tld')

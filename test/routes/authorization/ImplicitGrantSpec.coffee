@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -28,6 +28,12 @@ passport = require 'passport'
 
 
 
+# HTTP Client
+request = supertest(app)
+
+
+
+
 describe 'implicit grant', ->
 
 
@@ -44,7 +50,7 @@ describe 'implicit grant', ->
     describe 'with text/html', ->
 
       before (done) ->
-        request(app)
+        request
           .get('/authorize')
           .end (error, response) ->
             err = error
@@ -83,13 +89,13 @@ describe 'implicit grant', ->
         sinon.stub(passport, 'deserializeUser').callsArgWith(1, null, account)
 
         # LOGIN
-        agent = request.agent()
+        agent = supertest.agent()
         login = email: 'valid@example.com', password: 'secret1337'
-        request(app).post('/login').send(login).end (error, response) ->
+        request.post('/login').send(login).end (error, response) ->
           agent.saveCookies response
 
           # AUTH REQUEST
-          req = request(app).get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
+          req = supertest(app).get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
           agent.attachCookies req
           req.end (error, response) ->
               err = error
@@ -127,7 +133,7 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request(app)
+          request
             .get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -162,7 +168,7 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request(app)
+          request
             .get("/authorize?client_id=#{application._id}&response_type=invalid&redirect_uri=#{application.redirect_uri}")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -198,7 +204,7 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request(app)
+          request
             .get("/authorize?client_id=#{application._id}&redirect_uri=#{application.redirect_uri}")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -234,7 +240,7 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, null)
-          request(app)
+          request
             .get("/authorize?client_id=unknown&response_type=token&redirect_uri=#{application.redirect_uri}")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -268,7 +274,7 @@ describe 'implicit grant', ->
       describe 'with missing client id', ->
 
         before (done) ->
-          request(app)
+          request
             .get("/authorize")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -301,7 +307,7 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request(app)
+          request
             .get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=https://wrong.tld")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -337,7 +343,7 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request(app)
+          request
             .get("/authorize?client_id=#{application._id}&response_type=token")
             .set('Content-type', 'application/json')
             .end (error, response) ->
@@ -496,11 +502,11 @@ describe 'implicit grant', ->
 
       successInfo = message: 'Authenticated successfully!'
 
-      agent = request.agent()
+      agent = supertest.agent()
       login = email: 'valid@example.com', password: 'secret1337'
       sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
       sinon.stub(passport, 'deserializeUser').callsArgWith(1, null, account)
-      request(app).post('/login').send(login).end (err, res) ->
+      supertest(app).post('/login').send(login).end (err, res) ->
         agent.saveCookies res
         done()
 
@@ -515,7 +521,7 @@ describe 'implicit grant', ->
     describe 'without authentication', ->
 
       before (done) ->
-        request(app)
+        request
           .post('/authorize')
           .end (error, response) ->
             err = error
@@ -535,7 +541,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(accessGranted)
@@ -570,7 +576,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(accessDenied)
@@ -602,7 +608,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(unsupportedResponseType)
@@ -638,7 +644,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(missingResponseType)
@@ -674,7 +680,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, null)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(invalidClientId)
@@ -710,7 +716,7 @@ describe 'implicit grant', ->
     describe 'with missing client id', ->
 
       before (done) ->
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(missingClientId)
@@ -744,7 +750,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(mismatchingRedirectUri)
@@ -781,7 +787,7 @@ describe 'implicit grant', ->
 
       before (done) ->
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        req = request(app).post('/authorize')
+        req = supertest(app).post('/authorize')
         agent.attachCookies req
         req.set('Content-type', 'application/json')
         req.send(missingRedirectUri)

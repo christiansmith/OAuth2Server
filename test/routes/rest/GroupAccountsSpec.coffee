@@ -21,8 +21,8 @@ chai.should()
 # Code under test
 app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
-Account     = require path.join(cwd, 'models/Account')
 Group       = require path.join(cwd, 'models/Group')
+Account     = require path.join(cwd, 'models/Account')
 
 
 
@@ -33,13 +33,15 @@ request = supertest(app)
 
 
 
-describe 'Account Groups REST Routes', ->
+describe 'Group Accounts REST Routes', ->
 
 
 
   {err,res} = {}
   {credentials,validCredentials,invalidCredentials} = {}
-  {account,accounts,group,groups} = {}
+  {group,groups,account,accounts} = {}
+
+
 
   before ->
     credentials        = new Credentials role: 'admin'
@@ -47,8 +49,13 @@ describe 'Account Groups REST Routes', ->
     invalidCredentials = new Buffer(credentials.key + ':wrong').toString('base64')
 
     # Mock data
-    accounts = []
     groups   = []
+    accounts = []
+
+    for i in [0..4]
+      groups.push Group.initialize
+        name: Faker.random.number(10).toString()
+
 
     for i in [0..9]
       accounts.push Account.initialize
@@ -58,20 +65,15 @@ describe 'Account Groups REST Routes', ->
         password: 'secret1337'
 
 
-    for i in [0..4]
-      groups.push Group.initialize
-        name: Faker.random.number(10).toString()
 
-
-
-  describe 'GET /v1/accounts/:accountId/groups', ->
+  describe 'GET /v1/groups/:groupId/accounts', ->
 
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
         request
-          .get('/v1/accounts/1234/groups')
+          .get('/v1/groups/1234/accounts')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
             err = error
@@ -91,12 +93,12 @@ describe 'Account Groups REST Routes', ->
     describe 'by default', ->
 
       before (done) ->
-        account = accounts[0]
+        group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, account)
-        sinon.stub(Group, 'list').callsArgWith(1, null, groups)
+        sinon.stub(Group, 'get').callsArgWith(1, null, group)
+        sinon.stub(Account, 'list').callsArgWith(1, null, accounts)
         request
-          .get('/v1/accounts/1234/groups')
+          .get('/v1/groups/1234/accounts')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -105,8 +107,8 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
-        Account.get.restore()
-        Group.list.restore()
+        Group.get.restore()
+        Account.list.restore()
 
       it 'should respond 200', ->
         res.statusCode.should.equal 200
@@ -116,7 +118,7 @@ describe 'Account Groups REST Routes', ->
 
       it 'should respond with a list', ->
         res.body.should.be.an 'array'
-        res.body.length.should.equal groups.length
+        res.body.length.should.equal accounts.length
 
 
     describe 'with paging', ->
@@ -129,12 +131,12 @@ describe 'Account Groups REST Routes', ->
     describe 'with empty results', ->
 
       before (done) ->
-        account = accounts[1]
+        group = groups[1]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, account)
-        sinon.stub(Group, 'list').callsArgWith(1, null, [])
+        sinon.stub(Group, 'get').callsArgWith(1, null, group)
+        sinon.stub(Account, 'list').callsArgWith(1, null, [])
         request
-          .get('/v1/accounts/1234/groups')
+          .get('/v1/groups/1234/accounts')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -143,8 +145,8 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
-        Account.get.restore()
-        Group.list.restore()
+        Group.get.restore()
+        Account.list.restore()
 
       it 'should respond 200', ->
         res.statusCode.should.equal 200
@@ -157,13 +159,14 @@ describe 'Account Groups REST Routes', ->
         res.body.length.should.equal 0
 
 
-    describe 'with unknown account', ->
+    describe 'with unknown group', ->
 
       before (done) ->
+        group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, null)
+        sinon.stub(Group, 'get').callsArgWith(1, null, null)
         request
-          .get('/v1/accounts/1234/groups')
+          .get('/v1/groups/1234/accounts')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -172,7 +175,8 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
-        Account.get.restore()
+        Group.get.restore()
+
 
       it 'should respond 404', ->
         res.statusCode.should.equal 404
@@ -185,14 +189,14 @@ describe 'Account Groups REST Routes', ->
 
 
 
-  describe 'PUT /v1/accounts/:accountId/groups/:groupId', ->
+  describe 'PUT /v1/groups/:groupId/accounts/:accountId', ->
 
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
         request
-          .put("/v1/accounts/1234/groups/5678")
+          .put("/v1/groups/1234/accounts/5678")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
           .end (error, response) ->
@@ -213,13 +217,13 @@ describe 'Account Groups REST Routes', ->
     describe 'with valid data', ->
 
       before (done) ->
-        account = accounts[0]
         group = groups[0]
+        account = accounts[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, account)
         sinon.stub(Group, 'get').callsArgWith(1, null, group)
+        sinon.stub(Account, 'get').callsArgWith(1, null, account)
         request
-          .put("/v1/accounts/#{account._id}/groups/#{group._id}")
+          .put("/v1/groups/#{group._id}/accounts/#{account._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -228,8 +232,8 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
-        Account.get.restore()
         Group.get.restore()
+        Account.get.restore()
 
       it 'should respond 200', ->
         res.statusCode.should.equal 200
@@ -241,42 +245,13 @@ describe 'Account Groups REST Routes', ->
         res.body.should.have.property 'added'
 
 
-    describe 'with unknown account', ->
-
-      before (done) ->
-        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, null)
-        request
-          .put("/v1/accounts/#{accounts[0]._id}/groups/#{groups[1]._id}")
-          .set('Authorization', 'Basic ' + validCredentials)
-          .end (error, response) ->
-            err = error
-            res = response
-            done()
-
-      after ->
-        Credentials.get.restore()
-        Account.get.restore()
-
-      it 'should respond 404', ->
-        res.statusCode.should.equal 404
-
-      it 'should respond with JSON', ->
-        res.headers['content-type'].should.contain 'application/json'
-
-      it 'should respond with "Not found" error', ->
-        res.body.error.should.equal 'Not found.'
-
-
     describe 'with unknown group', ->
 
       before (done) ->
-        account = accounts[3]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, account)
         sinon.stub(Group, 'get').callsArgWith(1, null, null)
         request
-          .put("/v1/accounts/#{account._id}/groups/unknown")
+          .put("/v1/groups/#{groups[0]._id}/accounts/#{accounts[1]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -286,7 +261,36 @@ describe 'Account Groups REST Routes', ->
       after ->
         Credentials.get.restore()
         Group.get.restore()
+
+      it 'should respond 404', ->
+        res.statusCode.should.equal 404
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.contain 'application/json'
+
+      it 'should respond with "Not found" error', ->
+        res.body.error.should.equal 'Not found.'
+
+
+    describe 'with unknown account', ->
+
+      before (done) ->
+        group = groups[3]
+        sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
+        sinon.stub(Group, 'get').callsArgWith(1, null, group)
+        sinon.stub(Account, 'get').callsArgWith(1, null, null)
+        request
+          .put("/v1/groups/#{group._id}/accounts/unknown")
+          .set('Authorization', 'Basic ' + validCredentials)
+          .end (error, response) ->
+            err = error
+            res = response
+            done()
+
+      after ->
+        Credentials.get.restore()
         Account.get.restore()
+        Group.get.restore()
 
       it 'should respond 404', ->
         res.statusCode.should.equal 404
@@ -300,14 +304,14 @@ describe 'Account Groups REST Routes', ->
 
 
 
-  describe 'DELETE /v1/accounts/:id', ->
+  describe 'DELETE /v1/groups/:id', ->
 
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
         request
-          .del('/v1/accounts/1234/groups/5678')
+          .del('/v1/groups/1234/accounts/5678')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
             err = error
@@ -324,13 +328,13 @@ describe 'Account Groups REST Routes', ->
         res.text.should.equal 'Unauthorized'
 
 
-    describe 'with unknown account', ->
+    describe 'with unknown group', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, null)
+        sinon.stub(Group, 'get').callsArgWith(1, null, null)
         request
-          .del("/v1/accounts/1234/groups/5678")
+          .del("/v1/groups/1234/accounts/5678")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -339,7 +343,7 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
-        Account.get.restore()
+        Group.get.restore()
 
       it 'should respond 404', ->
         res.statusCode.should.equal 404
@@ -355,10 +359,10 @@ describe 'Account Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
-        sinon.stub(Account, 'get').callsArgWith(1, null, accounts[1])
-        sinon.stub(Account.prototype, 'removeGroups').callsArgWith(1, null, true)
+        sinon.stub(Group, 'get').callsArgWith(1, null, groups[1])
+        sinon.stub(Group.prototype, 'removeAccounts').callsArgWith(1, null, true)
         request
-          .del("/v1/accounts/1234/groups/5678")
+          .del("/v1/groups/1234/accounts/5678")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
             err = error
@@ -367,8 +371,8 @@ describe 'Account Groups REST Routes', ->
 
       after ->
         Credentials.get.restore()
-        Account.get.restore()
-        Account.prototype.removeGroups.restore()
+        Group.get.restore()
+        Group.prototype.removeAccounts.restore()
 
       it 'should respond 204', ->
         res.statusCode.should.equal 204

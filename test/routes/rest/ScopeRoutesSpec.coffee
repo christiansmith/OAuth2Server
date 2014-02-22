@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -22,6 +22,12 @@ chai.should()
 app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
 Scope       = require path.join(cwd, 'models/Scope')
+
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -57,7 +63,7 @@ describe 'Scopes REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/scopes')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -80,7 +86,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'list').callsArgWith(0, null, scopes)
-        request(app)
+        request
           .get('/v1/scopes')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -115,7 +121,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'list').callsArgWith(0, null, [])
-        request(app)
+        request
           .get('/v1/scopes')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -144,12 +150,12 @@ describe 'Scopes REST Routes', ->
 
 
   describe 'GET /v1/scopes/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get("/v1/scopes/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -173,7 +179,7 @@ describe 'Scopes REST Routes', ->
         scope = scopes[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'get').callsArgWith(1, null, scope)
-        request(app)
+        request
           .get('/v1/scopes/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -201,7 +207,7 @@ describe 'Scopes REST Routes', ->
         scope = scopes[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/scopes/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -226,12 +232,12 @@ describe 'Scopes REST Routes', ->
 
 
   describe 'POST /v1/scopes', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .post("/v1/scopes")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -256,7 +262,7 @@ describe 'Scopes REST Routes', ->
         scope = scopes[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'insert').callsArgWith(1, null, scope)
-        request(app)
+        request
           .post("/v1/scopes")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(scope)
@@ -285,7 +291,7 @@ describe 'Scopes REST Routes', ->
         scope = scopes[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'insert').callsArgWith(1, new Scope.ValidationError())
-        request(app)
+        request
           .post("/v1/scopes")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(scope)
@@ -311,12 +317,12 @@ describe 'Scopes REST Routes', ->
 
 
   describe 'PUT /v1/scopes/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/scopes/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -340,7 +346,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'replace').callsArgWith(2, null, scope)
-        request(app)
+        request
           .put("/v1/scopes/#{scopes[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -368,7 +374,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'replace').callsArgWith(2, null, null)
-        request(app)
+        request
           .put("/v1/scopes/#{scopes[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -396,7 +402,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'replace').callsArgWith(2, new Scope.ValidationError())
-        request(app)
+        request
           .put("/v1/scopes/#{scopes[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -422,12 +428,12 @@ describe 'Scopes REST Routes', ->
 
 
   describe 'PATCH /v1/scopes/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .patch("/v1/scopes/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -452,7 +458,7 @@ describe 'Scopes REST Routes', ->
         scope = scopes[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'patch').callsArgWith(2, null, scope)
-        request(app)
+        request
           .patch("/v1/scopes/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -480,7 +486,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'patch').callsArgWith(2, null, null)
-        request(app)
+        request
           .patch("/v1/scopes/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -508,7 +514,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'patch').callsArgWith(2, new Scope.ValidationError())
-        request(app)
+        request
           .patch("/v1/scopes/#{scopes[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -539,7 +545,7 @@ describe 'Scopes REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/scopes/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -562,7 +568,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'delete').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/scopes/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -590,7 +596,7 @@ describe 'Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Scope, 'delete').callsArgWith(1, null, true)
-        request(app)
+        request
           .del("/v1/scopes/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->

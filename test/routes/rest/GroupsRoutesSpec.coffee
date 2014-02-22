@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -22,6 +22,11 @@ chai.should()
 app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
 Group     = require path.join(cwd, 'models/Group')
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -55,7 +60,7 @@ describe 'Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/groups')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -78,7 +83,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'list').callsArgWith(0, null, groups)
-        request(app)
+        request
           .get('/v1/groups')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -113,7 +118,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'list').callsArgWith(0, null, [])
-        request(app)
+        request
           .get('/v1/groups')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -147,7 +152,7 @@ describe 'Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get("/v1/groups/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -171,7 +176,7 @@ describe 'Groups REST Routes', ->
         group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'get').callsArgWith(1, null, group)
-        request(app)
+        request
           .get('/v1/groups/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -199,7 +204,7 @@ describe 'Groups REST Routes', ->
         group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/groups/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -229,7 +234,7 @@ describe 'Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .post("/v1/groups")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -254,7 +259,7 @@ describe 'Groups REST Routes', ->
         group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'insert').callsArgWith(1, null, group)
-        request(app)
+        request
           .post("/v1/groups")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(group)
@@ -283,7 +288,7 @@ describe 'Groups REST Routes', ->
         group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'insert').callsArgWith(1, new Group.ValidationError())
-        request(app)
+        request
           .post("/v1/groups")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(group)
@@ -314,7 +319,7 @@ describe 'Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/groups/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -338,7 +343,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'replace').callsArgWith(2, null, group)
-        request(app)
+        request
           .put("/v1/groups/#{groups[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -366,7 +371,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'replace').callsArgWith(2, null, null)
-        request(app)
+        request
           .put("/v1/groups/#{groups[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -394,7 +399,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'replace').callsArgWith(2, new Group.ValidationError())
-        request(app)
+        request
           .put("/v1/groups/#{groups[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -425,7 +430,7 @@ describe 'Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .patch("/v1/groups/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -450,7 +455,7 @@ describe 'Groups REST Routes', ->
         group = groups[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'patch').callsArgWith(2, null, group)
-        request(app)
+        request
           .patch("/v1/groups/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -478,7 +483,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'patch').callsArgWith(2, null, null)
-        request(app)
+        request
           .patch("/v1/groups/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -506,7 +511,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'patch').callsArgWith(2, new Group.ValidationError())
-        request(app)
+        request
           .patch("/v1/groups/#{groups[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -537,7 +542,7 @@ describe 'Groups REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/groups/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -560,7 +565,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'delete').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/groups/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -588,7 +593,7 @@ describe 'Groups REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Group, 'delete').callsArgWith(1, null, true)
-        request(app)
+        request
           .del("/v1/groups/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->

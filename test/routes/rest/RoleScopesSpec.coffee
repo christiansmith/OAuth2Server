@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -23,6 +23,12 @@ app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
 Role     = require path.join(cwd, 'models/Role')
 Scope       = require path.join(cwd, 'models/Scope')
+
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -64,7 +70,7 @@ describe 'Role Scopes REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/roles/1234/scopes')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -89,7 +95,7 @@ describe 'Role Scopes REST Routes', ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, role)
         sinon.stub(Scope, 'list').callsArgWith(1, null, scopes)
-        request(app)
+        request
           .get('/v1/roles/1234/scopes')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -127,7 +133,7 @@ describe 'Role Scopes REST Routes', ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, role)
         sinon.stub(Scope, 'list').callsArgWith(1, null, [])
-        request(app)
+        request
           .get('/v1/roles/1234/scopes')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -156,7 +162,7 @@ describe 'Role Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/roles/1234/scopes')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -185,7 +191,7 @@ describe 'Role Scopes REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/roles/1234/scopes/5678")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -212,7 +218,7 @@ describe 'Role Scopes REST Routes', ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, role)
         sinon.stub(Scope, 'get').callsArgWith(1, null, scope)
-        request(app)
+        request
           .put("/v1/roles/#{role._id}/scopes/#{scope._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -240,7 +246,7 @@ describe 'Role Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/roles/#{roles[0]._id}/scopes/#{scopes[1]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -269,7 +275,7 @@ describe 'Role Scopes REST Routes', ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, role)
         sinon.stub(Scope, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/roles/#{role._id}/scopes/unknown")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -300,7 +306,7 @@ describe 'Role Scopes REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del('/v1/roles/1234/scopes/5678')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -323,7 +329,7 @@ describe 'Role Scopes REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/roles/1234/scopes/5678")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -351,7 +357,7 @@ describe 'Role Scopes REST Routes', ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, roles[1])
         sinon.stub(Role.prototype, 'removeScopes').callsArgWith(1, null, true)
-        request(app)
+        request
           .del("/v1/roles/1234/scopes/5678")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->

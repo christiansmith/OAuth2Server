@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -22,6 +22,12 @@ chai.should()
 app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
 Role     = require path.join(cwd, 'models/Role')
+
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -55,7 +61,7 @@ describe 'Roles REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/roles')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -78,7 +84,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'list').callsArgWith(0, null, roles)
-        request(app)
+        request
           .get('/v1/roles')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -113,7 +119,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'list').callsArgWith(0, null, [])
-        request(app)
+        request
           .get('/v1/roles')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -147,7 +153,7 @@ describe 'Roles REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get("/v1/roles/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -171,7 +177,7 @@ describe 'Roles REST Routes', ->
         role = roles[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, role)
-        request(app)
+        request
           .get('/v1/roles/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -199,7 +205,7 @@ describe 'Roles REST Routes', ->
         role = roles[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/roles/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -229,7 +235,7 @@ describe 'Roles REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .post("/v1/roles")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -254,7 +260,7 @@ describe 'Roles REST Routes', ->
         role = roles[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'insert').callsArgWith(1, null, role)
-        request(app)
+        request
           .post("/v1/roles")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(role)
@@ -283,7 +289,7 @@ describe 'Roles REST Routes', ->
         role = roles[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'insert').callsArgWith(1, new Role.ValidationError())
-        request(app)
+        request
           .post("/v1/roles")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(role)
@@ -314,7 +320,7 @@ describe 'Roles REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/roles/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -338,7 +344,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'replace').callsArgWith(2, null, role)
-        request(app)
+        request
           .put("/v1/roles/#{roles[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -366,7 +372,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'replace').callsArgWith(2, null, null)
-        request(app)
+        request
           .put("/v1/roles/#{roles[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -394,7 +400,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'replace').callsArgWith(2, new Role.ValidationError())
-        request(app)
+        request
           .put("/v1/roles/#{roles[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -425,7 +431,7 @@ describe 'Roles REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .patch("/v1/roles/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -450,7 +456,7 @@ describe 'Roles REST Routes', ->
         role = roles[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'patch').callsArgWith(2, null, role)
-        request(app)
+        request
           .patch("/v1/roles/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -478,7 +484,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'patch').callsArgWith(2, null, null)
-        request(app)
+        request
           .patch("/v1/roles/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -506,7 +512,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'patch').callsArgWith(2, new Role.ValidationError())
-        request(app)
+        request
           .patch("/v1/roles/#{roles[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -537,7 +543,7 @@ describe 'Roles REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/roles/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -560,7 +566,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'delete').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/roles/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -588,7 +594,7 @@ describe 'Roles REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Role, 'delete').callsArgWith(1, null, true)
-        request(app)
+        request
           .del("/v1/roles/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->

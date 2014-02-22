@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -22,6 +22,12 @@ chai.should()
 app     = require path.join(cwd, 'app')
 Token   = require path.join(cwd, 'models/Token')
 Account = require path.join(cwd, 'models/Account')
+
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -44,7 +50,7 @@ describe 'Account Routes', ->
     describe 'with missing access token', ->
 
       before (done) ->
-        request(app)
+        request
           .get('/v1/account')
           .end (error, response) ->
             err = error
@@ -68,7 +74,7 @@ describe 'Account Routes', ->
 
       before (done) ->
         sinon.stub(Token, 'verify').callsArgWith(2, new InvalidTokenError('Unknown access token'))
-        request(app)
+        request
           .get('/v1/account')
           .set('Authorization', 'Bearer UNKNOWN')
           .end (error, response) ->
@@ -97,7 +103,7 @@ describe 'Account Routes', ->
       before (done) ->
         token = new Token
         sinon.stub(Token, 'verify').callsArgWith(2, new InvalidTokenError('Expired access token'))
-        request(app)
+        request
           .get('/v1/account')
           .set('Authorization', "Bearer #{token.access}")
           .end (error, response) ->
@@ -126,7 +132,7 @@ describe 'Account Routes', ->
       before (done) ->
         token = new Token
         sinon.stub(Token, 'verify').callsArgWith(2, new InsufficientScopeError())
-        request(app)
+        request
           .get('/v1/account')
           .set('Authorization', "Bearer #{token.access}")
           .end (error, response) ->
@@ -158,7 +164,7 @@ describe 'Account Routes', ->
         account = new Account email: 'valid@example.com'
         sinon.stub(Token, 'verify').callsArgWith(2, null, token)
         sinon.stub(Account, 'get').callsArgWith(1, null, account)
-        request(app)
+        request
           .get('/v1/account')
           .set('Authorization', "Bearer #{token.access}")
           .end (error, response) ->
@@ -190,7 +196,7 @@ describe 'Account Routes', ->
     describe 'with missing access token', ->
 
       before (done) ->
-        request(app)
+        request
           .patch('/v1/account')
           .end (error, response) ->
             err = error
@@ -214,7 +220,7 @@ describe 'Account Routes', ->
 
       before (done) ->
         sinon.stub(Token, 'verify').callsArgWith(2, new InvalidTokenError('Unknown access token'))
-        request(app)
+        request
           .patch('/v1/account')
           .set('Authorization', 'Bearer UNKNOWN')
           .send({})
@@ -244,7 +250,7 @@ describe 'Account Routes', ->
       before (done) ->
         token = new Token
         sinon.stub(Token, 'verify').callsArgWith(2, new InvalidTokenError('Expired access token'))
-        request(app)
+        request
           .patch('/v1/account')
           .set('Authorization', "Bearer #{token.access}")
           .send({})
@@ -274,7 +280,7 @@ describe 'Account Routes', ->
       before (done) ->
         token = new Token
         sinon.stub(Token, 'verify').callsArgWith(2, new InsufficientScopeError())
-        request(app)
+        request
           .patch('/v1/account')
           .set('Authorization', "Bearer #{token.access}")
           .send({})
@@ -299,7 +305,7 @@ describe 'Account Routes', ->
         res.body.error_description.should.equal 'Insufficient scope'
 
 
-    describe 'with valid access token and valid request', ->    
+    describe 'with valid access token and valid request', ->
 
       before (done) ->
         account = new Account email: 'valid@example.com'
@@ -309,7 +315,7 @@ describe 'Account Routes', ->
         updated.email = update.email
         sinon.stub(Token, 'verify').callsArgWith(2, null, token)
         sinon.stub(Account, 'patch').callsArgWith(2, null, updated)
-        request(app)
+        request
           .patch('/v1/account')
           .send(update)
           .set('Authorization', "Bearer #{token.access}")
@@ -345,7 +351,7 @@ describe 'Account Routes', ->
 
         sinon.stub(Token, 'verify').callsArgWith(2, null, token)
         sinon.stub(Account, 'patch').callsArgWith(2, new Account.ValidationError())
-        request(app)
+        request
           .patch('/v1/account')
           .send(update)
           .set('Authorization', "Bearer #{token.access}")

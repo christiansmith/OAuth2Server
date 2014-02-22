@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -23,7 +23,7 @@ app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
 Service     = require path.join(cwd, 'models/Service')
 
-
+request = supertest(app)
 
 
 describe 'Services REST Routes', ->
@@ -57,7 +57,7 @@ describe 'Services REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/services')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -80,7 +80,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'list').callsArgWith(0, null, services)
-        request(app)
+        request
           .get('/v1/services')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -115,7 +115,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'list').callsArgWith(0, null, [])
-        request(app)
+        request
           .get('/v1/services')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -144,12 +144,12 @@ describe 'Services REST Routes', ->
 
 
   describe 'GET /v1/services/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get("/v1/services/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -173,7 +173,7 @@ describe 'Services REST Routes', ->
         service = services[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'get').callsArgWith(1, null, service)
-        request(app)
+        request
           .get('/v1/services/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -201,7 +201,7 @@ describe 'Services REST Routes', ->
         service = services[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/services/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -226,12 +226,12 @@ describe 'Services REST Routes', ->
 
 
   describe 'POST /v1/services', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .post("/v1/services")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -256,7 +256,7 @@ describe 'Services REST Routes', ->
         service = services[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'insert').callsArgWith(1, null, service)
-        request(app)
+        request
           .post("/v1/services")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(service)
@@ -285,7 +285,7 @@ describe 'Services REST Routes', ->
         service = services[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'insert').callsArgWith(1, new Service.ValidationError())
-        request(app)
+        request
           .post("/v1/services")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(service)
@@ -311,12 +311,12 @@ describe 'Services REST Routes', ->
 
 
   describe 'PUT /v1/services/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/services/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -340,7 +340,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'replace').callsArgWith(2, null, service)
-        request(app)
+        request
           .put("/v1/services/#{services[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -368,7 +368,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'replace').callsArgWith(2, null, null)
-        request(app)
+        request
           .put("/v1/services/#{services[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -396,7 +396,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'replace').callsArgWith(2, new Service.ValidationError())
-        request(app)
+        request
           .put("/v1/services/#{services[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -422,12 +422,12 @@ describe 'Services REST Routes', ->
 
 
   describe 'PATCH /v1/services/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .patch("/v1/services/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -452,7 +452,7 @@ describe 'Services REST Routes', ->
         service = services[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'patch').callsArgWith(2, null, service)
-        request(app)
+        request
           .patch("/v1/services/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -480,7 +480,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'patch').callsArgWith(2, null, null)
-        request(app)
+        request
           .patch("/v1/services/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -508,7 +508,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'patch').callsArgWith(2, new Service.ValidationError())
-        request(app)
+        request
           .patch("/v1/services/#{services[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -539,7 +539,7 @@ describe 'Services REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/services/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -562,7 +562,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'delete').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/services/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -590,7 +590,7 @@ describe 'Services REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(Service, 'delete').callsArgWith(1, null, true)
-        request(app)
+        request
           .del("/v1/services/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->

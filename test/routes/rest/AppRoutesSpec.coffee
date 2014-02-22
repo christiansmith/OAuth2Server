@@ -5,7 +5,7 @@ Faker       = require 'Faker'
 chai        = require 'chai'
 sinon       = require 'sinon'
 sinonChai   = require 'sinon-chai'
-request     = require 'supertest'
+supertest   = require 'supertest'
 expect      = chai.expect
 
 
@@ -22,6 +22,12 @@ chai.should()
 app         = require path.join(cwd, 'app')
 Credentials = require path.join(cwd, 'models/Credentials')
 App     = require path.join(cwd, 'models/App')
+
+
+
+
+# HTTP Client
+request = supertest(app)
 
 
 
@@ -58,7 +64,7 @@ describe 'Apps REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/apps')
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -81,7 +87,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'list').callsArgWith(0, null, apps)
-        request(app)
+        request
           .get('/v1/apps')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -116,7 +122,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'list').callsArgWith(0, null, [])
-        request(app)
+        request
           .get('/v1/apps')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -145,12 +151,12 @@ describe 'Apps REST Routes', ->
 
 
   describe 'GET /v1/apps/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get("/v1/apps/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -174,7 +180,7 @@ describe 'Apps REST Routes', ->
         application = apps[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'get').callsArgWith(1, null, application)
-        request(app)
+        request
           .get('/v1/apps/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -202,7 +208,7 @@ describe 'Apps REST Routes', ->
         application = apps[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .get('/v1/apps/id')
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
@@ -227,12 +233,12 @@ describe 'Apps REST Routes', ->
 
 
   describe 'POST /v1/apps', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .post("/v1/apps")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -257,7 +263,7 @@ describe 'Apps REST Routes', ->
         application = apps[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'insert').callsArgWith(1, null, application)
-        request(app)
+        request
           .post("/v1/apps")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(application)
@@ -278,7 +284,7 @@ describe 'Apps REST Routes', ->
 
       it 'should respond with the resource', ->
         res.body.should.have.property 'redirect_uri'
-        
+
 
     describe 'with invalid data', ->
 
@@ -286,7 +292,7 @@ describe 'Apps REST Routes', ->
         application = apps[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'insert').callsArgWith(1, new App.ValidationError())
-        request(app)
+        request
           .post("/v1/apps")
           .set('Authorization', 'Basic ' + validCredentials)
           .send(application)
@@ -312,12 +318,12 @@ describe 'Apps REST Routes', ->
 
 
   describe 'PUT /v1/apps/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .put("/v1/apps/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -341,7 +347,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'replace').callsArgWith(2, null, application)
-        request(app)
+        request
           .put("/v1/apps/#{apps[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -369,7 +375,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'replace').callsArgWith(2, null, null)
-        request(app)
+        request
           .put("/v1/apps/#{apps[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -397,7 +403,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'replace').callsArgWith(2, new App.ValidationError())
-        request(app)
+        request
           .put("/v1/apps/#{apps[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -423,12 +429,12 @@ describe 'Apps REST Routes', ->
 
 
   describe 'PATCH /v1/apps/:id', ->
-  
+
     describe 'without authentication', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .patch("/v1/apps/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .send({})
@@ -453,7 +459,7 @@ describe 'Apps REST Routes', ->
         application = apps[0]
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'patch').callsArgWith(2, null, application)
-        request(app)
+        request
           .patch("/v1/apps/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -481,7 +487,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'patch').callsArgWith(2, null, null)
-        request(app)
+        request
           .patch("/v1/apps/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -509,7 +515,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'patch').callsArgWith(2, new App.ValidationError())
-        request(app)
+        request
           .patch("/v1/apps/#{apps[0]._id}")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -540,7 +546,7 @@ describe 'Apps REST Routes', ->
 
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/apps/id")
           .set('Authorization', 'Basic ' + invalidCredentials)
           .end (error, response) ->
@@ -563,7 +569,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'delete').callsArgWith(1, null, null)
-        request(app)
+        request
           .del("/v1/apps/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .send({})
@@ -591,7 +597,7 @@ describe 'Apps REST Routes', ->
       before (done) ->
         sinon.stub(Credentials, 'get').callsArgWith(1, null, credentials)
         sinon.stub(App, 'delete').callsArgWith(1, null, true)
-        request(app)
+        request
           .del("/v1/apps/id")
           .set('Authorization', 'Basic ' + validCredentials)
           .end (error, response) ->
