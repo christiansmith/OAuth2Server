@@ -14,14 +14,14 @@ var client      = require('../config/redis')
  */
 
 var App = Modinha.define('apps', {
-  type:         { 
-                  type: 'string', 
-                  required: true, 
+  type:         {
+                  type: 'string',
+                  required: true,
                   enum: [
-                    'confidential', 
-                    'public', 
+                    'confidential',
+                    'public',
                     'trusted'
-                  ] 
+                  ]
                 },
   name:         { type: 'string' },
   website:      { type: 'string' },
@@ -39,6 +39,14 @@ var App = Modinha.define('apps', {
 
 App.extend(Document);
 App.__client = client;
+
+
+/**
+ * App intersections
+ */
+
+App.intersects('groups');
+
 
 /**
  * Create app
@@ -64,7 +72,7 @@ App.insert = function (data, options, callback) {
     // associate the app with new credentials
     app.key = credentials.key;
 
-    // store and index 
+    // store and index
     var multi = App.__client.multi();
     multi.hset(collection, app._id, App.serialize(app));
 
@@ -72,7 +80,7 @@ App.insert = function (data, options, callback) {
 
     multi.exec(function (err, result) {
       if (err) { return callback(err); }
-      
+
       // provide the secret without saving it in app
       app.secret = credentials.secret;
       callback(null, app);

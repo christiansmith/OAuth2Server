@@ -20,6 +20,7 @@ chai.should()
 # Code under test
 Modinha     = require 'modinha'
 App         = require path.join(cwd, 'models/App')
+Group       = require path.join(cwd, 'models/Group')
 Credentials = require path.join(cwd, 'models/Credentials')
 
 
@@ -37,9 +38,9 @@ App.__client = client
 describe 'App', ->
 
 
-  {data,app,apps,jsonApps,credentials} = {}
+  {data,app,apps,application,group,jsonApps,credentials} = {}
   {err,validation,instance,instances,update,deleted,original,ids} = {}
-  
+
 
   before ->
 
@@ -54,7 +55,7 @@ describe 'App', ->
         redirect_uri: "https://#{Faker.Internet.domainName()}/callback"
 
     apps = App.initialize(data, { private: true })
-    jsonApps = apps.map (d) -> 
+    jsonApps = apps.map (d) ->
       App.serialize(d)
     ids = apps.map (d) ->
       d._id
@@ -132,7 +133,7 @@ describe 'App', ->
         rclient.zrevrange.restore()
 
       it 'should query the created index', ->
-        rclient.zrevrange.should.have.been.calledWith 'apps:created', 0, 49  
+        rclient.zrevrange.should.have.been.calledWith 'apps:created', 0, 49
 
       it 'should provide null error', ->
         expect(err).to.be.null
@@ -171,7 +172,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10      
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof App
 
@@ -201,7 +202,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10        
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof App
 
@@ -312,7 +313,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should provide a list of instances', ->
-        instances.length.should.equal 10        
+        instances.length.should.equal 10
         instances.forEach (instance) ->
           expect(instance).to.be.instanceof App
 
@@ -434,8 +435,8 @@ describe 'App', ->
 
       after ->
         multi.hset.restore()
-        multi.zadd.restore() 
-        App.index.restore()   
+        multi.zadd.restore()
+        App.index.restore()
 
       it 'should provide a validation error', ->
         err.should.be.instanceof Modinha.ValidationError
@@ -539,7 +540,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null  
+        expect(instance).to.be.null
 
 
     describe 'with invalid data', ->
@@ -659,7 +660,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null 
+        expect(instance).to.be.null
 
 
     describe 'with invalid data', ->
@@ -775,7 +776,7 @@ describe 'App', ->
         expect(err).to.be.null
 
       it 'should not provide an instance', ->
-        expect(instance).to.be.null  
+        expect(instance).to.be.null
 
 
     describe 'by array', ->
@@ -806,6 +807,66 @@ describe 'App', ->
       it 'should deindex each instance', ->
         apps.forEach (doc) ->
           App.deindex.should.have.been.calledWith sinon.match.object, doc
+
+
+
+
+
+
+  describe 'add groups', ->
+
+    before (done) ->
+      application = apps[0]
+      group = new Group
+
+      sinon.spy multi, 'zadd'
+      App.addGroups application, group, done
+
+    after ->
+      multi.zadd.restore()
+
+    it 'should index the app by the group', ->
+      multi.zadd.should.have.been.calledWith "groups:#{group._id}:apps", application.created, application._id
+
+    it 'should index the group by the app', ->
+      multi.zadd.should.have.been.calledWith "apps:#{application._id}:groups", group.created, group._id
+
+
+
+  describe 'remove groups', ->
+
+    before (done) ->
+      application = apps[1]
+      group = new Group
+
+      sinon.spy multi, 'zrem'
+      App.removeGroups application, group, done
+
+    after ->
+      multi.zrem.restore()
+
+    it 'should deindex the app by the group', ->
+      multi.zrem.should.have.been.calledWith "groups:#{group._id}:apps", application._id
+
+    it 'should deindex the group by the app', ->
+      multi.zrem.should.have.been.calledWith "apps:#{application._id}:groups", group._id
+
+
+
+  describe 'list by group', ->
+
+    before (done) ->
+      group = new Group
+      sinon.spy App, 'list'
+      App.listByGroups group, done
+
+    after ->
+      App.list.restore()
+
+    it 'should look in the accounts index', ->
+      App.list.should.have.been.calledWith { index: "groups:#{group._id}:apps" }
+
+
 
 
 

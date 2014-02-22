@@ -68,6 +68,7 @@ module.exports = function (app) {
   require('./rest/roleAccounts')(app);
   require('./rest/groupAccounts')(app);
   require('./rest/scopeRoles')(app);
+  require('./rest/appGroups')(app);
 
 
   /**

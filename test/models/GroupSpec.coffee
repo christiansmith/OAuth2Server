@@ -19,6 +19,7 @@ chai.should()
 Modinha = require 'modinha'
 Group   = require path.join(cwd, 'models/Group')
 Account = require path.join(cwd, 'models/Account')
+App = require path.join(cwd, 'models/App')
 
 
 
@@ -35,7 +36,7 @@ Account.__client = client
 describe 'Group', ->
 
 
-  {data,groups,jsonGroups,err,instance,instances,group,account,validation,update,deleted,keys} = {}
+  {data,groups,jsonGroups,err,instance,instances,group,account,application,validation,update,deleted,keys} = {}
 
 
   before ->
@@ -623,3 +624,66 @@ describe 'Group', ->
 
     it 'should look in the accounts index', ->
       Group.list.should.have.been.calledWith { index: "accounts:#{account._id}:groups" }
+
+
+
+
+
+
+
+
+
+
+
+  describe 'add apps', ->
+
+    before (done) ->
+      group = groups[0]
+      application = new App
+
+      sinon.spy multi, 'zadd'
+      Group.addApps group, application, done
+
+    after ->
+      multi.zadd.restore()
+
+    it 'should index the group by the app', ->
+      multi.zadd.should.have.been.calledWith "apps:#{application._id}:groups", group.created, group._id
+
+    it 'should index the app by the group', ->
+      multi.zadd.should.have.been.calledWith "groups:#{group._id}:apps", application.created, application._id
+
+
+
+  describe 'remove apps', ->
+
+    before (done) ->
+      group = groups[1]
+      application = new App
+
+      sinon.spy multi, 'zrem'
+      Group.removeApps group, application, done
+
+    after ->
+      multi.zrem.restore()
+
+    it 'should deindex the group by the app', ->
+      multi.zrem.should.have.been.calledWith "apps:#{application._id}:groups", group._id
+
+    it 'should deindex the app by the group', ->
+      multi.zrem.should.have.been.calledWith "groups:#{group._id}:apps", application._id
+
+
+
+  describe 'list by app', ->
+
+    before (done) ->
+      application = new App
+      sinon.spy Group, 'list'
+      Group.listByApps application, done
+
+    after ->
+      Group.list.restore()
+
+    it 'should look in the apps index', ->
+      Group.list.should.have.been.calledWith { index: "apps:#{application._id}:groups" }

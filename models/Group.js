@@ -31,6 +31,7 @@ Group.__client = client;
  */
 
 Group.intersects('accounts');
+Group.intersects('apps');
 
 
 /**
