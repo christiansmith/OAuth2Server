@@ -70,6 +70,7 @@ module.exports = function (app) {
   require('./rest/groupApps')(app);
   require('./rest/scopeRoles')(app);
   require('./rest/appGroups')(app);
+  require('./rest/serviceScopes')(app);
 
 
   /**
