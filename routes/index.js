@@ -19,10 +19,14 @@ module.exports = function (app) {
    * Basic authentication middleware
    */
 
-  app.authenticate = passport.authenticate('basic', {
-    session: false
-  });
+  //app.authenticate = passport.authenticate('basic', {
+  //  session: false
+  //});
 
+  app.authenticate = function (req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    passport.authenticate('basic', { session: false })(req, res, next);
+  }
 
   /**
    * Local user authentication middleware
@@ -47,9 +51,11 @@ module.exports = function (app) {
    * Verify HTTP Basic Credentials
    */
 
-  app.post('/', app.authenticate, function (req, res) {
-    res.json({ validCredentials: true });
-  });
+  app.post('/',
+    passport.authenticate('basic', { session: false }),
+    function (req, res) {
+      res.json({ validCredentials: true });
+    });
 
 
   /**

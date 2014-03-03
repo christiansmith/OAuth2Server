@@ -18,9 +18,7 @@ module.exports = function (app) {
    * Authentication middleware
    */
 
-  var authenticate = passport.authenticate('basic', {
-    session: false
-  });
+  var authenticate = app.authenticate;
 
 
   /**

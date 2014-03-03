@@ -4,7 +4,7 @@
 
 var passport      = require('passport')
   , Scope         = require('../../models/Scope')
-  , NotFoundError = require('../../errors/NotFoundError')  
+  , NotFoundError = require('../../errors/NotFoundError')
   ;
 
 
@@ -18,10 +18,8 @@ module.exports = function (app) {
    * Authentication middleware
    */
 
-  var authenticate = passport.authenticate('basic', { 
-    session: false 
-  });
-  
+  var authenticate = app.authenticate;
+
 
   /**
    * GET /v1/scopes
@@ -30,7 +28,7 @@ module.exports = function (app) {
   app.get('/v1/scopes', authenticate, function (req, res, next) {
     Scope.list(function (err, instances) {
       if (err) { return next(err); }
-      res.json(instances);        
+      res.json(instances);
     });
   });
 

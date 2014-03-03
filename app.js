@@ -25,7 +25,7 @@ app.start = function () {
   app.listen(app.settings.port, function () {
     console.log(
         'OAuth2Server is running on port ' + app.settings.port
-    );   
+    );
   });
 }
 
