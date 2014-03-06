@@ -158,7 +158,7 @@ module.exports = function (app) {
     if (req.isAuthenticated() && req.query.client_id) {
       Token.existing(req.user._id, req.query.client_id, function (err, token) {
         req.token = token;
-        next(err);
+        next(err || null);
       });
     } else {
       next();
@@ -170,12 +170,19 @@ module.exports = function (app) {
    * GET /authorize
    */
 
-  app.get('/authorize', findExistingToken, redirectToClient, ui, validateRequest, scopeDetails, function (req, res, next) {
-    res.json({
-      app: req.client,
-      scope: req.scope
+  app.get('/authorize',
+    findExistingToken,
+    // VERIFY GROUP MEMBERSHIP REQUIREMENT
+    redirectToClient,
+    ui,
+    validateRequest,
+    scopeDetails,
+    function (req, res, next) {
+      res.json({
+        app: req.client,
+        scope: req.scope
+      });
     });
-  });
 
 
   /**

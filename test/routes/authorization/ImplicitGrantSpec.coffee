@@ -439,6 +439,31 @@ describe 'implicit grant', ->
 
 
 
+      describe 'without required group membership', ->
+
+        it 'should respond 302'
+        it 'should redirect to the redirect uri'
+        it 'should respond with "access denied"'
+        it 'should respond with an error description'
+        it 'should respond with an error uri'
+        it 'should respond with state'
+
+
+
+
+      describe 'with required group membership', ->
+
+        it 'should respond 302'
+        it 'should redirect to the redirect uri'
+        it 'should respond with access token'
+        it 'should respond with token type'
+        it 'should respond with expriration'
+        it 'should respond with scope'
+        it 'should respond with state'
+
+
+
+
   describe 'POST /authorize', ->
 
 
@@ -880,6 +905,31 @@ describe 'implicit grant', ->
       it 'should respond with an error'
       it 'should respond with an error description'
       it 'should respond with an error uri'
+      it 'should respond with state'
+
+
+
+
+    describe 'without required group membership', ->
+
+      it 'should respond 302'
+      it 'should redirect to the redirect uri'
+      it 'should respond with "access denied"'
+      it 'should respond with an error description'
+      it 'should respond with an error uri'
+      it 'should respond with state'
+
+
+
+
+    describe 'with required group membership', ->
+
+      it 'should respond 302'
+      it 'should redirect to the redirect uri'
+      it 'should respond with access token'
+      it 'should respond with token type'
+      it 'should respond with expriration'
+      it 'should respond with scope'
       it 'should respond with state'
 
 

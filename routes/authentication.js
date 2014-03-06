@@ -25,6 +25,7 @@ module.exports = function (app) {
   app.get('/signup', ui);
   app.get('/account', ui);
   app.get('/account/apps', ui);
+  app.get('/developer', ui);
 
 
   /**
