@@ -172,14 +172,18 @@ Account.listApps = function (accountId, options, callback) {
 Account.prototype.isAppGroupsMember = function (app, callback) {
   var accountGroups = 'accounts:'+this._id+':groups'
     , appGroups = 'apps:'+app._id+':groups'
+    , client = Account.__client
     ;
 
-  Account.__client.zinterstore(
-    'account:app:groups:tmp', 2,
-    accountGroups, appGroups,
-  function (err, count) {
+  client.zcard(appGroups, function (err, count) {
     if (err) { return callback(err); }
-    callback(null, Boolean(count));
+    if (count === 0) { return callback(null, true); }
+
+    client.zinterstore('account:app:groups', 2, accountGroups, appGroups,
+      function (err, count) {
+        if (err) { return callback(err); }
+        callback(null, Boolean(count));
+      });
   });
 };
 

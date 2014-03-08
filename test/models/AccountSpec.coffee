@@ -1290,16 +1290,27 @@ describe 'Account', ->
         expect(err).equals null
         done()
 
+    it 'should provide "true" when membership is not required', (done) ->
+      sinon.stub(rclient, 'zcard').callsArgWith(1, null, 0)
+      account.isAppGroupsMember new App, (err, member) ->
+        member.should.be.true
+        rclient.zcard.restore()
+        done()
+
     it 'should provide "true" when membership is confirmed', (done) ->
+      sinon.stub(rclient, 'zcard').callsArgWith(1, null, 2)
       sinon.stub(rclient, 'zinterstore').callsArgWith(4, null, true)
       account.isAppGroupsMember new App, (err, member) ->
         member.should.be.true
+        rclient.zcard.restore()
         rclient.zinterstore.restore()
         done()
 
     it 'should provide "false" when membership is not confirmed', (done) ->
+      sinon.stub(rclient, 'zcard').callsArgWith(1, null, 2)
       sinon.stub(rclient, 'zinterstore').callsArgWith(4, null, false)
       account.isAppGroupsMember new App, (err, member) ->
         member.should.be.false
+        rclient.zcard.restore()
         rclient.zinterstore.restore()
         done()
