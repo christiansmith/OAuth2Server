@@ -165,6 +165,23 @@ Account.listApps = function (accountId, options, callback) {
 };
 
 
+/**
+ * Account group membership
+ */
+
+Account.prototype.isAppGroupsMember = function (app, callback) {
+  var accountGroups = 'accounts:'+this._id+':groups'
+    , appGroups = 'apps:'+app._id+':groups'
+    ;
+
+  Account.__client.zinterstore(
+    'account:app:groups:tmp', 2,
+    accountGroups, appGroups,
+  function (err, count) {
+    if (err) { return callback(err); }
+    callback(null, Boolean(count));
+  });
+};
 
 /**
  * Errors

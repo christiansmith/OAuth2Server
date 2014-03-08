@@ -40,7 +40,7 @@ Group.__client   = client
 describe 'Account', ->
 
 
-  {data,account,accounts,group,role,jsonAccounts} = {}
+  {data,account,accounts,group,groups,role,jsonAccounts} = {}
   {err,validation,instance,instances,update,deleted,original,ids,info} = {}
 
 
@@ -62,7 +62,8 @@ describe 'Account', ->
     ids = accounts.map (d) ->
       d._id
 
-
+    groups = []
+    groups.push(new Group) for i in [0..9]
 
 
   describe 'schema', ->
@@ -1279,4 +1280,26 @@ describe 'Account', ->
       Account.list.should.have.been.calledWith { index: "groups:#{group._id}:accounts" }
 
 
+  describe 'group membership verification', ->
 
+    before ->
+      account = accounts[0]
+
+    it 'should provide a null error', (done) ->
+      account.isAppGroupsMember new App, (err, member) ->
+        expect(err).equals null
+        done()
+
+    it 'should provide "true" when membership is confirmed', (done) ->
+      sinon.stub(rclient, 'zinterstore').callsArgWith(4, null, true)
+      account.isAppGroupsMember new App, (err, member) ->
+        member.should.be.true
+        rclient.zinterstore.restore()
+        done()
+
+    it 'should provide "false" when membership is not confirmed', (done) ->
+      sinon.stub(rclient, 'zinterstore').callsArgWith(4, null, false)
+      account.isAppGroupsMember new App, (err, member) ->
+        member.should.be.false
+        rclient.zinterstore.restore()
+        done()
