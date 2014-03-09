@@ -158,11 +158,7 @@ module.exports = function (app) {
     req.user.isAppGroupsMember(req.client, function (err, member) {
       if (err) { return next(err); }
       if (!member) {
-        var error = new Error();
-        error.statusCode = 403;
-        error.message = 'unauthorized_user'
-        error.description = 'Unauthorized user'
-        next(error);
+        next(new AuthorizationError('unauthorized_user', 'Unauthorized user', 403));
       } else {
         next();
       }
