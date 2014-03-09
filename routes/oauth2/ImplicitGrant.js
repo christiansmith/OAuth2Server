@@ -151,6 +151,26 @@ module.exports = function (app) {
 
 
   /**
+   * Verify Group Membership
+   */
+
+  function verifyGroupMembership (req, res, next) {
+    req.user.isAppGroupsMember(req.client, function (err, member) {
+      if (err) { return next(err); }
+      if (!member) {
+        var error = new Error();
+        error.statusCode = 403;
+        error.message = 'unauthorized_user'
+        error.description = 'Unauthorized user'
+        next(error);
+      } else {
+        next();
+      }
+    });
+  }
+
+
+  /**
    * Find existing access token
    */
 
@@ -172,10 +192,11 @@ module.exports = function (app) {
 
   app.get('/authorize',
     findExistingToken,
-    // VERIFY GROUP MEMBERSHIP REQUIREMENT
     redirectToClient,
     ui,
+    authenticateUser,
     validateRequest,
+    verifyGroupMembership,
     scopeDetails,
     function (req, res, next) {
       res.json({
@@ -189,40 +210,16 @@ module.exports = function (app) {
    * POST /authorize
    */
 
-  app.post('/authorize', authenticateUser, validateRequest, issueToken, redirectToClient);
+  app.post('/authorize',
+    authenticateUser,
+    validateRequest,
+    verifyGroupMembership,
+    issueToken,
+    redirectToClient
+  );
 
 };
 
 
 
-  //// sketch
-  //function reuseToken (req, res, next) {
 
-  //  // the user is authenticated
-  //  // check for an existing access token that matches
-  //  // the user account and client app.
-  //  if (req.user) {
-  //    Token.getByUserAndClient(user._id, req.params.client_id, function (err, token) {
-  //      if (err) { return next(err); }
-
-  //      // provide the app with existing access token
-  //      if (token) {
-  //        //validateRequest(req, res, next);
-  //        res.redirect(req.body.redirect_uri + '#' + FormUrlencoded.encode(token));
-  //      }
-
-  //      // there is no existing token
-  //      // pass to the next middleware
-  //      else {
-  //        return next();
-  //      }
-
-  //    });
-  //  }
-
-  //  // the user isn't authenticated
-  //  // pass to the next middleware
-  //  else {
-  //    return next();
-  //  }
-  //}

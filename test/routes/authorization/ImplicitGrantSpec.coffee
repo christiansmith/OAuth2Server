@@ -22,6 +22,7 @@ chai.should()
 app     = require path.join(cwd, 'app')
 App     = require path.join(cwd, 'models/App')
 Account = require path.join(cwd, 'models/Account')
+Group   = require path.join(cwd, 'models/Group')
 Token   = require path.join(cwd, 'models/Token')
 passport = require 'passport'
 
@@ -128,18 +129,44 @@ describe 'implicit grant', ->
 
     describe 'with application/json', ->
 
+      {agent} = {}
+
+      before (done) ->
+
+        # DATA
+        application = new App redirect_uri: "https://#{Faker.Internet.domainName()}/callback"
+        account = new Account
+        successInfo = message: 'Authenticated successfully!'
+
+        # STUBS
+        sinon.stub(Account, 'authenticate').callsArgWith(2, null, account, successInfo)
+        sinon.stub(passport, 'deserializeUser').callsArgWith(1, null, account)
+
+        # LOGIN
+        agent = supertest.agent()
+        login = email: 'valid@example.com', password: 'secret1337'
+        request.post('/login').send(login).end (error, response) ->
+          agent.saveCookies response
+          done()
+
+
+      after ->
+        Account.authenticate.restore()
+        passport.deserializeUser.restore()
+
       describe 'with valid request', ->
 
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request
-            .get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          req = supertest(app).get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
+
 
         after ->
           App.get.restore()
@@ -168,13 +195,14 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request
-            .get("/authorize?client_id=#{application._id}&response_type=invalid&redirect_uri=#{application.redirect_uri}")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          req = supertest(app).get("/authorize?client_id=#{application._id}&response_type=invalid&redirect_uri=#{application.redirect_uri}")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
+
 
         after ->
           App.get.restore()
@@ -204,13 +232,14 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request
-            .get("/authorize?client_id=#{application._id}&redirect_uri=#{application.redirect_uri}")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          req = supertest(app).get("/authorize?client_id=#{application._id}&redirect_uri=#{application.redirect_uri}")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
+
 
         after ->
           App.get.restore()
@@ -240,13 +269,15 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, null)
-          request
-            .get("/authorize?client_id=unknown&response_type=token&redirect_uri=#{application.redirect_uri}")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          req = supertest(app).get("/authorize?client_id=unknown&response_type=token&redirect_uri=#{application.redirect_uri}")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
+
+
 
         after ->
           App.get.restore()
@@ -274,13 +305,19 @@ describe 'implicit grant', ->
       describe 'with missing client id', ->
 
         before (done) ->
-          request
-            .get("/authorize")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          application = new App redirect_uri: 'https://app.tld/callback'
+          sinon.stub(App, 'get').callsArgWith(1, null, null)
+          req = supertest(app).get("/authorize?response_type=token&redirect_uri=#{application.redirect_uri}")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
+
+        after ->
+          App.get.restore()
+
 
         it 'should respond 403', ->
           res.statusCode.should.equal 403
@@ -307,16 +344,17 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request
-            .get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=https://wrong.tld")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          req = supertest(app).get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=https://wrong.tld")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
 
         after ->
           App.get.restore()
+
 
         it 'should respond 400', ->
           res.statusCode.should.equal 400
@@ -343,10 +381,10 @@ describe 'implicit grant', ->
         before (done) ->
           application = new App redirect_uri: 'https://app.tld/callback'
           sinon.stub(App, 'get').callsArgWith(1, null, application)
-          request
-            .get("/authorize?client_id=#{application._id}&response_type=token")
-            .set('Content-type', 'application/json')
-            .end (error, response) ->
+          req = supertest(app).get("/authorize?client_id=#{application._id}&response_type=token")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
               err = error
               res = response
               done()
@@ -441,26 +479,41 @@ describe 'implicit grant', ->
 
       describe 'without required group membership', ->
 
-        it 'should respond 302'
-        it 'should redirect to the redirect uri'
-        it 'should respond with "access denied"'
-        it 'should respond with an error description'
+        before (done) ->
+          application = new App redirect_uri: 'https://app.tld/callback'
+          sinon.stub(Account.prototype, 'isAppGroupsMember')
+            .callsArgWith(1, null, false)
+          sinon.stub(App, 'get').callsArgWith(1, null, application)
+          req = supertest(app).get("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
+          agent.attachCookies req
+          req.set('Content-type', 'application/json')
+          req.end (error, response) ->
+              err = error
+              res = response
+              done()
+
+
+        after ->
+          Account.prototype.isAppGroupsMember.restore()
+          App.get.restore()
+
+        it 'should respond 403', ->
+          res.statusCode.should.equal 403
+
+        it 'should respond with JSON', ->
+          res.headers['content-type'].should.contain 'application/json'
+
+        it 'should NOT redirect', ->
+          res.statusCode.should.not.equal 302
+
+        it 'should respond with an error', ->
+          res.body.error.should.equal 'unauthorized_user'
+
+        it 'should respond with an error description', ->
+          res.body.error_description.should.equal 'Unauthorized user'
+
         it 'should respond with an error uri'
         it 'should respond with state'
-
-
-
-
-      describe 'with required group membership', ->
-
-        it 'should respond 302'
-        it 'should redirect to the redirect uri'
-        it 'should respond with access token'
-        it 'should respond with token type'
-        it 'should respond with expriration'
-        it 'should respond with scope'
-        it 'should respond with state'
-
 
 
 
@@ -912,10 +965,39 @@ describe 'implicit grant', ->
 
     describe 'without required group membership', ->
 
-      it 'should respond 302'
-      it 'should redirect to the redirect uri'
-      it 'should respond with "access denied"'
-      it 'should respond with an error description'
+      before (done) ->
+        sinon.stub(Account.prototype, 'isAppGroupsMember')
+          .callsArgWith(1, null, false)
+        sinon.stub(App, 'get').callsArgWith(1, null, application)
+        req = supertest(app).post("/authorize?client_id=#{application._id}&response_type=token&redirect_uri=#{application.redirect_uri}")
+        agent.attachCookies req
+        req.set('Content-type', 'application/json')
+        req.send(accessGranted)
+        req.end (error, response) ->
+            err = error
+            res = response
+            done()
+
+
+      after ->
+        Account.prototype.isAppGroupsMember.restore()
+        App.get.restore()
+
+      it 'should respond 403', ->
+        res.statusCode.should.equal 403
+
+      it 'should respond with JSON', ->
+        res.headers['content-type'].should.contain 'application/json'
+
+      it 'should NOT redirect', ->
+        res.statusCode.should.not.equal 302
+
+      it 'should respond with an error', ->
+        res.body.error.should.equal 'unauthorized_user'
+
+      it 'should respond with an error description', ->
+        res.body.error_description.should.equal 'Unauthorized user'
+
       it 'should respond with an error uri'
       it 'should respond with state'
 
