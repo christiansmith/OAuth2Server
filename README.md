@@ -1,5 +1,10 @@
 # OAuth2Server
 
+## STATUS
+
+Work on this project has moved to a new repository. Please see [Anvil Connect](https://github.com/christiansmith/anvil-connect).
+
+
 ## Project Goals
 
 Most OAuth-related packages provide middleware or toolkits for implementing an authorization server. This project aims to deliver a complete, standalone, ready-to-deploy authorization server that can be incorporated out-of-the-box into a distributed architecture, along with a collection of SDKs for using it within client apps and API services. This won't be right for everyone, so it's great to have options like [nightworld](https://github.com/nightworld)'s [node-oauth2-server](https://npmjs.org/package/node-oauth2-server) and [jaredhanson](https://github.com/jaredhanson)'s [oauth2orize](https://github.com/jaredhanson/oauth2orize).
@@ -12,7 +17,7 @@ There are currently three major use cases we intend to support:
 
 ## Using OAuth2Server
 
-OAuth2Server is available as an npm package. 
+OAuth2Server is available as an npm package.
 
     $ npm install oauth2server --save
 
@@ -37,12 +42,12 @@ require('oauth2server').start();
 }
 ```
 
-[API](https://github.com/christiansmith/OAuth2Server/wiki/API) and [configuration](https://github.com/christiansmith/OAuth2Server/wiki/Configuration) docs are in the [wiki](https://github.com/christiansmith/OAuth2Server/wiki). We're developing fast and this may be out of sync with the code. Please [post an issue](https://github.com/christiansmith/OAuth2Server/issues) if you have questions about usage. 
+[API](https://github.com/christiansmith/OAuth2Server/wiki/API) and [configuration](https://github.com/christiansmith/OAuth2Server/wiki/Configuration) docs are in the [wiki](https://github.com/christiansmith/OAuth2Server/wiki). We're developing fast and this may be out of sync with the code. Please [post an issue](https://github.com/christiansmith/OAuth2Server/issues) if you have questions about usage.
 
 
 ## Developing OAuth2Server
 
-Please fork the repository if you intend to contribute. Otherwise just clone this repo. 
+Please fork the repository if you intend to contribute. Otherwise just clone this repo.
 
     $ git clone https://github.com/christiansmith/OAuth2Server.git
 
@@ -60,9 +65,9 @@ Help us **build the right thing** by coming to the **Google Hangout** at **10am 
 
 To help us **build the thing right**:
 
-* *Post and comment* on [**issues**](https://github.com/christiansmith/OAuth2Server/issues). This is the best place to discuss/debate implementation details, point out bugs, flaws, and security issues. 
+* *Post and comment* on [**issues**](https://github.com/christiansmith/OAuth2Server/issues). This is the best place to discuss/debate implementation details, point out bugs, flaws, and security issues.
 * *Fork and request pulls* for features and bug fixes. For substantial features, please [**submit an issue**](https://github.com/christiansmith/OAuth2Server/issues) describing your proposed enhancements *first*, so we can avoid duplicating efforts.
-* *Pair program*. These sessions are always fun and productive. Send me an email to arrange a time (smith at anvil dot io). 
+* *Pair program*. These sessions are always fun and productive. Send me an email to arrange a time (smith at anvil dot io).
 * *Stay up to date* by watching this repository, reading the [**project blog**](http://oauth2server.blogspot.com/) and checking the [**issues**](https://github.com/christiansmith/OAuth2Server/issues).
 * *Promote the project* and help us find more early users by blogging, tweeting, +1-ing, starring, gossiping and anything else you think might help.
 
