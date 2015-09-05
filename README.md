@@ -2,7 +2,7 @@
 
 ## STATUS
 
-Work on this project has moved to a new repository. Please see [Anvil Connect](https://github.com/christiansmith/anvil-connect).
+Work on this project has moved to a new repository. Please see [Anvil Connect](https://github.com/anvilresearch/connect).
 
 
 ## Project Goals
